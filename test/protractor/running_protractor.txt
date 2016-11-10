@@ -1,0 +1,20 @@
+Running the Protractor testing suite
+Follow all these instructions:
+https://github.com/angular/protractor
+Make sure you scroll to the bottom of the page and read the section on running standalone selenium server.
+
+Make sure that you've installed all of the npm dependencies by running npm install from the command line.
+
+You have to make sure that your database is connected, by executing mongod.
+
+After that you have to start the selenium server.  Do this in the command line by typing 
+	webdriver-manager update //(to make sure your version is up to date)
+	webdriver-manager start //starts the server
+
+then just run the test by typing:
+protractor test/protractor/config.protractor.js
+
+you can run grunt test if you have grunt installed and the unit tests, mocha tests and end to end tests will run.  You can set this all up in the gruntfile.js located in the root directory.
+
+There is a bug in the chrome web-driver not allowing clicks on elements, am working on a work-around.
+

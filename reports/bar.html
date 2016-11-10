@@ -1,0 +1,130 @@
+<!DOCTYPE HTML>
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+		<title>Highcharts Example</title>
+
+		<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
+		<style type="text/css">
+${demo.css}
+		</style>
+		<script type="text/javascript">
+$(function () {
+
+	$.ajax({
+	  dataType: "json",
+	  url: '/sfdc/reports/00O400000048eLH',
+	  data: null,
+	  success: function(data) {
+		console.log(data);
+		
+		//"groupingsDown"
+		if(data.groupingsDown.groupings.length <= 0) {
+			return;
+		}
+		
+		var  labels = _.pluck(data.groupingsDown.groupings, "label");
+		
+		var first = data.groupingsDown.groupings[0]
+		
+		var  series = _.pluck(first.groupings, "label");
+		
+		var sdata = [];
+		
+		for(i=0; i<series.length; i++) {
+			var obj = {
+				name: series[i],
+				data: []
+			}
+			sdata.push(obj);
+		}
+			
+		
+		for(i=0; i<data.groupingsDown.groupings.length; i++) {
+			var group = data.groupingsDown.groupings[i];
+			for(j=0; j<group.groupings.length; j++) {
+				var g = group.groupings[j];
+				
+				var sd = _.findWhere(sdata, {name: g.label});
+				var da = data.factMap[g.key+'!T'].aggregates[0].value;
+				
+				sd.data.push(da);
+			
+			}
+		}
+		
+
+		$('#container').highcharts({
+			chart: {
+				type: 'column'
+			},
+			title: {
+				text: 'Exam Registrations Over Time'
+			},
+			xAxis: {
+				categories: labels,
+				title: {
+					text: 'Exams'
+				}
+			},
+			yAxis: {
+				min: 0,
+				title: {
+					text: 'Exam Registrations'
+				},
+				stackLabels: {
+					enabled: true,
+					style: {
+						fontWeight: 'bold',
+						color: (Highcharts.theme && Highcharts.theme.textColor) || 'gray'
+					}
+				}
+			},
+			legend: {
+				align: 'right',
+				x: -30,
+				verticalAlign: 'top',
+				y: 25,
+				floating: true,
+				backgroundColor: (Highcharts.theme && Highcharts.theme.background2) || 'white',
+				borderColor: '#CCC',
+				borderWidth: 1,
+				shadow: false
+			},
+			tooltip: {
+				formatter: function () {
+					return '<b>' + this.x + '</b><br/>' +
+						this.series.name + ': ' + this.y + '<br/>' +
+						'Total: ' + this.point.stackTotal;
+				}
+			},
+			plotOptions: {
+				column: {
+					stacking: 'normal',
+					dataLabels: {
+						enabled: true,
+						color: (Highcharts.theme && Highcharts.theme.dataLabelsColor) || 'white',
+						style: {
+							textShadow: '0 0 3px black'
+						}
+					}
+				}
+			},
+			series: sdata
+		});
+	
+	  }
+	});
+	
+});
+		</script>
+	</head>
+	<body>
+<script src="/www/lib/highchart/js/highcharts.js"></script>
+<script src="/www/lib/highchart/js/modules/exporting.js"></script>
+<script src="/www/lib/underscore.js"></script>
+
+<div id="container" style="min-width: 310px; height: 400px; margin: 0 auto"></div>
+
+	</body>
+</html>
