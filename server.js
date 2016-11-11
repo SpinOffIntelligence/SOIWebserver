@@ -111,8 +111,10 @@ var server = OrientDB({
 console.log('Server');
 console.dir(server);
 
+console.log('**********************');
+
 var db = server.use({
-   name:     'SPINOFFINTELLIGENCE',
+   name:     'SpinOffIntelligence',
    username: 'admin',
    password: 'admin'
 });
@@ -120,6 +122,7 @@ var db = server.use({
 console.log('db');
 console.dir(db);
 
+console.log('**********************');
 
 var dbs = server.list()
    .then(
@@ -127,6 +130,14 @@ var dbs = server.list()
          console.log('Databases on Server:', list.length);
       }
    );
+
+console.log('**********************');
+
+db.query(
+   'SELECT FROM orgnization'
+).then(function(hitters){
+   console.log(hitters)
+});
 
 logger.log('Express app started on port ' + port);
 
