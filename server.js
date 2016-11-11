@@ -7,11 +7,13 @@ var express = require('express'),
     fs = require('fs'),
     passport = require('passport'),
     loggercomp = require('./components/logger.js'),
-    sfdccomp =  require('./components/jsforce.js'),
+//    sfdccomp =  require('./components/jsforce.js'),
     mongo =  require('./components/mongo.js'),
     path = require('path'),
     apncomp =  require('./components/apn.js'),
-    apn = require('apn');
+    apn = require('apn'),
+    OrientDB = require('orientjs');
+
 
 
 
@@ -93,9 +95,38 @@ app.listen(port);
 var logger = loggercomp.init(app, passport, mongoose);
 
 // Initialize SFDC Connection
-sfdccomp.init(function(err, res) {
-    console.log('sfdccomp.init done:' + err + ':' + res);    
+//sfdccomp.init(function(err, res) {
+//    console.log('sfdccomp.init done:' + err + ':' + res);    
+//});
+
+console.log('**********************');
+
+var server = OrientDB({
+   host:       'ec2-35-162-142-38.us-west-2.compute.amazonaws.com',
+   port:       2424,
+   username:   'root',
+   password:   '9WlcEMvyBJqKToMWO4vvqrgRx7iuzKuf'
 });
+
+console.log('Server');
+console.dir(server);
+
+var db = server.use({
+   name:     'SPINOFFINTELLIGENCE',
+   username: 'admin',
+   password: 'admin'
+});
+
+console.log('db');
+console.dir(db);
+
+
+var dbs = server.list()
+   .then(
+      function(list){
+         console.log('Databases on Server:', list.length);
+      }
+   );
 
 logger.log('Express app started on port ' + port);
 
