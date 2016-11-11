@@ -5,48 +5,12 @@
  */
 var express = require('express'),
     consolidate = require('consolidate'),
-    mongoStore = require('connect-mongo')(express),
+    //mongoStore = require('connect-mongo')(express),
     flash = require('connect-flash'),
     helpers = require('view-helpers'),
     config = require('./config');
 
 
- var SEOProxy = function(req, res, next) {
-
-    //console.log('Bot:' + res.locals.is_bot);
-    //console.log('req.url:' + req.url);
-
-    var userAgent = req.headers['user-agent']
-    var isGooglePlus = (userAgent.indexOf('Google') > -1 && userAgent.indexOf('developers.google.com') > -1);
-
-    //_escaped_fragment_
-    if(req.url.indexOf('_escaped_fragment_') > -1 && req.url.indexOf('ushare') > -1 && !isGooglePlus) {
-
-        console.log('ExpressJS req.url:',req.url);
-        console.dir(req.query);
-
-        var host = req.get('host');
-
-        var queryString = '';
-        for(var propt in req.query){
-
-          if(propt != '_escaped_fragment_' && propt != 'ushare') {
-              if(queryString=='') {
-                queryString = '?' + propt + '=' + req.query[propt];
-              } else {
-                queryString = queryString + '&' + propt + '=' + req.query[propt];
-              }
-          }
-        }
-        console.log(queryString);
-
-        var host = req.get('host');
-        res.redirect('http://' + host + '/#!/' + req.query['_escaped_fragment_'] + queryString);
-    } else {
-        next();    
-    }
-    
- }
 
 module.exports = function(app, passport, db) {
     app.set('showStackError', true);
@@ -57,9 +21,7 @@ module.exports = function(app, passport, db) {
 	// cache=memory or swig dies in NODE_ENV=production
 	app.locals.cache = 'memory';
 
-    app.use(SEOProxy);
-
-	app.use(require('prerender-node').set('prerenderToken', 'SihYeog6GcwanrfmpUBp'));
+	//app.use(require('prerender-node').set('prerenderToken', 'SihYeog6GcwanrfmpUBp'));
 
     // Should be placed before express.static
     // To ensure that all assets and data are compressed (utilize bandwidth)
@@ -114,8 +76,8 @@ module.exports = function(app, passport, db) {
         app.use(helpers(config.app.name));
 
         // Use passport session
-        app.use(passport.initialize());
-        app.use(passport.session());
+        //app.use(passport.initialize());
+        //app.use(passport.session());
 
         // Connect flash for flash messages
         app.use(flash());
