@@ -102,7 +102,7 @@ var logger = loggercomp.init(app, passport, mongoose);
 console.log('**********************');
 
 var server = OrientDB({
-   host:       'ec2-35-162-142-38.us-west-2.compute.amazonaws.com',
+   host:       '172.31.28.183',
    port:       2424,
    username:   'root',
    password:   '9WlcEMvyBJqKToMWO4vvqrgRx7iuzKuf'
