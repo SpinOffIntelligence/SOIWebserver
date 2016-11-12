@@ -17,7 +17,7 @@ odb.db.class.get('VOrg').then(function(vorg){
 	vorg.create({
 	   Name:      "VOrgX1",
 	}).then(
-	   function(player){
+	   function(vorg){
 	      console.log('Created Record: ' vorg.Name);
 	   }
 	);
