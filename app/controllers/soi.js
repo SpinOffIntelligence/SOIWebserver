@@ -13,13 +13,17 @@ exports.getOrganizations = function(req, res, next) {
 	// 	res.json(hitters);
 	// });
 
-odb.db.class.get('VOrg').then(function(vorg){
-	vorg.create({
-	   Name:      "VOrgX1",
-	}).then(
-	   function(vorg){
-	      console.log('Created Record: ' vorg.Name);
-	   }
-	);
-});
+	odb.db.class.get('VOrganization').then(function(vorg){
 
+		vorg.create({
+		   Name:      "VOrgX1",
+		}).then(
+		   function(vorg){
+		      console.log('Created Record: ' + vorg.Name);
+		   }
+		);
+
+
+	});
+
+}

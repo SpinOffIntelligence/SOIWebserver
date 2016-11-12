@@ -5,5 +5,6 @@ var config = require('./config'),
   module.exports = function(app,express){
 
   app.use("/www", express.static(path.join(__dirname, '../public')));
+  app.use("/sioapp", express.static(path.join(__dirname, '../../soiapp')));
 
 }
