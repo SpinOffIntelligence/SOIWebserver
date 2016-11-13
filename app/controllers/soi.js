@@ -14,7 +14,6 @@ exports.getOrganizations = function(req, res, next) {
 	// });
 
 	odb.db.class.get('VOrganization').then(function(vorg){
-
 		vorg.create({
 		   Name:      "VOrgX1",
 		}).then(
@@ -22,8 +21,13 @@ exports.getOrganizations = function(req, res, next) {
 		      console.log('Created Record: ' + vorg.Name);
 		   }
 		);
-
-
 	});
+}
 
+exports.fetchRecords = function(req, res, next) {
+
+	var fetchPanelFieldsParams = req.body.fetchPanelFieldsParams;
+	console.log(fetchPanelFieldsParams);
+
+	res.json(fetchPanelFieldsParams);
 }
