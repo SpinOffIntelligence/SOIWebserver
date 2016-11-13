@@ -2,10 +2,10 @@
 
 module.exports = function(app) {
 
-	var soi = require('../controllers/soi');
+	var soiControllers = require('../controllers/soi');
 
-	app.get('/soi/organizations', soi.getOrganizations);
-	app.post('/soi/fetchRecords', soi.fetchRecords);
+	app.get('/soi/organizations', soiControllers.getOrganizations);
+	app.post('/soi/fetchRecords', soiControllers.fetchRecords);
 
  };
 

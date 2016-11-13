@@ -1,33 +1,40 @@
 'use strict';
 
 var odb = require('../../components/orientdb.js');
+var soiServices = require('../services/soi');
 
 exports.getOrganizations = function(req, res, next) {
-
 	console.log(odb.server);
 
-	// odb.db.query(
-	//    "select Name from (Select expand( out('Worksfor') ) From VPerson Where Name = 'Bob')"
-	// ).then(function(hitters){
-	//    console.log(hitters)
-	// 	res.json(hitters);
-	// });
-
-	odb.db.class.get('VOrganization').then(function(vorg){
-		vorg.create({
-		   Name:      "VOrgX1",
-		}).then(
-		   function(vorg){
-		      console.log('Created Record: ' + vorg.Name);
-		   }
-		);
+	odb.db.query(
+	   'SELECT name, phone, size, website FROM VOrganization'
+	).then(function(hitters){
+	   console.log(hitters);
+	   res.json(hitters);
 	});
+
 }
 
 exports.fetchRecords = function(req, res, next) {
 
+	console.log(odb.server);
+
 	var fetchPanelFieldsParams = req.body.fetchPanelFieldsParams;
 	console.log(fetchPanelFieldsParams);
 
-	res.json(fetchPanelFieldsParams);
+	soiServices.getSchema(fetchPanelFieldsParams.objectType, function(err, data) {
+		fetchPanelFieldsParams.schema = data;
+
+		console.log('getRecords');
+
+		soiServices.getRecords(fetchPanelFieldsParams.objectType, fetchPanelFieldsParams.fields, function(err, data) {
+
+			console.log('Records');
+			console.dir(data);
+
+			fetchPanelFieldsParams.records = data;
+			res.json(fetchPanelFieldsParams);
+		});
+	});
+
 }
