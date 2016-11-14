@@ -15,25 +15,34 @@ exports.getOrganizations = function(req, res, next) {
 
 }
 
-exports.fetchRecords = function(req, res, next) {
+exports.savePanelRecord = function(req, res, next) {
+	var objectType = req.body.objectType;
+	var panelRecord = req.body.panelRecord;
+	console.log(panelRecord);
 
-	console.log(odb.server);
+	soiServices.updateRecord(panelRecord, function(err, data) {
+		res.json(data);
+	});
 
-	var fetchPanelFieldsParams = req.body.fetchPanelFieldsParams;
-	console.log(fetchPanelFieldsParams);
+}
 
-	soiServices.getSchema(fetchPanelFieldsParams.objectType, function(err, data) {
-		fetchPanelFieldsParams.schema = data;
+
+exports.fetchPanelRecords = function(req, res, next) {
+	var panelInfo = req.body.panelInfo;
+	console.log(panelInfo);
+
+	soiServices.getSchema(panelInfo.objectType, function(err, data) {
+		panelInfo.schema = data;
 
 		console.log('getRecords');
 
-		soiServices.getRecords(fetchPanelFieldsParams.objectType, fetchPanelFieldsParams.fields, function(err, data) {
+		soiServices.getRecords(panelInfo.objectType, panelInfo.fields, function(err, data) {
 
 			console.log('Records');
 			console.dir(data);
 
-			fetchPanelFieldsParams.records = data;
-			res.json(fetchPanelFieldsParams);
+			panelInfo.records = data;
+			res.json(panelInfo);
 		});
 	});
 

@@ -11,6 +11,23 @@ var schemaTypeMap = [
 ];
 
 
+exports.updateRecord = function(panelRecord, callback) {
+	var updateObj = {};
+	for(var propertyName in panelRecord) {
+		if(propertyName.indexOf('@') == -1 && propertyName != 'id' && propertyName != 'backup') {
+			updateObj[propertyName] = panelRecord[propertyName];
+		}
+	}
+
+	odb.db.update(panelRecord.id)
+   .set(updateObj).one()
+   .then(
+      function(update){
+         console.log('Records Updated:', update);
+         callback(null, update);
+      }
+   );	
+}
 
 exports.getRecords = function(objName, fields, callback) {
 
@@ -30,13 +47,38 @@ exports.getRecords = function(objName, fields, callback) {
 	var query = strUtil.format("SELECT %s FROM %s", fieldString, objName);
 	console.log(query);	
 
-	odb.db.query(
-	   query
-	).then(function(records){
-	   console.log(records);
-	   callback(null,records);
-	});
+	odb.db.class.get(objName).then(function(obj){
+	   obj.property.list()
+	   .then(
+	      function(properties){
+	      	var cluster=0;
+	        if(properties.length > 0) {
+	        	var cluster = properties[0]['class'].defaultClusterId;
 
+						odb.db.query(
+						   query
+						).then(function(records){
+						   console.log(records);
+
+							var recs=[];
+						  for(var i=0; i<records.length; i++) {
+						  	var rec = records[i];
+						  	var recId = rec['@rid'];
+
+						  	console.log('***************');
+						  	console.log(recId.position);
+
+					  		rec.id = '#'+	cluster + ':' + recId.position;
+						  	recs.push(rec);
+						  }
+						  callback(null,recs);
+						});		        	
+	        } else {
+	        	callback(404,null);
+	        }
+	      }
+		  )
+	});
 }
 
 exports.getSchema = function(objName, callback) {
@@ -48,7 +90,7 @@ exports.getSchema = function(objName, callback) {
 	        console.log('properties');
 	        console.dir(properties);
 
-	        var props=[];
+	        var props={};
 	        for(var i=0; i<properties.length; i++) {
 	        	var prop = properties[i];
 	        	console.log('prop:' + prop);
@@ -61,16 +103,16 @@ exports.getSchema = function(objName, callback) {
 	        	}
 
 	        	var obj = {
-	        		name: prop.name,
 	        		type: appType,
 	        		mandatory: prop.mandatory,
 	        		defaultValue: prop.defaultValue,
 	        		readOnly: prop.readonly,
 	        		notNull: prop.notNull,
 	        		min: prop.min,
-	        		max: prop.max
+	        		max: prop.max,
+	        		cluster: prop['class'].defaultClusterId
 	        	}
-	        	props.push(obj);
+	        	props[prop.name] = obj;
 	        }
 		      callback(null,props);        
 	      }
