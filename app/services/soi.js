@@ -11,13 +11,33 @@ var schemaTypeMap = [
 ];
 
 
-exports.updateRecord = function(panelRecord, callback) {
+exports.addRecord = function(objectType, panelRecord, callback) {
 	var updateObj = {};
 	for(var propertyName in panelRecord) {
 		if(propertyName.indexOf('@') == -1 && propertyName != 'id' && propertyName != 'backup') {
 			updateObj[propertyName] = panelRecord[propertyName];
 		}
 	}
+
+	odb.db.insert().into(objectType)
+   .set(updateObj).all().then(function(returnObj){
+      console.log(returnObj);
+      callback(null, returnObj);
+   });
+}
+
+
+exports.updateRecord = function(objectType, panelRecord, callback) {
+	var updateObj = {};
+	var rid = panelRecord['@rid'];
+	for(var propertyName in panelRecord) {
+		if(propertyName.indexOf('@') == -1 && propertyName != 'id' && propertyName != 'backup') {
+			updateObj[propertyName] = panelRecord[propertyName];
+		}
+	}
+
+	console.log('Update:');
+	console.dir(updateObj);
 
 	odb.db.update(panelRecord.id)
    .set(updateObj).one()
@@ -28,6 +48,12 @@ exports.updateRecord = function(panelRecord, callback) {
       }
    );	
 }
+
+exports.deleteRecord = function(objectType, panelRecord, callback) {
+	odb.db.record.delete(panelRecord.id);
+	callback(null, true);
+}
+
 
 exports.getRecords = function(objName, fields, callback) {
 
@@ -44,40 +70,23 @@ exports.getRecords = function(objName, fields, callback) {
 	}
 	console.log(fieldString);
 
-	var query = strUtil.format("SELECT %s FROM %s", fieldString, objName);
+	var query = strUtil.format("SELECT FROM %s", objName);
 	console.log(query);	
 
-	odb.db.class.get(objName).then(function(obj){
-	   obj.property.list()
-	   .then(
-	      function(properties){
-	      	var cluster=0;
-	        if(properties.length > 0) {
-	        	var cluster = properties[0]['class'].defaultClusterId;
+	odb.db.query(query).then(function(records){
+		console.log('***************');
+		console.dir(records);
+		console.log('***************');
 
-						odb.db.query(
-						   query
-						).then(function(records){
-						   console.log(records);
-
-							var recs=[];
-						  for(var i=0; i<records.length; i++) {
-						  	var rec = records[i];
-						  	var recId = rec['@rid'];
-
-						  	console.log('***************');
-						  	console.log(recId.position);
-
-					  		rec.id = '#'+	cluster + ':' + recId.position;
-						  	recs.push(rec);
-						  }
-						  callback(null,recs);
-						});		        	
-	        } else {
-	        	callback(404,null);
-	        }
-	      }
-		  )
+		var recs=[];
+		for(var i=0; i<records.length; i++) {
+			var rec = records[i];
+			var recId = rec['@rid'];
+			console.log(recId.position);
+			rec.id = '#'+	recId.cluster + ':' + recId.position;
+			recs.push(rec);
+		}
+		callback(null,records);
 	});
 }
 
