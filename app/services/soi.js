@@ -10,9 +10,10 @@ var schemaTypeMap = [
 	{dbtype: 1, apptype: 'integer'}
 ];
 
-exports.getRecordDetails = function(callback) {
-	var panelRecord={};
-	panelRecord.id = '#13:1';
+exports.getRecordDetails = function(objectType, panelRecord, callback) {
+	//var panelRecord={};
+	//panelRecord.id = '#13:1';
+
 	odb.db.query("traverse * from " + panelRecord.id).then(function(recordDetails){
    console.dir(recordDetails)
 
