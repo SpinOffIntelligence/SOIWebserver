@@ -3,6 +3,12 @@
 var odb = require('../../components/orientdb.js');
 var soiServices = require('../services/soi');
 
+exports.getRecordDetails = function(req, res, next) {
+	soiServices.getRecordDetails(function(err, data) {
+		res.json(data);
+	});
+}
+
 
 exports.addPanelRecord = function(req, res, next) {
 	var objectType = req.body.objectType;
@@ -38,6 +44,10 @@ exports.deletePanelRecord = function(req, res, next) {
 exports.fetchPanelRecords = function(req, res, next) {
 	var panelInfo = req.body.panelInfo;
 	console.log(panelInfo);
+
+	var relationships = panelInfo.relationships;
+
+	// Get all related as well.
 
 	soiServices.getSchema(panelInfo.objectType, function(err, data) {
 		panelInfo.schema = data;

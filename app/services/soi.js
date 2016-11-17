@@ -10,6 +10,63 @@ var schemaTypeMap = [
 	{dbtype: 1, apptype: 'integer'}
 ];
 
+exports.getRecordDetails = function(callback) {
+	var panelRecord={};
+	panelRecord.id = '#13:1';
+	odb.db.query("traverse * from " + panelRecord.id).then(function(recordDetails){
+   console.dir(recordDetails)
+
+   var returnObj = {};
+   for(var i=0; i<recordDetails.length; i++) {
+			var obj = recordDetails[i];
+			var className = obj['@class'];
+			console.log(obj['@class']);
+
+			if(!util.defined(returnObj,className)) {
+				returnObj[className]=[];
+			}
+
+			var props={};
+			for(var propertyName in obj) {
+				// console.log('propertyName: ' + propertyName);
+				// console.log('propertyValue: ' + obj[propertyName]);
+				console.log('typeof propertyName: ' + typeof propertyName);
+
+				if(propertyName.indexOf('in') == -1 && propertyName.indexOf('out') == -1 && propertyName.indexOf('@') == -1 && propertyName != 'id' && propertyName != 'backup' && typeof propertyName != 'object' && typeof propertyName != 'array') {
+					props[propertyName] = obj[propertyName];
+					console.log('*add:' + propertyName);
+				} else if(propertyName.indexOf('@rid') > -1) {
+					console.log('*Id:' );
+					var idobj = obj[propertyName];
+					console.dir(idobj.cluster + ':' + idobj.position);
+					props.id = '#' + idobj.cluster + ':' + idobj.position;
+				} else if(propertyName.indexOf('in') > -1 && propertyName.indexOf('_') == -1) {
+					var inobj = obj[propertyName];
+					console.log('*****IN:' );
+					console.dir(inobj);
+
+					var inprops={};
+					for(var propertyName in inobj) {
+						if(propertyName.indexOf('in') == -1 && propertyName.indexOf('out') == -1 && propertyName.indexOf('@') == -1 && propertyName != 'id' && propertyName != 'backup' && typeof propertyName != 'object' && typeof propertyName != 'array') {
+							props[propertyName] = inobj[propertyName];
+							console.log('*add:' + propertyName);
+						} else if(propertyName.indexOf('@rid') > -1) {
+							console.log('*Id:' );
+							var idobj = inobj[propertyName];
+							console.dir(idobj.cluster + ':' + idobj.position);
+							props.inId = '#' + idobj.cluster + ':' + idobj.position;
+						}
+					}
+
+				}
+			}
+			returnObj[className].push(props);
+			console.log('returnObj: ');
+			console.dir(returnObj);
+   }
+   callback(null,returnObj);
+	});
+}
 
 exports.addRecord = function(objectType, panelRecord, callback) {
 	var updateObj = {};
