@@ -5,12 +5,61 @@ var soiServices = require('../services/soi');
 var async = require('async');
 var util = require('../../components/utilities.js');
 
-exports.getRecordDetails = function(req, res, next) {
-	soiServices.getRecordDetails(objectType, panelRecord, function(err, data) {
+
+
+exports.getEdge = function(req, res, next) {
+	var edgeObjectType = req.body.edgeObjectType;
+	var edgeRecordItemId = req.body.edgeRecordItemId;
+
+	soiServices.getEdge(edgeObjectType, edgeRecordItemId, function(err, data) {
 		res.json(data);
 	});
 }
 
+exports.deleteEdge = function(req, res, next) {
+	var recordId = req.body.recordId;
+
+	soiServices.deleteEdge(recordId, function(err, data) {
+		res.json(data);
+	});
+}
+
+exports.updateEdge = function(req, res, next) {
+	var objectType = req.body.objectType;
+	var recordData = req.body.recordData;
+	var sourceId = req.body.sourceId;
+	var targetId = req.body.targetId;
+
+	soiServices.updateEdge(objectType, recordData, sourceId, targetId, function(err, data) {
+		res.json(data);
+	});
+}
+
+exports.addEdge = function(req, res, next) {
+	var objectType = req.body.objectType;
+	var recordData = req.body.recordData;
+	var sourceId = req.body.sourceId;
+	var targetId = req.body.targetId;
+
+	soiServices.addEdge(objectType, recordData, sourceId, targetId, function(err, data) {
+		res.json(data);
+	});
+}
+
+exports.fetchRecords = function(req, res, next) {
+	var objectType = req.body.objectType;
+	soiServices.fetchRecords(objectType, function(err, data) {
+		res.json(data);
+	});
+}
+
+exports.getRecordDetails = function(req, res, next) {
+	var objectType = req.body.objectType;
+	var recordId = req.body.recordId;
+	soiServices.getRecordDetails(objectType, recordId, function(err, data) {
+		res.json(data);
+	});
+}
 
 exports.addPanelRecord = function(req, res, next) {
 	var objectType = req.body.objectType;
@@ -48,7 +97,6 @@ exports.fetchPanelRecords = function(req, res, next) {
 	console.log(panelInfo);
 
 	var relationships = panelInfo.relationships;
-
 
 	function getInfo(infoObj, callback) {
 
