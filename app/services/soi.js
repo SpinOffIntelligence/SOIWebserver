@@ -206,20 +206,20 @@ exports.deleteRecord = function(objectType, panelRecord, callback) {
 }
 
 
-exports.getRecords = function(objName, fields, callback) {
+exports.getRecords = function(objName, callback) {
 
 	console.log('getRecords');
 
-	var fieldString = '';
-	for(var i=0; i<fields.length; i++) {
-		var field=fields[i];
-		if(i == fields.length-1) {
-			fieldString += field.schemaName;
-		} else {
-			fieldString += field.schemaName + ', ';
-		}
-	}
-	console.log(fieldString);
+	// var fieldString = '';
+	// for(var i=0; i<fields.length; i++) {
+	// 	var field=fields[i];
+	// 	if(i == fields.length-1) {
+	// 		fieldString += field.schemaName;
+	// 	} else {
+	// 		fieldString += field.schemaName + ', ';
+	// 	}
+	// }
+	// console.log(fieldString);
 
 	var query = strUtil.format("SELECT FROM %s", objName);
 	console.log(query);	
