@@ -29,17 +29,26 @@ function toLower(inStr) {
 }
 
 function prepareInboudDate(obj) {
+  console.log('prepareInboudDate:');
 
   for(var propertyName in obj) {
     if(defined(obj,propertyName)) {
       var val = obj[propertyName];
+
+      console.log(propertyName + ':' + val);
+
       if(typeof val == 'string' && val.indexOf('.000Z') > -1) {
         var x = moment(val);
-        val = x.format('YYYY-MM-DD') + ' 00:00:00';
+        var newDate = x.format('YYYY-MM-DD') + ' 00:00:00';
+        obj[propertyName] = newDate;
+
+        console.log('Fix Date:' + obj[propertyName]);
+
       }
     }
-    obj[propertyName] = val;
   }
+  console.log('done:')
+  console.dir(obj);
   return obj;
 }
 
