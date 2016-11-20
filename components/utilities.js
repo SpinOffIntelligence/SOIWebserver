@@ -33,7 +33,7 @@ function prepareInboudDate(obj) {
   for(var propertyName in obj) {
     if(defined(obj,propertyName)) {
       var val = obj[propertyName];
-      if(val.indexOf('.000Z') > -1) {
+      if(typeof val == 'string' && val.indexOf('.000Z') > -1) {
         var x = moment(val);
         val = x.format('YYYY-MM-DD') + ' 00:00:00';
       }
