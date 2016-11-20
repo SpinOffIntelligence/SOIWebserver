@@ -34,11 +34,14 @@ exports.deleteEdge = function(recordId, callback) {
 exports.updateEdge = function(objectType, recordData, sourceId, targetId, callback) {
 
 	var cleanData = {};
-	for(var propertyName in recordData) {
-		if(recordData[propertyName] != null && propertyName.indexOf('in') == -1 && propertyName.indexOf('out') == -1 && propertyName.indexOf('@') == -1 && propertyName != 'id' && propertyName != 'backup' && typeof propertyName != 'object' && typeof propertyName != 'array')
-			cleanData[propertyName] = recordData[propertyName];
+	var sendObj = {};
+	if(util.defined(recordData)) {
+		for(var propertyName in recordData) {
+			if(recordData[propertyName] != null && propertyName.indexOf('in') == -1 && propertyName.indexOf('out') == -1 && propertyName.indexOf('@') == -1 && propertyName != 'id' && propertyName != 'backup' && typeof propertyName != 'object' && typeof propertyName != 'array' && util.defined(recordData,propertyName))
+				cleanData[propertyName] = recordData[propertyName];
+		}
+		sendObj = util.prepareInboudDate(cleanData);
 	}
-	var sendObj = util.prepareInboudDate(cleanData);
 
 	var ret = odb.db.record.delete(recordData.id);
 	if(ret != null) {
