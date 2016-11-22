@@ -50,12 +50,27 @@ exports.getEdge = function(req, res, next) {
 }
 
 exports.deleteEdge = function(req, res, next) {
-	var recordId = req.body.recordId;
+	var objectType = req.body.objectType;
+	var edgeId = req.body.edgeId;
+	var outRecordId = req.body.outRecordId;
+	var outObjectType = req.body.outObjectType;
+	var inRecordId = req.body.inRecordId;
+	var inObjectType = req.body.inObjectType;
 
-	console.log('*** deleteEdge ***');
-	console.dir(recordId);
+	console.log('*** updateEdge ***');
+	console.dir(objectType);
+	console.log('~~~~~~~~~~~~~~');
+	console.dir(edgeId);
+	console.log('~~~~~~~~~~~~~~');
+	console.dir(outObjectType);
+	console.log('~~~~~~~~~~~~~~');
+	console.dir(outRecordId);
+	console.log('~~~~~~~~~~~~~~');
+	console.dir(inObjectType);
+	console.log('~~~~~~~~~~~~~~');
+	console.dir(inRecordId);
 
-	soiServices.deleteEdge(recordId, function(err, data) {
+	soiServices.deleteEdge(objectType, edgeId, outObjectType, outRecordId, inObjectType, inRecordId, function(err, data) {
 		res.json(data);
 	});
 }

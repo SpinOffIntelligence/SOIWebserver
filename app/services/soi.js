@@ -26,9 +26,20 @@ var query = strUtil.format("SELECT FROM %s where @rid = %s", edgeObjectType, edg
 	});
 }
 
-exports.deleteEdge = function(recordId, callback) {
-	odb.db.record.delete(recordId);
-	callback(null, true);
+exports.deleteEdge = function(objectType, edgeId, outObjectType, outRecordId, inObjectType, inRecordId, callback) {
+	odb.db.record.delete(edgeId);
+
+	var query = 'update ' + outObjectType + ' remove out_' + objectType + ' where @rid = ' + outRecordId;
+	console.log('^^^^^^^ query:' + query);
+	odb.db.query(query).then(function(hitters){
+   console.log(hitters);
+   var query1 = 'update ' + inObjectType + ' remove in_' + objectType + ' where @rid = ' + inRecordId;
+   console.log('^^^^^^^ query1:' + query1);
+		odb.db.query(query1).then(function(hitters){
+		   console.log(hitters)
+		   callback(null, true);
+		});
+	});
 }
 
 exports.updateEdge = function(objectType, recordData, sourceId, targetId, callback) {
@@ -58,17 +69,28 @@ exports.addEdge = function(objectType, recordData, sourceId, targetId, callback)
 
 	var cleanData = {};
 	var sendObj = {};
+	var fndProp = false;
 	if(util.defined(recordData)) {
 		for(var propertyName in recordData) {
+			fndProp = true;
 			if(recordData[propertyName] != null)
 				cleanData[propertyName] = recordData[propertyName];
 		}
 		sendObj = util.prepareInboudDate(cleanData);		
 	}
 
-	var playsFor = odb.db.create('EDGE', objectType)
-   	.from(sourceId).to(targetId).set(sendObj).one();
-   callback(null, playsFor);
+	console.log('^^^ Prep Data:' + fndProp);
+	console.dir(sendObj);
+
+	var addedEdge;
+	if(fndProp) {
+		addedEdge = odb.db.create('EDGE', objectType)
+	   	.from(sourceId).to(targetId).set(sendObj).one();		
+	} else {
+		addedEdge = odb.db.create('EDGE', objectType)
+	   	.from(sourceId).to(targetId).one();				
+	}
+   callback(null, addedEdge);
 }
 
 exports.fetchRecords = function(objectType, callback) {
@@ -186,32 +208,67 @@ exports.getRecords = function(objName, callback) {
 
 exports.getSchema = function(objName, callback) {
 
+	console.log('^^^^^^^^^ getSchema ^^^^^^^^^^^' + objName);
+	function getSchemaProperties(properties) {
+		var props={};
+		var superClass=null;
+		for(var i=0; i<properties.length; i++) {
+			var prop = properties[i];
+			var appType = '';
+			var fnd = _.findWhere(schemaTypeMap, {dbtype: prop.type})
+			if(util.defined(fnd)) {
+				appType = fnd.apptype;
+			}
+			if(util.defined(prop,"class.superClass"))
+				superClass = prop.class.superClass;
+			var obj = {
+				type: appType,
+				mandatory: prop.mandatory,
+				defaultValue: prop.defaultValue,
+				readOnly: prop.readonly,
+				notNull: prop.notNull,
+				min: prop.min,
+				max: prop.max,
+				cluster: prop['class'].defaultClusterId
+			}
+			props[prop.name] = obj;
+		}		
+		if(util.defined(superClass)) {
+			props['superClass'] = superClass;
+		}
+		return props;
+	}
+
 	odb.db.class.get(objName).then(function(obj){
 	   obj.property.list()
 	   .then(
 	      function(properties){
-	        var props={};
-	        for(var i=0; i<properties.length; i++) {
-	        	var prop = properties[i];
-	        	var appType = '';
-	        	var fnd = _.findWhere(schemaTypeMap, {dbtype: prop.type})
-	        	if(util.defined(fnd)) {
-	        		appType = fnd.apptype;
-	        	}
+	        var props=getSchemaProperties(properties);
+	        console.log('^^^^^^^^^ props ^^^^^^^^^^^' + objName);
+	        console.dir(props);
 
-	        	var obj = {
-	        		type: appType,
-	        		mandatory: prop.mandatory,
-	        		defaultValue: prop.defaultValue,
-	        		readOnly: prop.readonly,
-	        		notNull: prop.notNull,
-	        		min: prop.min,
-	        		max: prop.max,
-	        		cluster: prop['class'].defaultClusterId
-	        	}
-	        	props[prop.name] = obj;
+	        if(util.defined(props,"superClass")) {
+
+						odb.db.class.get(props.superClass).then(function(obj){
+							obj.property.list()
+							.then(
+							function(properties){	        	
+								var subProps=getSchemaProperties(properties);
+								console.log('^^^^^^^^^ subProps ^^^^^^^^^^^' + props.superClass);
+								console.dir(subProps);
+
+								for(var propertyName in subProps) {
+									props[propertyName] = subProps[propertyName];
+								}
+								console.log('^^^^^^^^^ final props ^^^^^^^^^^^');
+								console.dir(props);
+								delete props.superClass;
+								callback(null,props);	        	
+							});
+						});
+	        } else {
+	        	callback(null,props);
 	        }
-		      callback(null,props);        
 	      }
 	    );
 	});
