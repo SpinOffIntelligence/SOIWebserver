@@ -18,5 +18,7 @@ module.exports = function(app) {
 	app.post('/soi/addEdge', soiControllers.addEdge);
 	app.post('/soi/deleteEdge', soiControllers.deleteEdge);
 
+	app.post('/soi/getRelationship', soiControllers.getRelationship);
+
  };
 

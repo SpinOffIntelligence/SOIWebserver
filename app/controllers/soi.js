@@ -35,6 +35,22 @@ exports.getSchemas = function(req, res, next) {
 	});
 }
 
+exports.getRelationship = function(req, res, next) {
+	var edgeObjectType = req.body.edgeObjectType;
+	var recordItemId = req.body.recordItemId;
+
+	console.log('*** getEdge ***');
+	console.dir(edgeObjectType);
+	console.log('~~~~~~~~~~~~~~');
+	console.dir(recordItemId);
+
+	soiServices.getRelationship(edgeObjectType, recordItemId, function(err, data) {
+		res.json(data);
+	});	
+
+
+}
+
 exports.getEdge = function(req, res, next) {
 	var edgeObjectType = req.body.edgeObjectType;
 	var edgeRecordItemId = req.body.edgeRecordItemId;
@@ -51,26 +67,17 @@ exports.getEdge = function(req, res, next) {
 
 exports.deleteEdge = function(req, res, next) {
 	var objectType = req.body.objectType;
-	var edgeId = req.body.edgeId;
-	var outRecordId = req.body.outRecordId;
-	var outObjectType = req.body.outObjectType;
-	var inRecordId = req.body.inRecordId;
-	var inObjectType = req.body.inObjectType;
+	var sourceId = req.body.sourceId;
+	var targetId = req.body.targetId;
 
 	console.log('*** updateEdge ***');
 	console.dir(objectType);
 	console.log('~~~~~~~~~~~~~~');
-	console.dir(edgeId);
+	console.dir(sourceId);
 	console.log('~~~~~~~~~~~~~~');
-	console.dir(outObjectType);
-	console.log('~~~~~~~~~~~~~~');
-	console.dir(outRecordId);
-	console.log('~~~~~~~~~~~~~~');
-	console.dir(inObjectType);
-	console.log('~~~~~~~~~~~~~~');
-	console.dir(inRecordId);
+	console.dir(targetId);
 
-	soiServices.deleteEdge(objectType, edgeId, outObjectType, outRecordId, inObjectType, inRecordId, function(err, data) {
+	soiServices.deleteEdge(objectType, sourceId, targetId, function(err, data) {
 		res.json(data);
 	});
 }

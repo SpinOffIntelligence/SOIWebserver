@@ -11,9 +11,22 @@ var schemaTypeMap = [
 	{dbtype: 19, apptype: 'date'}
 ];
 
-exports.getEdge = function(edgeObjectType, edgeRecordItemId, callback) {
-var query = strUtil.format("SELECT FROM %s where @rid = %s", edgeObjectType, edgeRecordItemId);
 
+exports.getRelationship = function(edgeObjectType, recordItemId, callback) {
+	var query = strUtil.format("traverse out('%s') from %s", edgeObjectType, recordItemId);
+	console.log('query:' + query);
+	odb.db.query(query).then(function(records){
+		var obj = {
+			edgeObjectType: edgeObjectType,
+			data: records
+		}
+		callback(null,obj);
+	});
+}
+
+exports.getEdge = function(edgeObjectType, edgeRecordItemId, callback) {
+	var query = strUtil.format("SELECT FROM %s where @rid = %s", edgeObjectType, edgeRecordItemId);
+	console.log('query:' + query);
 	odb.db.query(query).then(function(records){
 		var recs=[];
 		for(var i=0; i<records.length; i++) {
@@ -26,20 +39,28 @@ var query = strUtil.format("SELECT FROM %s where @rid = %s", edgeObjectType, edg
 	});
 }
 
-exports.deleteEdge = function(objectType, edgeId, outObjectType, outRecordId, inObjectType, inRecordId, callback) {
-	odb.db.record.delete(edgeId);
+exports.deleteEdge = function(objectType, sourceId, targetId, callback) {
 
-	var query = 'update ' + outObjectType + ' remove out_' + objectType + ' where @rid = ' + outRecordId;
-	console.log('^^^^^^^ query:' + query);
-	odb.db.query(query).then(function(hitters){
-   console.log(hitters);
-   var query1 = 'update ' + inObjectType + ' remove in_' + objectType + ' where @rid = ' + inRecordId;
-   console.log('^^^^^^^ query1:' + query1);
-		odb.db.query(query1).then(function(hitters){
-		   console.log(hitters)
-		   callback(null, true);
-		});
+	var query = strUtil.format("delete edge from %s to %s where @class = '%s'", sourceId, targetId, objectType);
+	//var query = "delete edge from " + sourceId + " to " + targetId + " where @class = '" + objectType + "'";
+
+	console.log('query:' + query);
+	odb.db.query(query).then(function(results){
+		 console.log(results);
+		 callback(null, results);
 	});
+
+	// var query = 'update ' + outObjectType + ' remove out_' + objectType + ' where @rid = ' + outRecordId;
+	// console.log('^^^^^^^ query:' + query);
+	// odb.db.query(query).then(function(hitters){
+ //   console.log(hitters);
+ //   var query1 = 'update ' + inObjectType + ' remove in_' + objectType + ' where @rid = ' + inRecordId;
+ //   console.log('^^^^^^^ query1:' + query1);
+	// 	odb.db.query(query1).then(function(hitters){
+	// 	   console.log(hitters)
+	// 	   callback(null, true);
+	// 	});
+	// });
 }
 
 exports.updateEdge = function(objectType, recordData, sourceId, targetId, callback) {
