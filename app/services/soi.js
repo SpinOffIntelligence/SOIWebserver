@@ -84,36 +84,7 @@ exports.deleteEdge = function(objectType, sourceId, targetId, callback) {
 
 exports.updateEdge = function(objectType, recordData, sourceId, targetId, callback) {
 
-	var cleanData = {};
-	var sendObj = {};
-	if(util.defined(recordData)) {
-		for(var propertyName in recordData) {
-			console.log('^^^^ propertyName:' + propertyName);
-			if(recordData[propertyName] == null) {
-				console.log('fail1');
-			} else if(propertyName == 'in') {
-				console.log('fail2');
-			} else if(propertyName == 'out') {
-				console.log('fail3');
-			} else if(propertyName.indexOf('@') != -1) { 
-				console.log('fail4');
-			} else if(propertyName == 'id') {
-				console.log('fail5');
-			} else if(propertyName == 'backup') {
-				console.log('fail6');
-			} else if(typeof propertyName == 'object') {
-				console.log('fail7');
-			} else if(typeof propertyName == 'array') {
-				console.log('fail8');
-			} else if(!util.defined(recordData,propertyName)) {
-				console.log('fail9');
-			} else {
-				cleanData[propertyName] = recordData[propertyName];
-			}
-		}
-		sendObj = util.prepareInboudDate(cleanData);
-	}
-
+	var sendObj = util.cleanInBoundData(recordData);
 	console.log('^^^^ sendObj:');
 	console.dir(sendObj);
 
@@ -128,18 +99,15 @@ exports.updateEdge = function(objectType, recordData, sourceId, targetId, callba
 
 exports.addEdge = function(objectType, recordData, sourceId, targetId, callback) {
 
-	var cleanData = {};
-	var sendObj = {};
 	var fndProp = false;
-	if(util.defined(recordData)) {
-		for(var propertyName in recordData) {
-			fndProp = true;
-			if(recordData[propertyName] != null)
-				cleanData[propertyName] = recordData[propertyName];
-		}
-		sendObj = util.prepareInboudDate(cleanData);		
-	}
+	var sendObj = util.cleanInBoundData(recordData);
 
+	console.log('^^^ cleanInBoundData:');
+	console.dir(sendObj);
+
+	for(var propertyName in sendObj) {
+		fndProp = true;
+	}
 	console.log('^^^ Prep Data:' + fndProp);
 	console.dir(sendObj);
 
