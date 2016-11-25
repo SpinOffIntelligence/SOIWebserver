@@ -78,6 +78,21 @@ exports.getEdge = function(req, res, next) {
 	});
 }
 
+
+exports.getEdgeBySource = function(req, res, next) {
+	var edgeObjectType = req.body.edgeObjectType;
+	var recordItemId = req.body.recordItemId;
+
+	console.log('*** getEdge ***');
+	console.dir(edgeObjectType);
+	console.log('~~~~~~~~~~~~~~');
+	console.dir(recordItemId);
+	
+	soiServices.getEdgeBySource(edgeObjectType, recordItemId, function(err, data) {
+		res.json(data);
+	});
+}
+
 exports.deleteEdge = function(req, res, next) {
 	var objectType = req.body.objectType;
 	var sourceId = req.body.sourceId;

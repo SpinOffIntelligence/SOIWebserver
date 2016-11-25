@@ -15,6 +15,7 @@ module.exports = function(app) {
 
 	app.post('/soi/updateEdge', soiControllers.updateEdge);	
 	app.post('/soi/getEdge', soiControllers.getEdge);	
+	app.post('/soi/getEdgeBySource', soiControllers.getEdgeBySource);	
 	app.post('/soi/addEdge', soiControllers.addEdge);
 	app.post('/soi/deleteEdge', soiControllers.deleteEdge);
 

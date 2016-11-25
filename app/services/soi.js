@@ -51,6 +51,14 @@ exports.getEdge = function(edgeObjectType, edgeRecordItemId, callback) {
 	});
 }
 
+exports.getEdgeBySource = function(edgeObjectType, recordItemId, callback) {
+	var query = strUtil.format("select from %s where out = %s", edgeObjectType, recordItemId);
+	console.log('query:' + query);
+	odb.db.query(query).then(function(records){
+		callback(null,records);
+	});
+}
+
 exports.deleteEdge = function(objectType, sourceId, targetId, callback) {
 
 	var query = strUtil.format("delete edge from %s to %s where @class = '%s'", sourceId, targetId, objectType);
