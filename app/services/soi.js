@@ -11,6 +11,18 @@ var schemaTypeMap = [
 	{dbtype: 19, apptype: 'date'}
 ];
 
+exports.getRelationshipDetails = function(edgeObjectType, recordItemId, callback) {
+	var query = strUtil.format("select from %s where out = %s", edgeObjectType, recordItemId);
+	console.log('query:' + query);
+	odb.db.query(query).then(function(records){
+		var obj = {
+			edgeObjectType: edgeObjectType,
+			data: records
+		}
+		callback(null,obj);
+	});
+}
+
 
 exports.getRelationship = function(edgeObjectType, recordItemId, callback) {
 	var query = strUtil.format("traverse out('%s') from %s", edgeObjectType, recordItemId);
@@ -42,7 +54,6 @@ exports.getEdge = function(edgeObjectType, edgeRecordItemId, callback) {
 exports.deleteEdge = function(objectType, sourceId, targetId, callback) {
 
 	var query = strUtil.format("delete edge from %s to %s where @class = '%s'", sourceId, targetId, objectType);
-	//var query = "delete edge from " + sourceId + " to " + targetId + " where @class = '" + objectType + "'";
 
 	console.log('query:' + query);
 	odb.db.query(query).then(function(results){
@@ -69,21 +80,42 @@ exports.updateEdge = function(objectType, recordData, sourceId, targetId, callba
 	var sendObj = {};
 	if(util.defined(recordData)) {
 		for(var propertyName in recordData) {
-			if(recordData[propertyName] != null && propertyName.indexOf('in') == -1 && propertyName.indexOf('out') == -1 && propertyName.indexOf('@') == -1 && propertyName != 'id' && propertyName != 'backup' && typeof propertyName != 'object' && typeof propertyName != 'array' && util.defined(recordData,propertyName))
+			console.log('^^^^ propertyName:' + propertyName);
+			if(recordData[propertyName] == null) {
+				console.log('fail1');
+			} else if(propertyName == 'in') {
+				console.log('fail2');
+			} else if(propertyName == 'out') {
+				console.log('fail3');
+			} else if(propertyName.indexOf('@') != -1) { 
+				console.log('fail4');
+			} else if(propertyName == 'id') {
+				console.log('fail5');
+			} else if(propertyName == 'backup') {
+				console.log('fail6');
+			} else if(typeof propertyName == 'object') {
+				console.log('fail7');
+			} else if(typeof propertyName == 'array') {
+				console.log('fail8');
+			} else if(!util.defined(recordData,propertyName)) {
+				console.log('fail9');
+			} else {
 				cleanData[propertyName] = recordData[propertyName];
+			}
 		}
 		sendObj = util.prepareInboudDate(cleanData);
 	}
 
-	var ret = odb.db.record.delete(recordData.id);
-	if(ret != null) {
-		var playsFor = odb.db.create('EDGE', objectType)
-	   	.from(sourceId).to(targetId).set(sendObj).one();		
-	  callback(null, playsFor);
-	} else {
-		callback(500, null);	
-	}
-	
+	console.log('^^^^ sendObj:');
+	console.dir(sendObj);
+
+	// Delete Edge
+	var query = strUtil.format("delete edge from %s to %s where @class = '%s'", sourceId, targetId, objectType);
+	console.log('query:' + query);
+	odb.db.query(query).then(function(results){
+		 console.log(results);
+		 exports.addEdge(objectType, sendObj, sourceId, targetId, callback);
+	});		
 }
 
 exports.addEdge = function(objectType, recordData, sourceId, targetId, callback) {

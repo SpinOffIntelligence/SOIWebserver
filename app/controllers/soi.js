@@ -47,8 +47,21 @@ exports.getRelationship = function(req, res, next) {
 	soiServices.getRelationship(edgeObjectType, recordItemId, function(err, data) {
 		res.json(data);
 	});	
+}
 
 
+exports.getRelationshipDetails = function(req, res, next) {
+	var edgeObjectType = req.body.edgeObjectType;
+	var recordItemId = req.body.recordItemId;
+
+	console.log('*** getRelationshipDetails ***');
+	console.dir(edgeObjectType);
+	console.log('~~~~~~~~~~~~~~');
+	console.dir(recordItemId);
+
+	soiServices.getRelationshipDetails(edgeObjectType, recordItemId, function(err, data) {
+		res.json(data);
+	});
 }
 
 exports.getEdge = function(req, res, next) {
