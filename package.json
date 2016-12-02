@@ -18,6 +18,8 @@
     "postinstall": "node bower install"
   },
   "dependencies": {
+    "body-parser" : "1.15.2",
+    "multer": "1.2.0",
     "async": "2.1.2",
     "apn": "1.5.2",
     "bower": "~1.2.8",

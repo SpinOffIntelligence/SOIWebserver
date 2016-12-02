@@ -11,6 +11,38 @@ var schemaTypeMap = [
 	{dbtype: 19, apptype: 'date'}
 ];
 
+exports.deleteVertexByProp = function(objectType, propName, propValue, callback) {
+
+	var query = strUtil.format("SELECT FROM %s where %s = '%s'", objectType ,propName, propValue);
+	console.log('query:' + query);
+	odb.db.query(query).then(function(records){
+		console.log('records:' + records);
+		console.dir(records);
+		if(records.length == 0) {
+			callback('Not Found!',null);
+			return;
+		} else if(records.length > 1) {
+			callback('Not Unqiue!',null);
+			return;
+		} else {
+			var query = strUtil.format("DELETE VERTEX %s where %s = '%s'", objectType ,propName, propValue);
+			console.log('query:' + query);
+			odb.db.query(query).then(function(records){
+				callback(null,records);
+				return;
+			});
+		}
+	});
+}
+
+exports.fetchRecordByName = function(objectType, name, callback) {
+	var query = strUtil.format("SELECT FROM %s where name = '%s'", objectType, name);
+		odb.db.query(query).then(function(records){
+			callback(null,records);
+		});
+}
+
+
 exports.getRelationshipDetails = function(edgeObjectType, recordItemId, callback) {
 	var query = strUtil.format("select from %s where out = %s", edgeObjectType, recordItemId);
 	console.log('query:' + query);
