@@ -166,51 +166,19 @@ module.exports = function(app,express){
 						    			console.dir(addObj);
 
 						    			if(sourceId.indexOf('#') == -1) {
-						    				soiServices.fetchRecordByName(objectTypeSource, sourceId, function(err, records) {
-													if(records.length == 0) {
-														err = strUtil.format("Source name %s not found!", sourceId);
-														res.json({error_code:2,err_desc:err});
-														return;
-													} else if(records.length > 1) {
-														err = strUtil.format("Source name %s not unique!", sourceId);
-														res.json({error_code:2,err_desc:err});
-														return;
-													} else {
-														var rec = records[0];
-														if(util.defined(rec,'@rid')) {
-															var sourceRecId = records[0]['@rid'];
-															console.log('sourceRecId:' + sourceRecId);
-															soiServices.fetchRecordByName(objectTypeTarget, targetId, function(err, records) {
-																if(records.length == 0) {
-																	err = strUtil.format("Target name %s not found!", targetId);
-																	res.json({error_code:2,err_desc:err});
-																	return;
-																} else if(records.length > 1) {
-																	err = strUtil.format("Target name %s not unique!", targetId);
-																	res.json({error_code:2,err_desc:err});
-																	return;
-																} else {
-																	var rec = records[0];
-																	if(util.defined(rec,'@rid')) {
-																		var targetRecId = records[0]['@rid'];
-																		console.log('targetRecId:' + targetRecId);
-																		soiServices.addEdge(objectType, addObj, sourceRecId, targetRecId, function(err, records) {
-																			console.log('Edge Added:' + records);
-								    								});
-																	} else {
-																		err = strUtil.format("Record ID not found!");
-																		res.json({error_code:2,err_desc:err});
-																		return;
-																	}
-																}
-															});															
-														} else {
-															err = strUtil.format("Record ID not found!");
-															res.json({error_code:2,err_desc:err});
-															return;
-														}
-													}
-												});
+						    				getSourceTargetID(objectTypeSource, objectTypeTarget, sourceId, targetId, function(err, data) {
+						    					if(util.defined(err)) {
+						    						console.log('getSourceTargetID Error:' + err);
+						    						res.json({error_code:2,err_desc:err});
+						    						return;
+						    					} else {
+						    						console.log('getSourceTargetID:' + data.sourceRecId + ":" + data.targetRecId);
+														soiServices.addEdge(objectType, addObj, data.sourceRecId, data.targetRecId, function(err, records) {
+															console.log('Edge Added:' + records);
+				    								});
+						    					}
+						    				})
+
 						    			} else {
 						    				soiServices.addEdge(objectType, addObj, sourceId, targetId, function(err, records) {
 						    					console.log('Edge Added:' + records);
@@ -221,11 +189,25 @@ module.exports = function(app,express){
 
 						    	} else if(mode.toLowerCase(mode) == 'delete') {
 						    		if(isEdge) {
+											if(sourceId.indexOf('#') == -1) {
+						    				getSourceTargetID(objectTypeSource, objectTypeTarget, sourceId, targetId, function(err, data) {
+						    					if(util.defined(err)) {
+						    						console.log('getSourceTargetID Error:' + err);
+						    						res.json({error_code:2,err_desc:err});
+						    						return;
+						    					} else {
+						    						console.log('getSourceTargetID:' + data.sourceRecId + ":" + data.targetRecId);
+														soiServices.deleteEdge(objectType, data.sourceRecId, data.targetRecId, function(err, records) {
+															console.log('Edge Deleted:' + records);
+				    								});
+						    					}
+						    				})
 
-										exports.deleteEdge = function(objectType, sourceId, targetId, callback) {
-
-
-
+						    			} else {
+						    				soiServices.deleteEdge(objectType, sourceId, targetId, function(err, records) {
+						    					console.log('Edge Deleted:' + records);
+						    				});
+						    			}
 						    		} else {
 							    		soiServices.deleteVertexByProp(objectType, arrProp[0], val, function(err, records) {
 							    			if(util.defined(err)) {
