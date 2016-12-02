@@ -145,13 +145,26 @@ exports.addEdge = function(objectType, recordData, sourceId, targetId, callback)
 
 	var addedEdge;
 	if(fndProp) {
-		addedEdge = odb.db.create('EDGE', objectType)
-	   	.from(sourceId).to(targetId).set(sendObj).one();		
+		var query = strUtil.format("CREATE EDGE %s FROM %s TO %s CONTENT %s", objectType, sourceId, targetId, JSON.stringify(recordData));
+		console.log('query:' + query);
+		odb.db.query(query).then(function(records){
+	   		console.log('records:' + records);
+   			callback(null, records);
+		}).catch(function(e) {
+			console.log('error:' + e);
+			callback(e, null);
+	  });			
 	} else {
-		addedEdge = odb.db.create('EDGE', objectType)
-	   	.from(sourceId).to(targetId).one();				
+		var query = strUtil.format("CREATE EDGE %s FROM %s TO %s", objectType, sourceId, targetId);
+		console.log('query:' + query);
+		odb.db.query(query).then(function(records){
+	   		console.log('records:' + records);
+   			callback(null, records);
+		}).catch(function(e) {
+			console.log('error:' + e);
+			callback(e, null);
+	  });			
 	}
-   callback(null, addedEdge);
 }
 
 exports.fetchRecords = function(objectType, callback) {
