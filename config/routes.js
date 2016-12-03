@@ -9,6 +9,7 @@ var fs = require('fs');
 var odb = require('../components/orientdb.js');
 var _ = require('underscore');
 var soiServices = require('../app/services/soi');
+var csv = require('csv-parser')
 
 module.exports = function(app,express){
 
@@ -73,162 +74,137 @@ module.exports = function(app,express){
 
   /** API path that will upload the files */
   app.post('/upload', function(req, res) {
-      upload(req,res,function(err){
-          if(err){
-               res.json({error_code:1,err_desc:err});
-               return;
-          }
-          console.dir(res.req.file.path);
+    upload(req,res,function(err){
+		
+		if(err){
+		   res.json({error_code:1,err_desc:err});
+		   return;
+		}
+		console.log('Body:');
+		console.dir(req.body);
 
-					var array = fs.readFileSync(res.req.file.path).toString().split("\r\n");
-					var lineNum=0;
-					var mode=null
-					var objectType=null;
-					var objectTypeSource=null;
-					var objectTypeTarget=null;
-					var isEdge=false;
-					var arrProp=null;
-					var numProp=0;
-					var arrSaveLines=[];
-					var err=null;					
-					for(i in array) {
-						var line = array[i];
-				    console.log(line + ':' + lineNum);
-				    var arrLine = line.split(',');
-				    if(util.defined(arrLine,"length")) {
-					    console.log(arrLine);
-					    if(lineNum==0) {
-					    	if(arrLine.length > 0) {
-					    		mode = arrLine[0];
-					    		console.log('mode:' + mode);
-								}
-								if(arrLine.length > 1) {
-					    		objectType=arrLine[1];
-					    		console.log('objectType:' + objectType);
-					    		if(objectType[0] == 'E') {
-					    			isEdge=true;
-					    			console.log('Is Edge!');
-					    		}
-					    	}
-					    	if(arrLine.length > 2) {
-					    		objectTypeSource=arrLine[2];
-					    		console.log('objectTypeSource:' + objectTypeSource);
-				    		}
-				    		if(arrLine.length > 3) {
-					    		objectTypeTarget=arrLine[3];
-					    		console.log('objectTypeTarget:' + objectTypeTarget);
-				    		}
-					    } else if(lineNum==1) {
-					    	arrProp=arrLine;
-					    	numProp=arrLine.length;
-					    	console.log('arrProp:' + arrProp);
-					    	console.log('numProp:' + numProp);
-					    	if(isEdge && _.indexOf(arrProp,'sourceid') == -1) {
-					    		err='Header sourceid missing!';
-					    		res.json({error_code:2,err_desc:err});
-									return;
-					    	} else if(isEdge && _.indexOf(arrProp,'targetid') == -1) {
-					    		err='Header targetid missing!';
-					    		res.json({error_code:2,err_desc:err});
-									return;
-					    	}
-					    } else if(err==null) {
-					    	if(arrLine.length != numProp) {
-					    		err='Line ' + lineNum + ' has wrong number of values!';
-					    	} else {
-					    		var obj = {};
-					    		var sourceId = null;
-					    		var targetId = null;
-					    		for(var i=0; i<arrProp.length; i++) {
-					    			var prop = arrProp[i];
-					    			var val = arrLine[i];
-					    			if(prop=='sourceid') {
-					    				sourceId = val;
-					    			} else if(prop=='targetid') {
-					    				targetId = val;
-					    			} else {
-					    				obj[prop] = val;	
-					    			}
-					    		}
-  				    		console.log('mode:' + mode);
-					    		if(mode.toLowerCase(mode) == 'add') {
-						    		var addObj = util.cleanInBoundData(obj);
-						    		console.dir(addObj);
-						    		if(isEdge==false) {						    			
-						    			soiServices.addRecord(objectType, addObj, function(err, returnObj) {
-												console.log('Added:');
-												console.dir(returnObj);
-											});					    			
-						    		} else {
-						    			console.log('sourceId:' + sourceId);
-						    			console.log('targetId:' + targetId);
-						    			console.log('data:');
-						    			console.dir(addObj);
+    if(util.defined(req,"body.formData")) {
+			var formData = req.body.formData;
 
-						    			if(sourceId.indexOf('#') == -1) {
-						    				getSourceTargetID(objectTypeSource, objectTypeTarget, sourceId, targetId, function(err, data) {
-						    					if(util.defined(err)) {
-						    						console.log('getSourceTargetID Error:' + err);
-						    						res.json({error_code:2,err_desc:err});
-						    						return;
-						    					} else {
-						    						console.log('getSourceTargetID:' + data.sourceRecId + ":" + data.targetRecId);
-														soiServices.addEdge(objectType, addObj, data.sourceRecId, data.targetRecId, function(err, records) {
-															console.log('Edge Added:' + records);
-				    								});
-						    					}
-						    				})
+			console.dir(res.req.file.path);
 
-						    			} else {
-						    				soiServices.addEdge(objectType, addObj, sourceId, targetId, function(err, records) {
-						    					console.log('Edge Added:' + records);
-						    				});
-						    			}
-						    		}
-						    	} else if(mode.toLowerCase(mode) == 'update') {
+			//var array = fs.readFileSync(res.req.file.path).toString().split("\r\n");
+			var lineNum=0;
+			var mode=formData.mode;
+			var objectType=formData.objectType;
+			var objectTypeSource=formData.sourceObjectType;
+			var objectTypeTarget=formData.targetObjectType;
+			
+			console.log('mode:'+mode);
+			console.log('objectType:'+objectType);
+			console.log('objectTypeSource:'+objectTypeSource);
+			console.log('objectTypeTarget:'+objectTypeTarget);
+			
+			var isEdge=false;
+			var arrProp=null;
+			var numProp=0;
+			var arrSaveLines=[];
+			var err=null;	
 
-						    	} else if(mode.toLowerCase(mode) == 'delete') {
-						    		if(isEdge) {
-											if(sourceId.indexOf('#') == -1) {
-						    				getSourceTargetID(objectTypeSource, objectTypeTarget, sourceId, targetId, function(err, data) {
-						    					if(util.defined(err)) {
-						    						console.log('getSourceTargetID Error:' + err);
-						    						res.json({error_code:2,err_desc:err});
-						    						return;
-						    					} else {
-						    						console.log('getSourceTargetID:' + data.sourceRecId + ":" + data.targetRecId);
-														soiServices.deleteEdge(objectType, data.sourceRecId, data.targetRecId, function(err, records) {
-															console.log('Edge Deleted:' + records);
-				    								});
-						    					}
-						    				})
+			if(objectType[0] == 'E') {
+				isEdge=true;
+				console.log('Is Edge!');
+			}
 
-						    			} else {
-						    				soiServices.deleteEdge(objectType, sourceId, targetId, function(err, records) {
-						    					console.log('Edge Deleted:' + records);
-						    				});
-						    			}
-						    		} else {
-							    		soiServices.deleteVertexByProp(objectType, arrProp[0], val, function(err, records) {
-							    			if(util.defined(err)) {
-							    				console.log('Error Deleting:' + err);
-							    			} else {
-							    				console.log('Record Deleted:' + records);	
-							    			}
-							    		});						    			
-						    		}
-						    	}
-					    	}
-					    }
-					    lineNum++;					    	
-				    }
-					}
-					if(err!=null) {
-						res.json({error_code:0,err_desc:null});
+			fs.createReadStream(res.req.file.path).pipe(csv()).on('data', function (lineData) {
+
+				console.log('****Line if data:');
+				console.dir(lineData);
+					
+				if(isEdge && !lineData.hasOwnProperty('sourceid')) {
+					err='Header sourceid missing!';
+					res.json({error_code:2,err_desc:err});
+					return;
+				} else if(isEdge &&  !lineData.hasOwnProperty('targetid')) {
+					err='Header targetid missing!';
+					res.json({error_code:2,err_desc:err});
+					return;
+				}
+
+				if(mode.toLowerCase(mode) == 'add') {
+					if(isEdge==false) {						    			
+						var addObj = util.cleanInBoundData(lineData);
+						console.dir(addObj);
+						soiServices.addRecord(objectType, addObj, function(err, returnObj) {
+								console.log('Added:');
+								console.dir(returnObj);
+							});					    			
 					} else {
-						res.json({error_code:1,err_desc:err});
+						var sourceId = lineData.sourceid;
+						var targetId = lineData.targetId;							
+						delete lineData.sourceid;
+						delete lineData.targetId;
+						var addObj = util.cleanInBoundData(lineData);
+						console.log('sourceId:' + sourceId);
+						console.log('targetId:' + targetId);
+						console.log('data:');
+						console.dir(addObj);
+
+						if(sourceId.indexOf('#') == -1) {
+							getSourceTargetID(objectTypeSource, objectTypeTarget, sourceId, targetId, function(err, data) {
+								if(util.defined(err)) {
+									console.log('getSourceTargetID Error:' + err);
+									res.json({error_code:2,err_desc:err});
+									return;
+								} else {
+									console.log('getSourceTargetID:' + data.sourceRecId + ":" + data.targetRecId);
+										soiServices.addEdge(objectType, addObj, data.sourceRecId, data.targetRecId, function(err, records) {
+											console.log('Edge Added:' + records);
+									});
+								}
+							})
+
+						} else {
+							soiServices.addEdge(objectType, addObj, sourceId, targetId, function(err, records) {
+								console.log('Edge Added:' + records);
+							});
+						}
 					}
-          
-      });
-  });
+				} else if(mode.toLowerCase(mode) == 'update') {
+
+				} else if(mode.toLowerCase(mode) == 'delete') {
+					if(isEdge) {
+						var sourceId = lineData.sourceid;
+						var targetId = lineData.targetId;							
+						if(sourceId.indexOf('#') == -1) {
+							getSourceTargetID(objectTypeSource, objectTypeTarget, sourceId, targetId, function(err, data) {
+								if(util.defined(err)) {
+									console.log('getSourceTargetID Error:' + err);
+									res.json({error_code:2,err_desc:err});
+									return;
+								} else {
+									console.log('getSourceTargetID:' + data.sourceRecId + ":" + data.targetRecId);
+										soiServices.deleteEdge(objectType, data.sourceRecId, data.targetRecId, function(err, records) {
+											console.log('Edge Deleted:' + records);
+									});
+								}
+							})
+						} else {
+							soiServices.deleteEdge(objectType, sourceId, targetId, function(err, records) {
+								console.log('Edge Deleted:' + records);
+							});
+						}
+					} else {
+						var delObj = util.cleanInBoundData(lineData);
+						soiServices.deleteVertexByProp(objectType, delObj, function(err, records) {
+							if(util.defined(err)) {
+								console.log('Error Deleting:' + err);
+							} else {
+								console.log('Record Deleted:' + records);	
+							}
+						});						    			
+					}
+				}
+				lineNum++;
+		    });
+			} else {
+				// no form data
+			}
+		});
+	});	
 }
