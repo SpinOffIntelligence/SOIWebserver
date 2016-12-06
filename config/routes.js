@@ -119,6 +119,12 @@ module.exports = function(app,express){
 				console.log('Is Edge!');
 			}
 
+			var idField;
+			if(mode == 'update') {
+				idField = formData.idObjField;
+				console.log('Update ID Field: ' + idField);
+			}
+
 			var file = res.req.file.path;
 			var strInfo;
 
@@ -129,11 +135,15 @@ module.exports = function(app,express){
 					
 				if(isEdge && !lineData.hasOwnProperty('sourceid')) {
 					err='Header sourceid missing!';
+					strInfo = 'Error on line ' + lineNum + ':' + err;
+					logInfo(mode, file, strInfo);	
 					res.json({error_code:2,err_desc:err});
 					return;
 				} else if(isEdge &&  !lineData.hasOwnProperty('targetid')) {
 					err='Header targetid missing!';
 					res.json({error_code:2,err_desc:err});
+					strInfo = 'Error on line ' + lineNum + ':' + err;
+					logInfo(mode, file, strInfo);						
 					return;
 				}
 
@@ -162,6 +172,8 @@ module.exports = function(app,express){
 							getSourceTargetID(objectTypeSource, objectTypeTarget, sourceId, targetId, function(err, data) {
 								if(util.defined(err)) {
 									console.log('getSourceTargetID Error:' + err);
+									strInfo = 'Error on line ' + lineNum + ':' + err;
+									logInfo(mode, file, strInfo);	
 									res.json({error_code:2,err_desc:err});
 									return;
 								} else {
@@ -184,6 +196,23 @@ module.exports = function(app,express){
 					}
 				} else if(mode.toLowerCase(mode) == 'update') {
 
+					if(isEdge==false) {				
+						var idValue = lineData[idField];
+						delete lineData[idField];
+						var updateObj = util.cleanInBoundData(lineData);
+						console.dir(updateObj);
+
+						console.log('idField:' + idField);
+						console.log('idValue:' + idValue);
+						
+						soiServices.updateRecordByProp(objectType, idField, idValue, updateObj, function(err, returnObj) {
+								console.log('Added:');
+								console.dir(returnObj);
+								strInfo = 'Record Added: ' + objectType + ':' + JSON.stringify(returnObj);
+								logInfo(mode, file, strInfo);	
+							});					    			
+					}
+
 				} else if(mode.toLowerCase(mode) == 'delete') {
 					if(isEdge) {
 						var sourceId = lineData.sourceid;
@@ -195,6 +224,8 @@ module.exports = function(app,express){
 							getSourceTargetID(objectTypeSource, objectTypeTarget, sourceId, targetId, function(err, data) {
 								if(util.defined(err)) {
 									console.log('getSourceTargetID Error:' + err);
+									strInfo = 'Error on line ' + lineNum + ':' + err;
+									logInfo(mode, file, strInfo);										
 									res.json({error_code:2,err_desc:err});
 									return;
 								} else {
@@ -218,6 +249,8 @@ module.exports = function(app,express){
 						soiServices.deleteVertexByProp(objectType, delObj, function(err, records) {
 							if(util.defined(err)) {
 								console.log('Error Deleting:' + err);
+								strInfo = 'Error on line ' + lineNum + ':' + err;
+								logInfo(mode, file, strInfo);									
 							} else {
 								console.log('Record Deleted:' + records);	
 								strInfo = 'Record Deleted: ' + objectType + ':' + JSON.stringify(delObj);
