@@ -22,5 +22,8 @@ module.exports = function(app) {
 	app.post('/soi/getRelationship', soiControllers.getRelationship);
 	app.post('/soi/getRelationshipDetails', soiControllers.getRelationshipDetails);
 
+	app.post('/soi/getLogInfo', soiControllers.getLogInfo);
+	app.post('/soi/deleteLogInfo', soiControllers.deleteLogInfo);
+	
  };
 

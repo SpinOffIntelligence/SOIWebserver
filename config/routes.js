@@ -9,7 +9,8 @@ var fs = require('fs');
 var odb = require('../components/orientdb.js');
 var _ = require('underscore');
 var soiServices = require('../app/services/soi');
-var csv = require('csv-parser')
+var csv = require('csv-parser');
+var moment = require('moment');
 
 module.exports = function(app,express){
 
@@ -32,6 +33,13 @@ module.exports = function(app,express){
                   storage: storage
               }).single('file');
 
+
+  function logInfo(mode, file, strInfo) {
+  	var strDateTime = moment().format('YYYY-MM-DD HH:mm:ss');
+  	console.log('Log Info: ' + mode + ':' + file + ':' + strInfo + ':' + strDateTime);
+  	soiServices.addLogInfo(mode, file, strInfo, strDateTime,function(err, data) {
+  	});
+  }
 
   function getSourceTargetID(objectTypeSource, objectTypeTarget, sourceId, targetId, callback) {
 
@@ -111,9 +119,12 @@ module.exports = function(app,express){
 				console.log('Is Edge!');
 			}
 
-			fs.createReadStream(res.req.file.path).pipe(csv()).on('data', function (lineData) {
+			var file = res.req.file.path;
+			var strInfo;
 
-				console.log('****Line if data:');
+			fs.createReadStream(file).pipe(csv()).on('data', function (lineData) {
+
+				console.log('****Line of data:');
 				console.dir(lineData);
 					
 				if(isEdge && !lineData.hasOwnProperty('sourceid')) {
@@ -133,10 +144,12 @@ module.exports = function(app,express){
 						soiServices.addRecord(objectType, addObj, function(err, returnObj) {
 								console.log('Added:');
 								console.dir(returnObj);
+								strInfo = 'Record Added: ' + objectType + ':' + JSON.stringify(returnObj);
+								logInfo(mode, file, strInfo);	
 							});					    			
 					} else {
 						var sourceId = lineData.sourceid;
-						var targetId = lineData.targetId;							
+						var targetId = lineData.targetid;							
 						delete lineData.sourceid;
 						delete lineData.targetId;
 						var addObj = util.cleanInBoundData(lineData);
@@ -155,6 +168,8 @@ module.exports = function(app,express){
 									console.log('getSourceTargetID:' + data.sourceRecId + ":" + data.targetRecId);
 										soiServices.addEdge(objectType, addObj, data.sourceRecId, data.targetRecId, function(err, records) {
 											console.log('Edge Added:' + records);
+											strInfo = 'Edge Added: ' + objectType + ':' + JSON.stringify(addObj) + ':' + data.sourceRecId + ':' + data.targetRecId;
+											logInfo(mode, file, strInfo);
 									});
 								}
 							})
@@ -162,6 +177,8 @@ module.exports = function(app,express){
 						} else {
 							soiServices.addEdge(objectType, addObj, sourceId, targetId, function(err, records) {
 								console.log('Edge Added:' + records);
+								strInfo = 'Edge Added: ' + objectType + ':' + JSON.stringify(addObj) + ':' + sourceId + ':' + targetId;
+								logInfo(mode, file, strInfo);	
 							});
 						}
 					}
@@ -170,7 +187,10 @@ module.exports = function(app,express){
 				} else if(mode.toLowerCase(mode) == 'delete') {
 					if(isEdge) {
 						var sourceId = lineData.sourceid;
-						var targetId = lineData.targetId;							
+						var targetId = lineData.targetid;
+						console.log('sourceId:' + sourceId);
+						console.log('targetId:' + targetId);
+
 						if(sourceId.indexOf('#') == -1) {
 							getSourceTargetID(objectTypeSource, objectTypeTarget, sourceId, targetId, function(err, data) {
 								if(util.defined(err)) {
@@ -181,12 +201,16 @@ module.exports = function(app,express){
 									console.log('getSourceTargetID:' + data.sourceRecId + ":" + data.targetRecId);
 										soiServices.deleteEdge(objectType, data.sourceRecId, data.targetRecId, function(err, records) {
 											console.log('Edge Deleted:' + records);
+ 											strInfo = 'Edge Deleted: ' + objectType + ':' + data.sourceRecId + ':' + data.targetRecId;
+											logInfo(mode, file, strInfo);	
 									});
 								}
 							})
 						} else {
 							soiServices.deleteEdge(objectType, sourceId, targetId, function(err, records) {
 								console.log('Edge Deleted:' + records);
+								strInfo = 'Edge Deleted: ' + objectType + ':' + sourceId + ':' + targetId;
+								logInfo(mode, file, strInfo);	
 							});
 						}
 					} else {
@@ -196,12 +220,18 @@ module.exports = function(app,express){
 								console.log('Error Deleting:' + err);
 							} else {
 								console.log('Record Deleted:' + records);	
+								strInfo = 'Record Deleted: ' + objectType + ':' + JSON.stringify(delObj);
+								logInfo(mode, file, strInfo);	
 							}
 						});						    			
 					}
 				}
 				lineNum++;
-		    });
+		    }).on('end', function() {
+      		console.log('Done:' + lineNum);	
+      		var strLog = lineNum + ' Records completed.';
+      		res.json({error_code:0,err_desc:null,strLog: strLog, file: file});
+    		});
 			} else {
 				// no form data
 			}

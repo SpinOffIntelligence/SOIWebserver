@@ -11,6 +11,46 @@ var schemaTypeMap = [
 	{dbtype: 19, apptype: 'date'}
 ];
 
+
+exports.deleteLogInfo = function(file, callback) {
+	file = file.replace('\\','\\\\')
+	var query = strUtil.format("delete from BatchJob where file = '%s'", file);
+	console.log('query:' + query);
+	odb.db.query(query).then(function(records){
+		callback(null,records);
+	});
+}
+
+exports.getAllLogInfo = function(callback) {
+	var query = "select from BatchJob";
+	console.log('query:' + query);
+	odb.db.query(query).then(function(records){
+		callback(null,records);
+	});
+}
+
+exports.getLogInfo = function(file, callback) {
+	file = file.replace('\\','\\\\')
+	var query = strUtil.format("select from BatchJob where file = '%s'", file);
+	console.log('query:' + query);
+	odb.db.query(query).then(function(records){
+		callback(null,records);
+	});
+}
+
+exports.addLogInfo = function(mode, file, strInfo, startdateTime, callback) {
+	var infoObj = {
+		file: file,
+		info: strInfo,
+		mode: mode,
+		startdatetime: startdateTime
+	}
+	odb.db.insert().into('BatchJob')
+   .set(infoObj).all().then(function(returnObj){
+      callback(null, returnObj);
+   });
+}
+
 exports.deleteVertexByProp = function(objectType, propObj, callback) {
 
 	var whereStr = '';
@@ -44,6 +84,7 @@ exports.deleteVertexByProp = function(objectType, propObj, callback) {
 
 exports.fetchRecordByName = function(objectType, name, callback) {
 	var query = strUtil.format("SELECT FROM %s where name = '%s'", objectType, name);
+	console.log('query:' + query);
 		odb.db.query(query).then(function(records){
 			callback(null,records);
 		});

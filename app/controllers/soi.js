@@ -6,6 +6,35 @@ var async = require('async');
 var util = require('../../components/utilities.js');
 
 
+
+exports.deleteLogInfo = function(req, res, next) {
+
+	console.log('*** getLogInfo ***');
+	var file = req.body.file;
+	console.dir(file);
+	soiServices.deleteLogInfo(file, function(err, data) {
+		res.json(data);
+	});	
+}
+
+exports.getLogInfo = function(req, res, next) {
+
+	console.log('*** getLogInfo ***');
+	if(util.defined(req,"body.file")) {
+		var file = req.body.file;
+		console.dir(file);
+		soiServices.getLogInfo(file, function(err, data) {
+			res.json(data);
+		});	
+	} else {
+		soiServices.getAllLogInfo(function(err, data) {
+			res.json(data);
+		});	
+
+	}
+}
+
+
 exports.getSchemas = function(req, res, next) {
 	var schemas = req.body.schemas
 
@@ -87,7 +116,7 @@ exports.getEdgeBySource = function(req, res, next) {
 	console.dir(edgeObjectType);
 	console.log('~~~~~~~~~~~~~~');
 	console.dir(recordItemId);
-	
+
 	soiServices.getEdgeBySource(edgeObjectType, recordItemId, function(err, data) {
 		res.json(data);
 	});
