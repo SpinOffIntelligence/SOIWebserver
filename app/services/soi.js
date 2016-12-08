@@ -57,7 +57,7 @@ exports.exportRecords = function(objectType, criteria, callback) {
 
 	var whereClause='';
 	var query;
-	if(util.defined(criteria)) {
+	if(util.defined(criteria,'length') && criteria.length > 0) {
 		for(var i=0; i<criteria.length; i++) {
 			var cri = criteria[i];
 			var clause;
