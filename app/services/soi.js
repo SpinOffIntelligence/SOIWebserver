@@ -51,6 +51,51 @@ exports.addLogInfo = function(mode, file, strInfo, startdateTime, callback) {
    });
 }
 
+
+
+exports.exportRecords = function(objectType, criteria, callback) {
+
+	var whereClause='';
+	var query;
+	if(util.defined(criteria)) {
+		for(var i=0; i<criteria.length; i++) {
+			var cri = criteria[i];
+			var clause;
+			if(cri.operator == 'equals') {
+				clause = strUtil.format("%s = '%s'", cri.field, cri.value);
+			} else if(cri.operator == 'greater') {
+				clause = strUtil.format("%s > %s", cri.field, cri.value);
+			} else if(cri.operator == 'less') {
+				clause = strUtil.format("%s < %s", cri.field, cri.value);
+			} else if(cri.operator == 'contains') {
+				clause = strUtil.format("%s like '\%%s\%'", cri.field, cri.value);
+			} else if(cri.operator == 'notequal') {
+				clause = strUtil.format("%s <> '%s'", cri.field, cri.value);
+			} else if(cri.operator == 'notcontain') {
+				clause = strUtil.format("NOT %s like '\%%s\%'", cri.field, cri.value);
+			}
+			if(i != criteria.length-1) {
+				whereClause = clause + ' and ';
+			} else {
+				whereClause += clause;
+			}
+		}
+		console.log('whereClause:' + whereClause);		
+		query = strUtil.format("SELECT FROM %s where %s", objectType, whereClause);
+	} else {
+		query = strUtil.format("SELECT FROM %s", objectType);
+	}
+
+	console.log('query:' + query);
+	odb.db.query(query).then(function(records){
+		console.log('records:');
+		//console.dir(records);
+		callback(null,records);
+	});
+
+}
+
+
 exports.updateRecordByProp = function(objectType, idField, idValue, updateObj, callback) {
 	var query = strUtil.format("SELECT FROM %s where %s = '%s'", objectType ,idField, idValue);
 	console.log('query:' + query);

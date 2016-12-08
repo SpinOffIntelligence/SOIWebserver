@@ -6,11 +6,35 @@ var async = require('async');
 var util = require('../../components/utilities.js');
 
 
+exports.exportRecords = function(req, res, next) {
+
+	var objectType = req.body.objectType;
+	var criteria = req.body.criteria;
+
+	console.log('*** exportRecords ***');
+	console.dir(objectType);
+	console.log('~~~~~~~~~~~~~~');
+	console.dir(criteria);
+
+	soiServices.exportRecords(objectType, criteria, function(err, records) {
+		var strInfo;
+		if(util.defined(err)) {
+			console.log('Error Exporting:' + err);
+			strInfo = 'Error Exporting:' + err;
+			util.logInfo('Export', 'n/a', strInfo);
+		} else {
+			console.log('Exporting:' + records);	
+			strInfo = 'Exporting: ' + objectType + ':' + records.length;
+			util.logInfo('Export', 'n/a', strInfo);	
+			res.json({error_code:0,err_desc:null,strLog: strInfo, file: 'n/a', exportData: records});			
+		}
+	});	
+}
 
 exports.deleteLogInfo = function(req, res, next) {
 
-	console.log('*** getLogInfo ***');
 	var file = req.body.file;
+	console.log('*** getLogInfo ***');
 	console.dir(file);
 	soiServices.deleteLogInfo(file, function(err, data) {
 		res.json(data);

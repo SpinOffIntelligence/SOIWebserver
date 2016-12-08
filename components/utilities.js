@@ -1,5 +1,6 @@
 'use strict';
 var moment = require('moment');
+var soiServices = require('../app/services/soi');
 
 function defined(ref, strNames) {
     var name;
@@ -87,7 +88,16 @@ function cleanInBoundData(recordData) {
   } 
 }
 
+function logInfo(mode, file, strInfo) {
+  var strDateTime = moment().format('YYYY-MM-DD HH:mm:ss');
+  console.log('Log Info: ' + mode + ':' + file + ':' + strInfo + ':' + strDateTime);
+  soiServices.addLogInfo(mode, file, strInfo, strDateTime,function(err, data) {
+  });
+}
+
+
 module.exports.defined = defined;
 module.exports.prepareInboudDate = prepareInboudDate;
 module.exports.cleanInBoundData = cleanInBoundData;
+module.exports.logInfo = logInfo;
 

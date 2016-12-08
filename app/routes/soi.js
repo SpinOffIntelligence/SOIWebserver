@@ -24,6 +24,8 @@ module.exports = function(app) {
 
 	app.post('/soi/getLogInfo', soiControllers.getLogInfo);
 	app.post('/soi/deleteLogInfo', soiControllers.deleteLogInfo);
+
+	app.post('/soi/exportRecords', soiControllers.exportRecords);
 	
  };
 
