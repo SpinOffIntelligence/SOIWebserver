@@ -68,7 +68,7 @@ exports.exportRecords = function(objectType, criteria, callback) {
 			} else if(cri.operator == 'less') {
 				clause = strUtil.format("%s < %s", cri.field, cri.value);
 			} else if(cri.operator == 'contains') {
-				clause = strUtil.format("%s like '\%%s\%'", cri.field, cri.value);
+				clause = cri.field + " like '%" + cri.value + "%'";
 			} else if(cri.operator == 'notequal') {
 				clause = strUtil.format("%s <> '%s'", cri.field, cri.value);
 			} else if(cri.operator == 'notcontain') {
