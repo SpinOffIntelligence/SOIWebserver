@@ -127,16 +127,9 @@ exports.updateRecordByProp = function(objectType, idField, idValue, updateObj, c
 	});
 }
 
-exports.deleteVertexByProp = function(objectType, propObj, callback) {
+exports.deleteVertexByProp = function(objectType, idField, idValue, callback) {
 
-	var whereStr = '';
-	for(var propertyName in propObj) {
-		if(whereStr == '')
-			whereStr = strUtil.format("%s = '%s'", propertyName, propObj[propertyName]);
-		else whereStr += ' and ' + strUtil.format("%s = '%s'", propertyName, propObj[propertyName]);
-	}
-
-	var query = strUtil.format("SELECT FROM %s where %s ", objectType ,whereStr);
+	var query = strUtil.format("SELECT FROM %s where %s = '%s'", objectType, idField, idValue);
 	console.log('query:' + query);
 	odb.db.query(query).then(function(records){
 		console.log('records:' + records);
@@ -148,7 +141,7 @@ exports.deleteVertexByProp = function(objectType, propObj, callback) {
 			callback('Not Unqiue!',null);
 			return;
 		} else {
-			var query = strUtil.format("DELETE VERTEX %s where %s ", objectType ,whereStr);
+			var query = strUtil.format("DELETE VERTEX %s where %s = '%s'", objectType, idField, idValue);
 			console.log('query:' + query);
 			odb.db.query(query).then(function(records){
 				callback(null,records);

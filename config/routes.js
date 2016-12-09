@@ -112,9 +112,9 @@ module.exports = function(app,express){
 			}
 
 			var idField;
-			if(mode == 'update') {
+			if(mode == 'update' || mode == 'delete') {
 				idField = formData.idObjField;
-				console.log('Update ID Field: ' + idField);
+				console.log('Update/Delete ID Field: ' + idField);
 			}
 
 			var file = res.req.file.path;
@@ -153,7 +153,7 @@ module.exports = function(app,express){
 						var sourceId = lineData.sourceid;
 						var targetId = lineData.targetid;							
 						delete lineData.sourceid;
-						delete lineData.targetId;
+						delete lineData.targetid;
 						var addObj = util.cleanInBoundData(lineData);
 						console.log('sourceId:' + sourceId);
 						console.log('targetId:' + targetId);
@@ -194,13 +194,16 @@ module.exports = function(app,express){
 						var updateObj = util.cleanInBoundData(lineData);
 						console.dir(updateObj);
 
+						if(idField.toLowerCase() == 'id')
+							idField = '@rid';
+
 						console.log('idField:' + idField);
 						console.log('idValue:' + idValue);
 
 						soiServices.updateRecordByProp(objectType, idField, idValue, updateObj, function(err, returnObj) {
-								console.log('Added:');
+								console.log('Update:');
 								console.dir(returnObj);
-								strInfo = 'Record Added: ' + objectType + ':' + JSON.stringify(returnObj);
+								strInfo = 'Record Updated: ' + objectType + ':' + JSON.stringify(returnObj);
 								util.logInfo(mode, file, strInfo);	
 							});					    			
 					} else {
@@ -270,15 +273,23 @@ module.exports = function(app,express){
 							});
 						}
 					} else {
-						var delObj = util.cleanInBoundData(lineData);
-						soiServices.deleteVertexByProp(objectType, delObj, function(err, records) {
+						//var delObj = util.cleanInBoundData(lineData);
+ 						var idValue = lineData[idField];
+
+						if(idField.toLowerCase() == 'id')
+							idField = '@rid';
+
+						console.log('idField:' + idField);
+						console.log('idValue:' + idValue);
+
+						soiServices.deleteVertexByProp(objectType, idField, idValue, function(err, records) {
 							if(util.defined(err)) {
 								console.log('Error Deleting:' + err);
 								strInfo = 'Error on line ' + lineNum + ':' + err;
 								util.logInfo(mode, file, strInfo);									
 							} else {
 								console.log('Record Deleted:' + records);	
-								strInfo = 'Record Deleted: ' + objectType + ':' + JSON.stringify(delObj);
+								strInfo = 'Record Deleted: ' + idField + ':' + idValue;
 								util.logInfo(mode, file, strInfo);	
 							}
 						});						    			
