@@ -194,13 +194,14 @@ module.exports = function(app,express){
 						var updateObj = util.cleanInBoundData(lineData);
 						console.dir(updateObj);
 
+						var sendIdField = idField;
 						if(idField.toLowerCase() == 'id')
-							idField = '@rid';
+							sendIdField = '@rid';
 
-						console.log('idField:' + idField);
+						console.log('idField:' + sendIdField);
 						console.log('idValue:' + idValue);
 
-						soiServices.updateRecordByProp(objectType, idField, idValue, updateObj, function(err, returnObj) {
+						soiServices.updateRecordByProp(objectType, sendIdField, idValue, updateObj, function(err, returnObj) {
 								console.log('Update:');
 								console.dir(returnObj);
 								strInfo = 'Record Updated: ' + objectType + ':' + JSON.stringify(returnObj);
@@ -276,13 +277,14 @@ module.exports = function(app,express){
 						//var delObj = util.cleanInBoundData(lineData);
  						var idValue = lineData[idField];
 
+						var sendIdField = idField;
 						if(idField.toLowerCase() == 'id')
-							idField = '@rid';
+							sendIdField = '@rid';
 
-						console.log('idField:' + idField);
+						console.log('idField:' + sendIdField);
 						console.log('idValue:' + idValue);
 
-						soiServices.deleteVertexByProp(objectType, idField, idValue, function(err, records) {
+						soiServices.deleteVertexByProp(objectType, sendIdField, idValue, function(err, records) {
 							if(util.defined(err)) {
 								console.log('Error Deleting:' + err);
 								strInfo = 'Error on line ' + lineNum + ':' + err;
