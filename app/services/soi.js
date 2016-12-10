@@ -344,7 +344,7 @@ exports.getRecordDetails = function(objectType, recordId, callback) {
 exports.addRecord = function(objectType, panelRecord, callback) {
 	var updateObj = {};
 	for(var propertyName in panelRecord) {
-		if(propertyName.indexOf('@') == -1 && propertyName != 'id' && propertyName != 'backup' && util.defined(panelRecord,propertyName)) {
+		if(propertyName.indexOf('@') == -1 && propertyName != 'id' && propertyName != 'backup' && util.defined(panelRecord,propertyName) && panelRecord[propertyName].length > 0) {
 			updateObj[propertyName] = panelRecord[propertyName];
 		}
 	}
