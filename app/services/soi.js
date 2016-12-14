@@ -151,6 +151,14 @@ exports.deleteVertexByProp = function(objectType, idField, idValue, callback) {
 	});
 }
 
+exports.fetchRecordByProp = function(objectType, prod, value, callback) {
+	var query = strUtil.format("SELECT FROM %s where %s = '%s'", objectType, prod, value);
+	console.log('query:' + query);
+		odb.db.query(query).then(function(records){
+			callback(null,records);
+		});
+}
+
 exports.fetchRecordByName = function(objectType, name, callback) {
 	var query = strUtil.format("SELECT FROM %s where name = '%s'", objectType, name);
 	console.log('query:' + query);

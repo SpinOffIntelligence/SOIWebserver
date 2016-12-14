@@ -204,6 +204,24 @@ exports.addEdge = function(req, res, next) {
 	});
 }
 
+exports.fetchRecordByProp = function(req, res, next) {
+	var objectType = req.body.objectType;
+	var prop = req.body.prop;
+	var value = req.body.value;
+
+	console.log('*** fetchRecords ***');
+	console.dir(objectType);
+	console.log('~~~~~~~~~~~~~~');
+	console.dir(prop);
+	console.log('~~~~~~~~~~~~~~');
+	console.dir(value);
+
+	soiServices.fetchRecordByProp(objectType, prop, value, function(err, data) {
+		res.json(data);
+	});
+}
+
+
 exports.fetchRecords = function(req, res, next) {
 	var objectType = req.body.objectType;
 

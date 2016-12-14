@@ -12,6 +12,7 @@ module.exports = function(app) {
 	app.post('/soi/addPanelRecord', soiControllers.addPanelRecord);
 	app.post('/soi/deletePanelRecord', soiControllers.deletePanelRecord);
 	app.post('/soi/fetchRecords', soiControllers.fetchRecords);
+	app.post('/soi/fetchRecordByProp', soiControllers.fetchRecordByProp);
 
 	app.post('/soi/updateEdge', soiControllers.updateEdge);	
 	app.post('/soi/getEdge', soiControllers.getEdge);	
