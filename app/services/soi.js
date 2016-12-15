@@ -313,10 +313,15 @@ exports.getRecordDetails = function(objectType, recordId, callback) {
 
 	odb.db.query("traverse * from " + recordId).then(function(recordDetails){
 
+		console.log('** traverse **');
+		console.dir(recordDetails);
+
    var returnObj = {};
    for(var i=0; i<recordDetails.length; i++) {
 			var obj = recordDetails[i];
 			var className = obj['@class'];
+
+			console.log('** Class:' + className);
 
 			if(!util.defined(returnObj,className)) {
 				returnObj[className]=[];
@@ -324,23 +329,49 @@ exports.getRecordDetails = function(objectType, recordId, callback) {
 
 			var props={};
 			for(var propertyName in obj) {
-				if(propertyName.indexOf('in') == -1 && propertyName.indexOf('out') == -1 && propertyName.indexOf('@') == -1 && propertyName != 'id' && propertyName != 'backup' && typeof propertyName != 'object' && typeof propertyName != 'array') {
+
+				console.log('** propertyName:' + propertyName);
+
+				if(propertyName.indexOf('in') == -1 && propertyName.indexOf('out') == -1 && propertyName.indexOf('@') == -1 && propertyName != 'id' && propertyName != 'backup' && typeof propertyName != 'object' && typeof propertyName != 'array') {					
 					props[propertyName] = obj[propertyName];
 				} else if(propertyName.indexOf('@rid') > -1) {
 					var idobj = obj[propertyName];
 					props.id = '#' + idobj.cluster + ':' + idobj.position;
 				} else if(propertyName.indexOf('in') > -1 && propertyName.indexOf('_') == -1) {
+
+					console.log('** IN:');
+
 					var inobj = obj[propertyName];
 					var inprops={};
 					for(var propertyName in inobj) {
 						if(propertyName.indexOf('in') == -1 && propertyName.indexOf('out') == -1 && propertyName.indexOf('@') == -1 && propertyName != 'id' && propertyName != 'backup' && typeof propertyName != 'object' && typeof propertyName != 'array') {
-							props[propertyName] = inobj[propertyName];
+							inprops[propertyName] = inobj[propertyName];
 						} else if(propertyName.indexOf('@rid') > -1) {
 							var idobj = inobj[propertyName];
-							props.inId = '#' + idobj.cluster + ':' + idobj.position;
+							inprops.inId = '#' + idobj.cluster + ':' + idobj.position;
+						}
+					}
+					console.log('** IN OBJ:');
+					console.dir(inprops)
+					props['in'] = inprops;
+				} else if(propertyName.indexOf('out') > -1 && propertyName.indexOf('_') == -1) {
+
+					console.log('** IN:');
+
+					var outobj = obj[propertyName];
+					var outprops={};
+					for(var propertyName in outobj) {
+						if(propertyName.indexOf('in') == -1 && propertyName.indexOf('out') == -1 && propertyName.indexOf('@') == -1 && propertyName != 'id' && propertyName != 'backup' && typeof propertyName != 'object' && typeof propertyName != 'array') {
+							outprops[propertyName] = outobj[propertyName];
+						} else if(propertyName.indexOf('@rid') > -1) {
+							var idobj = outobj[propertyName];
+							outprops.outId = '#' + idobj.cluster + ':' + idobj.position;
 						}
 					}
 
+					console.log('** OUT OBJ:');
+					console.dir(outprops)
+					props['out'] = outprops;
 				}
 			}
 			returnObj[className].push(props);
