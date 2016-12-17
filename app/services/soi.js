@@ -332,45 +332,55 @@ exports.getRecordDetails = function(objectType, recordId, callback) {
 
 				console.log('** propertyName:' + propertyName);
 
-				if(propertyName.indexOf('in') == -1 && propertyName.indexOf('out') == -1 && propertyName.indexOf('@') == -1 && propertyName != 'id' && propertyName != 'backup' && typeof propertyName != 'object' && typeof propertyName != 'array') {					
+				if(propertyName.indexOf('in') != 0 && propertyName.indexOf('out') != 0 && propertyName.indexOf('@') != 0 && propertyName != 'id' && propertyName != 'backup' && typeof propertyName != 'object' && typeof propertyName != 'array') {					
+					console.log('>>Add');
 					props[propertyName] = obj[propertyName];
-				} else if(propertyName.indexOf('@rid') > -1) {
+				} else if(propertyName.indexOf('@rid') == 0) {
+					console.log('>>Add');
 					var idobj = obj[propertyName];
 					props.id = '#' + idobj.cluster + ':' + idobj.position;
-				} else if(propertyName.indexOf('in') > -1 && propertyName.indexOf('_') == -1) {
+				} else if(propertyName.indexOf('in') == 0 && propertyName.indexOf('_') != 0) {
 
+					console.log('>>Add');
 					console.log('** IN:');
 
 					var inobj = obj[propertyName];
 					var inprops={};
 					for(var propertyName in inobj) {
-						if(propertyName.indexOf('in') == -1 && propertyName.indexOf('out') == -1 && propertyName.indexOf('@') == -1 && propertyName != 'id' && propertyName != 'backup' && typeof propertyName != 'object' && typeof propertyName != 'array') {
+						
+						console.log('** IN propertyName:' + propertyName);
+
+						if(propertyName.indexOf('in') != 0 && propertyName.indexOf('out') != 0 && propertyName.indexOf('@') != 0 && propertyName != 'id' && propertyName != 'backup' && typeof propertyName != 'object' && typeof propertyName != 'array') {
 							inprops[propertyName] = inobj[propertyName];
-						} else if(propertyName.indexOf('@rid') > -1) {
+							console.log('>>Add In' + inprops[propertyName]);
+
+						} else if(propertyName.indexOf('@rid') == 0) {
 							var idobj = inobj[propertyName];
 							inprops.inId = '#' + idobj.cluster + ':' + idobj.position;
+							console.log('>>Add In' + inprops.inId);
 						}
 					}
-					console.log('** IN OBJ:');
+					console.log('** IN OBJ DONE:');
 					console.dir(inprops)
 					props['in'] = inprops;
-				} else if(propertyName.indexOf('out') > -1 && propertyName.indexOf('_') == -1) {
+				} else if(propertyName.indexOf('out') == 0 && propertyName.indexOf('_') != 0) {
 
+					console.log('>>Add');
 					console.log('** IN:');
 
 					var outobj = obj[propertyName];
 					var outprops={};
 					for(var propertyName in outobj) {
-						if(propertyName.indexOf('in') == -1 && propertyName.indexOf('out') == -1 && propertyName.indexOf('@') == -1 && propertyName != 'id' && propertyName != 'backup' && typeof propertyName != 'object' && typeof propertyName != 'array') {
+						if(propertyName.indexOf('in') != 0 && propertyName.indexOf('out') != 0 && propertyName.indexOf('@') != 0 && propertyName != 'id' && propertyName != 'backup' && typeof propertyName != 'object' && typeof propertyName != 'array') {
 							outprops[propertyName] = outobj[propertyName];
-						} else if(propertyName.indexOf('@rid') > -1) {
+						} else if(propertyName.indexOf('@rid') == 0) {
 							var idobj = outobj[propertyName];
 							outprops.outId = '#' + idobj.cluster + ':' + idobj.position;
 						}
 					}
 
 					console.log('** OUT OBJ:');
-					console.dir(outprops)
+					//console.dir(outprops)
 					props['out'] = outprops;
 				}
 			}
