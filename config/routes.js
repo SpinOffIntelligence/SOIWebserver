@@ -15,7 +15,7 @@ var moment = require('moment');
 module.exports = function(app,express){
 
 	app.use("/www", express.static(path.join(__dirname, '../public')));
-	app.use("/sioapp", express.static(path.join(__dirname, '../../soiapp')));
+	app.use("/soiapp", express.static(path.join(__dirname, '../../soiapp')));
 
   app.use(bodyParser.json());  
 
