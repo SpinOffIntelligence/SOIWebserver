@@ -101,7 +101,7 @@ exports.updateRecordByProp = function(objectType, idField, idValue, updateObj, c
 	console.log('query:' + query);
 	odb.db.query(query).then(function(records){
 		console.log('records:' + records);
-		console.dir(records);
+		//console.dir(records);
 		if(records.length == 0) {
 			callback('Not Found!',null);
 			return;
@@ -133,7 +133,7 @@ exports.deleteVertexByProp = function(objectType, idField, idValue, callback) {
 	console.log('query:' + query);
 	odb.db.query(query).then(function(records){
 		console.log('records:' + records);
-		console.dir(records);
+		//console.dir(records);
 		if(records.length == 0) {
 			callback('Not Found!',null);
 			return;
@@ -292,6 +292,47 @@ exports.addEdge = function(objectType, recordData, sourceId, targetId, callback)
 	}
 }
 
+exports.fetchGridRecords = function(objectType, gridFields, callback) {
+
+	var props = '*, ';
+	for(var i=0; i<gridFields.length; i++) {
+		var gf = gridFields[i];
+
+		var prop='';
+		if(util.defined(gf,'schemaName')) {
+			prop = gf.schemaName;
+		} else if(util.defined(gf,'select')) {
+			prop = gf.select;
+		} else {
+			continue;
+		}
+			
+		console.log(prop);
+
+		if(i == gridFields.length-1) {
+			props += prop;
+		} else {
+			props += prop + ', ';
+
+		}
+
+	}
+
+	var query = strUtil.format("SELECT %s FROM %s", props, objectType);
+	console.log('query: ' + query);
+
+	odb.db.query(query).then(function(records){
+		var recs=[];
+		for(var i=0; i<records.length; i++) {
+			var rec = records[i];
+			var recId = rec['@rid'];
+			rec.id = '#'+	recId.cluster + ':' + recId.position;
+			recs.push(rec);
+		}
+		callback(null,records);
+	});
+}
+
 exports.fetchRecords = function(objectType, callback) {
 	var query = strUtil.format("SELECT FROM %s", objectType);
 
@@ -314,14 +355,14 @@ exports.getRecordDetails = function(objectType, recordId, callback) {
 	odb.db.query("traverse * from " + recordId).then(function(recordDetails){
 
 		console.log('** traverse **');
-		console.dir(recordDetails);
+		//console.dir(recordDetails);
 
    var returnObj = {};
    for(var i=0; i<recordDetails.length; i++) {
 			var obj = recordDetails[i];
 			var className = obj['@class'];
 
-			console.log('** Class:' + className);
+			//console.log('** Class:' + className);
 
 			if(!util.defined(returnObj,className)) {
 				returnObj[className]=[];
@@ -330,43 +371,43 @@ exports.getRecordDetails = function(objectType, recordId, callback) {
 			var props={};
 			for(var propertyName in obj) {
 
-				console.log('** propertyName:' + propertyName);
+				//console.log('** propertyName:' + propertyName);
 
 				if(propertyName.indexOf('in') != 0 && propertyName.indexOf('out') != 0 && propertyName.indexOf('@') != 0 && propertyName != 'id' && propertyName != 'backup' && typeof propertyName != 'object' && typeof propertyName != 'array') {					
-					console.log('>>Add');
+					//console.log('>>Add');
 					props[propertyName] = obj[propertyName];
 				} else if(propertyName.indexOf('@rid') == 0) {
-					console.log('>>Add');
+					//console.log('>>Add');
 					var idobj = obj[propertyName];
 					props.id = '#' + idobj.cluster + ':' + idobj.position;
 				} else if(propertyName.indexOf('in') == 0 && propertyName.indexOf('_') != 0) {
 
-					console.log('>>Add');
-					console.log('** IN:');
+					//console.log('>>Add');
+					//console.log('** IN:');
 
 					var inobj = obj[propertyName];
 					var inprops={};
 					for(var propertyName in inobj) {
 						
-						console.log('** IN propertyName:' + propertyName);
+						//console.log('** IN propertyName:' + propertyName);
 
 						if(propertyName.indexOf('in') != 0 && propertyName.indexOf('out') != 0 && propertyName.indexOf('@') != 0 && propertyName != 'id' && propertyName != 'backup' && typeof propertyName != 'object' && typeof propertyName != 'array') {
 							inprops[propertyName] = inobj[propertyName];
-							console.log('>>Add In' + inprops[propertyName]);
+							//console.log('>>Add In' + inprops[propertyName]);
 
 						} else if(propertyName.indexOf('@rid') == 0) {
 							var idobj = inobj[propertyName];
 							inprops.inId = '#' + idobj.cluster + ':' + idobj.position;
-							console.log('>>Add In' + inprops.inId);
+							//console.log('>>Add In' + inprops.inId);
 						}
 					}
-					console.log('** IN OBJ DONE:');
-					console.dir(inprops)
+					//console.log('** IN OBJ DONE:');
+					//console.dir(inprops)
 					props['in'] = inprops;
 				} else if(propertyName.indexOf('out') == 0 && propertyName.indexOf('_') != 0) {
 
-					console.log('>>Add');
-					console.log('** IN:');
+					//console.log('>>Add');
+					//console.log('** IN:');
 
 					var outobj = obj[propertyName];
 					var outprops={};
@@ -379,8 +420,8 @@ exports.getRecordDetails = function(objectType, recordId, callback) {
 						}
 					}
 
-					console.log('** OUT OBJ:');
-					//console.dir(outprops)
+					//console.log('** OUT OBJ:');
+					////console.dir(outprops)
 					props['out'] = outprops;
 				}
 			}
@@ -485,7 +526,7 @@ exports.getSchema = function(objName, callback) {
 	      function(properties){
 	        var props=getSchemaProperties(properties);
 	        console.log('^^^^^^^^^ props ^^^^^^^^^^^' + objName);
-	        console.dir(props);
+	        //console.dir(props);
 
 	        if(util.defined(props,"superClass")) {
 
@@ -495,13 +536,13 @@ exports.getSchema = function(objName, callback) {
 							function(properties){	        	
 								var subProps=getSchemaProperties(properties);
 								console.log('^^^^^^^^^ subProps ^^^^^^^^^^^' + props.superClass);
-								console.dir(subProps);
+								//console.dir(subProps);
 
 								for(var propertyName in subProps) {
 									props[propertyName] = subProps[propertyName];
 								}
 								console.log('^^^^^^^^^ final props ^^^^^^^^^^^');
-								console.dir(props);
+								//console.dir(props);
 								delete props.superClass;
 								callback(null,props);	        	
 							});

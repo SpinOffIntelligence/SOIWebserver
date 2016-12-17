@@ -5,58 +5,20 @@ var soiServices = require('../services/soi');
 var async = require('async');
 var util = require('../../components/utilities.js');
 
-
-exports.exportRecords = function(req, res, next) {
-
+exports.fetchGridRecords = function(req, res, next) {
 	var objectType = req.body.objectType;
-	var criteria = req.body.criteria;
+	var gridFields = req.body.gridFields;
 
-	console.log('*** exportRecords ***');
+	console.log('*** fetchGridRecords ***');
 	console.dir(objectType);
 	console.log('~~~~~~~~~~~~~~');
-	console.dir(criteria);
+	console.dir(gridFields);
 
-	soiServices.exportRecords(objectType, criteria, function(err, records) {
-		var strInfo;
-		if(util.defined(err)) {
-			console.log('Error Exporting:' + err);
-			strInfo = 'Error Exporting:' + err;
-			util.logInfo('Export', 'n/a', strInfo);
-		} else {
-			console.log('Exporting:' + records);	
-			strInfo = 'Exporting: ' + objectType + ':' + records.length;
-			util.logInfo('Export', 'n/a', strInfo);	
-			res.json({error_code:0,err_desc:null,strLog: strInfo, file: 'n/a', exportData: records});			
-		}
-	});	
-}
-
-exports.deleteLogInfo = function(req, res, next) {
-
-	var file = req.body.file;
-	console.log('*** getLogInfo ***');
-	console.dir(file);
-	soiServices.deleteLogInfo(file, function(err, data) {
+	soiServices.fetchGridRecords(objectType, gridFields, function(err, data) {
 		res.json(data);
-	});	
+	});
 }
 
-exports.getLogInfo = function(req, res, next) {
-
-	console.log('*** getLogInfo ***');
-	if(util.defined(req,"body.file")) {
-		var file = req.body.file;
-		console.dir(file);
-		soiServices.getLogInfo(file, function(err, data) {
-			res.json(data);
-		});	
-	} else {
-		soiServices.getAllLogInfo(function(err, data) {
-			res.json(data);
-		});	
-
-	}
-}
 
 
 exports.getSchemas = function(req, res, next) {
@@ -302,4 +264,56 @@ exports.fetchPanelRecords = function(req, res, next) {
 	soiServices.getRecords(objectType, function(err, data) {
 		res.json(data);
 	});
+}
+
+exports.exportRecords = function(req, res, next) {
+
+	var objectType = req.body.objectType;
+	var criteria = req.body.criteria;
+
+	console.log('*** exportRecords ***');
+	console.dir(objectType);
+	console.log('~~~~~~~~~~~~~~');
+	console.dir(criteria);
+
+	soiServices.exportRecords(objectType, criteria, function(err, records) {
+		var strInfo;
+		if(util.defined(err)) {
+			console.log('Error Exporting:' + err);
+			strInfo = 'Error Exporting:' + err;
+			util.logInfo('Export', 'n/a', strInfo);
+		} else {
+			console.log('Exporting:' + records);	
+			strInfo = 'Exporting: ' + objectType + ':' + records.length;
+			util.logInfo('Export', 'n/a', strInfo);	
+			res.json({error_code:0,err_desc:null,strLog: strInfo, file: 'n/a', exportData: records});			
+		}
+	});	
+}
+
+exports.deleteLogInfo = function(req, res, next) {
+
+	var file = req.body.file;
+	console.log('*** getLogInfo ***');
+	console.dir(file);
+	soiServices.deleteLogInfo(file, function(err, data) {
+		res.json(data);
+	});	
+}
+
+exports.getLogInfo = function(req, res, next) {
+
+	console.log('*** getLogInfo ***');
+	if(util.defined(req,"body.file")) {
+		var file = req.body.file;
+		console.dir(file);
+		soiServices.getLogInfo(file, function(err, data) {
+			res.json(data);
+		});	
+	} else {
+		soiServices.getAllLogInfo(function(err, data) {
+			res.json(data);
+		});	
+
+	}
 }
