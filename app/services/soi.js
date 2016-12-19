@@ -306,17 +306,10 @@ exports.fetchGridRecords = function(objectType, gridFields, callback) {
 		} else {
 			continue;
 		}
-			
 		console.log(prop);
-
-		if(i == gridFields.length-1) {
-			props += prop;
-		} else {
-			props += prop + ', ';
-
-		}
-
+		props += prop + ', ';
 	}
+	props = props.slice(0, -2);
 
 	var query = strUtil.format("SELECT %s FROM %s", props, objectType);
 	console.log('query: ' + query);
