@@ -8,6 +8,8 @@ module.exports = function(app) {
 
 	app.post('/soi/fetchGridRecords', soiControllers.fetchGridRecords);
 
+	app.post('/soi/searchRecords', soiControllers.searchRecords);
+
 	app.post('/soi/getRecordDetails', soiControllers.getRecordDetails);
 	app.post('/soi/fetchPanelRecords', soiControllers.fetchPanelRecords);
 	app.post('/soi/updatePanelRecord', soiControllers.updatePanelRecord);

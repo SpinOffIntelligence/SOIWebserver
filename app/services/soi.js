@@ -4,12 +4,111 @@ var odb = require('../../components/orientdb.js');
 var _ = require('underscore');
 var util = require('../../components/utilities.js');
 var strUtil = require('util');
+var async = require('async');
 
 var schemaTypeMap = [
 	{dbtype: 7, apptype: 'string'},
 	{dbtype: 1, apptype: 'integer'},
 	{dbtype: 19, apptype: 'date'}
 ];
+
+
+
+exports.searchRecords = function(objectTypes, terms, callback) {
+
+	function searchRecs(object, terms,callback) {
+		var query = strUtil.format("select from %s where any() like '%s", object, terms);
+		query = query + "%'";
+		console.log('search query:' + query);
+		odb.db.query(query).then(function(records){
+			//console.log('Search Results:');
+			//console.dir(records);
+			callback(null,records);
+		});		
+	}
+
+	var results=[];
+	async.parallel([
+		function(callback) { //This is the first task, and `callback` is its callback task
+        searchRecs('VPerson', terms, function(err, data) {
+        		var obj = {
+        			objectType: 'VPerson',
+        			results: data
+        		}
+						// console.log('VPerson Search Results:');
+						// console.dir(data);        		
+            results.push(obj);
+            callback();
+        });
+    },
+    function(callback) { //This is the second task, and `callback` is its callback task
+        searchRecs('VCompany', terms, function(err, data) {
+        		var obj = {
+        			objectType: 'VCompany',
+        			results: data
+        		}
+						console.log('VCompany Search Results:');
+						console.dir(data);        		
+            results.push(obj);
+            callback();
+        });
+    },
+		function(callback) { //This is the first task, and `callback` is its callback task
+        searchRecs('VAcquisition', terms, function(err, data) {
+        		var obj = {
+        			objectType: 'VAcquisition',
+        			results: data
+        		}
+            results.push(obj);
+            callback();
+        });
+    },
+		function(callback) { //This is the first task, and `callback` is its callback task
+        searchRecs('VInvestment', terms, function(err, data) {
+        		var obj = {
+        			objectType: 'VInvestment',
+        			results: data
+        		}
+            results.push(obj);
+            callback();
+        });
+    },
+		function(callback) { //This is the first task, and `callback` is its callback task
+        searchRecs('VPatent', terms, function(err, data) {
+        		var obj = {
+        			objectType: 'VPatent',
+        			results: data
+        		}
+            results.push(obj);
+            callback();
+        });
+    },
+		function(callback) { //This is the first task, and `callback` is its callback task
+        searchRecs('VInvestmentFirm', terms, function(err, data) {
+        		var obj = {
+        			objectType: 'VInvestmentFirm',
+        			results: data
+        		}
+            results.push(obj);
+            callback();
+        });
+    },
+		function(callback) { //This is the first task, and `callback` is its callback task
+        searchRecs('VUniversity', terms, function(err, data) {
+        		var obj = {
+        			objectType: 'VUniversity',
+        			results: data
+        		}
+            results.push(obj);
+            callback();
+        });
+    }
+	], function(err) { //This is the final callback
+    console.log('All Done');
+    console.dir(results);
+    callback(null, results);
+	});
+}
 
 
 exports.deleteLogInfo = function(file, callback) {

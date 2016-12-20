@@ -16,6 +16,7 @@ module.exports = function(app,express){
 
 	app.use("/www", express.static(path.join(__dirname, '../public')));
 	app.use("/soiapp", express.static(path.join(__dirname, '../../soiapp')));
+	app.use("/dev", express.static(path.join(__dirname, '../../../dev')));
 
   app.use(bodyParser.json());  
 

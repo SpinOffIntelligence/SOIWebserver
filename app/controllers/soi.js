@@ -5,6 +5,22 @@ var soiServices = require('../services/soi');
 var async = require('async');
 var util = require('../../components/utilities.js');
 
+
+exports.searchRecords = function(req, res, next) {
+	var objectTypes = req.body.objectTypes;
+	var terms = req.body.terms;
+
+	console.log('*** searchRecords ***');
+	console.dir(objectTypes);
+	console.log('~~~~~~~~~~~~~~');
+	console.dir(terms);
+
+	soiServices.searchRecords(objectTypes, terms, function(err, data) {
+		res.json(data);
+	});
+}
+
+
 exports.fetchGridRecords = function(req, res, next) {
 	var objectType = req.body.objectType;
 	var gridFields = req.body.gridFields;
@@ -18,8 +34,6 @@ exports.fetchGridRecords = function(req, res, next) {
 		res.json(data);
 	});
 }
-
-
 
 exports.getSchemas = function(req, res, next) {
 	var schemas = req.body.schemas
