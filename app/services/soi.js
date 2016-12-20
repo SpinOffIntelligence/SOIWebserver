@@ -444,7 +444,7 @@ exports.getRecordDetails = function(objectType, recordId, callback) {
 	//var panelRecord={};
 	//panelRecord.id = '#13:1';
 
-	odb.db.query("traverse * from " + recordId).then(function(recordDetails){
+	odb.db.query("traverse * from " + recordId + "while $depth < 3").then(function(recordDetails){
 
 		console.log('** traverse **');
 		//console.dir(recordDetails);
