@@ -445,8 +445,8 @@ exports.getRecordDetails = function(objectType, recordId, depth, callback) {
 	//panelRecord.id = '#13:1';
 
 	var deep = 3;
-	if(util.defined(depth)) {
-		deep+=depth;
+	if(util.defined(depth) && depth > 0) {
+		deep+=(depth*2);
 	}
 
 	var query = strUtil.format("traverse * from  %s while $depth < %s", recordId, deep);
