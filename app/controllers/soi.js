@@ -212,13 +212,16 @@ exports.fetchRecords = function(req, res, next) {
 exports.getRecordDetails = function(req, res, next) {
 	var objectType = req.body.objectType;
 	var recordId = req.body.recordId;
+	var depth = req.body.depth;
 
 	console.log('*** getRecordDetails ***');
 	console.dir(objectType);
 	console.log('~~~~~~~~~~~~~~');
 	console.dir(recordId);
+	console.log('~~~~~~~~~~~~~~');
+	console.dir(depth);
 
-	soiServices.getRecordDetails(objectType, recordId, function(err, data) {
+	soiServices.getRecordDetails(objectType, recordId, depth, function(err, data) {
 		res.json(data);
 	});
 }

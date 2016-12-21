@@ -440,11 +440,19 @@ exports.fetchRecords = function(objectType, callback) {
 	});
 }
 
-exports.getRecordDetails = function(objectType, recordId, callback) {
+exports.getRecordDetails = function(objectType, recordId, depth, callback) {
 	//var panelRecord={};
 	//panelRecord.id = '#13:1';
 
-	odb.db.query("traverse * from " + recordId + "while $depth < 3").then(function(recordDetails){
+	var deep = 3;
+	if(util.defined(depth)) {
+		deep+=depth;
+	}
+
+	var query = strUtil.format("traverse * from  %s while $depth < %s", recordId, deep);
+	console.log("query: " + query);
+
+	odb.db.query(query).then(function(recordDetails){
 
 		console.log('** traverse **');
 		//console.dir(recordDetails);
