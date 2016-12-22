@@ -238,77 +238,86 @@ exports.exportRecords = function(objectType, criteria, schema, callback) {
 }
 
 
-exports.updateRecordByProp = function(objectType, idField, idValue, updateObj, callback) {
-	var query = strUtil.format("SELECT FROM %s where %s = '%s'", objectType ,idField, idValue);
-	console.log('query:' + query);
-	odb.db.query(query).then(function(records){
-		console.log('records:' + records);
-		//console.dir(records);
-		if(records.length == 0) {
-			callback('Not Found!',null);
-			return;
-		} else if(records.length > 1) {
-			callback('Not Unqiue!',null);
-			return;
-		} else {
+// exports.updateRecordByProp = function(objectType, idField, idValue, updateObj, callback) {
+// 	var query = strUtil.format("SELECT FROM %s where %s = '%s'", objectType ,idField, idValue);
+// 	console.log('query:' + query);
+// 	odb.db.query(query).then(function(records){
+// 		console.log('records:' + records);
+// 		//console.dir(records);
+// 		if(records.length == 0) {
+// 			callback('Not Found!',null);
+// 			return;
+// 		} else if(records.length > 1) {
+// 			callback('Not Unqiue!',null);
+// 			return;
+// 		} else {
 
-			var updateStr = '';
-			for(var propertyName in updateObj) {
-				if(updateStr == '')
-					updateStr = strUtil.format("%s = '%s'", propertyName, updateObj[propertyName]);
-				else updateStr += ' , ' + strUtil.format("%s = '%s'", propertyName, updateObj[propertyName]);
-			}
-			var query = strUtil.format("UPDATE %s SET %s WHERE %s = '%s'", objectType, updateStr, idField, idValue);
-			console.log('query:' + query);
-			odb.db.query(query).then(function(records){
-				console.log('records:' + records);
-				callback(null,records);
-				return;				
-			});
-		}
-	});
-}
+// 			var updateStr = '';
+// 			for(var propertyName in updateObj) {
+// 				if(updateStr == '')
+// 					updateStr = strUtil.format("%s = '%s'", propertyName, updateObj[propertyName]);
+// 				else updateStr += ' , ' + strUtil.format("%s = '%s'", propertyName, updateObj[propertyName]);
+// 			}
+// 			var query = strUtil.format("UPDATE %s SET %s WHERE %s = '%s'", objectType, updateStr, idField, idValue);
+// 			console.log('query:' + query);
+// 			odb.db.query(query).then(function(records){
+// 				console.log('records:' + records);
+// 				callback(null,records);
+// 				return;				
+// 			});
+// 		}
+// 	});
+// }
 
-exports.deleteVertexByProp = function(objectType, idField, idValue, callback) {
+// exports.deleteVertexByProp = function(objectType, idField, idValue, callback) {
 
-	var query = strUtil.format("SELECT FROM %s where %s = '%s'", objectType, idField, idValue);
-	console.log('query:' + query);
-	odb.db.query(query).then(function(records){
-		console.log('records:' + records);
-		//console.dir(records);
-		if(records.length == 0) {
-			callback('Not Found!',null);
-			return;
-		} else if(records.length > 1) {
-			callback('Not Unqiue!',null);
-			return;
-		} else {
-			var query = strUtil.format("DELETE VERTEX %s where %s = '%s'", objectType, idField, idValue);
-			console.log('query:' + query);
-			odb.db.query(query).then(function(records){
-				callback(null,records);
-				return;
-			});
-		}
-	});
-}
+// 	var query = strUtil.format("SELECT FROM %s where %s = '%s'", objectType, idField, idValue);
+// 	console.log('query:' + query);
+// 	odb.db.query(query).then(function(records){
+// 		console.log('records:' + records);
+// 		//console.dir(records);
+// 		if(records.length == 0) {
+// 			callback('Not Found!',null);
+// 			return;
+// 		} else if(records.length > 1) {
+// 			callback('Not Unqiue!',null);
+// 			return;
+// 		} else {
+// 			var query = strUtil.format("DELETE VERTEX %s where %s = '%s'", objectType, idField, idValue);
+// 			console.log('query:' + query);
+// 			odb.db.query(query).then(function(records){
+// 				callback(null,records);
+// 				return;
+// 			});
+// 		}
+// 	});
+// }
 
-exports.fetchRecordByProp = function(objectType, prod, value, callback) {
-	var query = strUtil.format("SELECT FROM %s where %s = '%s'", objectType, prod, value);
+exports.fetchRecordByProp = function(objectType, prod, value, schema, callback) {
+
+	var schemaTypes = util.getSchemaType(schema, prod);
+	if(schemaTypes.isString) {
+		var query = strUtil.format("SELECT FROM %s where %s = '%s'", objectType, prod, value);	
+	} else if(schemaTypes.isDate) {
+		value = moment(value).format('YYYY-MM-DD');
+		var query = strUtil.format("SELECT FROM %s where %s = '%s'", objectType, prod, value);
+	} else {
+		var query = strUtil.format("SELECT FROM %s where %s = '%s'", objectType, prod, value);
+	}
+	
 	console.log('query:' + query);
 		odb.db.query(query).then(function(records){
 			callback(null,records);
 		});
 }
 
-exports.fetchRecordByName = function(objectType, name, callback) {
-	var query = strUtil.format("SELECT FROM %s where name = '%s'", objectType, name);
-	console.log('query:' + query);
-		odb.db.query(query).then(function(records){
-			callback(null,records);
-		});
-}
-
+// exports.fetchRecordByName = function(objectType, name, callback) {
+// 	var query = strUtil.format("SELECT FROM %s where name = '%s'", objectType, name);
+// 	console.log('query:' + query);
+// 		odb.db.query(query).then(function(records){
+// 			callback(null,records);
+// 		});
+// }
 
 exports.getRelationshipDetails = function(edgeObjectType, recordItemId, callback) {
 	var query = strUtil.format("select from %s where out = %s", edgeObjectType, recordItemId);

@@ -29,6 +29,24 @@ function toLower(inStr) {
   else return inStr;
 }
 
+function getSchemaType(schema, field) {
+  var retObj = {
+    isString : false,
+    isDate : false
+  }
+  console.log('~~~~~ field: ' + field);
+  if(defined(schema, field + '.type')) {
+    var schemaType = schema[field].type
+    console.log('~~~~~ schemaType: ' + schemaType);
+    if(schemaType == 'string')
+      retObj.isString = true;
+    if(schemaType == 'date')
+      retObj.isDate = true;
+  }
+  return retObj;
+}
+
+
 function prepareInboudDate(obj) {
   console.log('prepareInboudDate:');
 
@@ -100,4 +118,5 @@ module.exports.defined = defined;
 module.exports.prepareInboudDate = prepareInboudDate;
 module.exports.cleanInBoundData = cleanInBoundData;
 module.exports.logInfo = logInfo;
+module.exports.getSchemaType = getSchemaType;
 

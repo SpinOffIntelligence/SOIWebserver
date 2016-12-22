@@ -184,6 +184,8 @@ exports.fetchRecordByProp = function(req, res, next) {
 	var objectType = req.body.objectType;
 	var prop = req.body.prop;
 	var value = req.body.value;
+	var schema = req.body.schema;
+
 
 	console.log('*** fetchRecords ***');
 	console.dir(objectType);
@@ -191,8 +193,10 @@ exports.fetchRecordByProp = function(req, res, next) {
 	console.dir(prop);
 	console.log('~~~~~~~~~~~~~~');
 	console.dir(value);
+	console.log('~~~~~~~~~~~~~~');
+	console.dir(schema);
 
-	soiServices.fetchRecordByProp(objectType, prop, value, function(err, data) {
+	soiServices.fetchRecordByProp(objectType, prop, value, schema, function(err, data) {
 		res.json(data);
 	});
 }
