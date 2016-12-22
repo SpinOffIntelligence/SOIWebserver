@@ -5,6 +5,7 @@ var _ = require('underscore');
 var util = require('../../components/utilities.js');
 var strUtil = require('util');
 var async = require('async');
+var moment = require('moment');
 
 var schemaTypeMap = [
 	{dbtype: 7, apptype: 'string'},
@@ -152,7 +153,7 @@ exports.addLogInfo = function(mode, file, strInfo, startdateTime, callback) {
 
 
 
-exports.exportRecords = function(objectType, criteria, callback) {
+exports.exportRecords = function(objectType, criteria, schema, callback) {
 
 	var whereClause='';
 	var query;
@@ -160,18 +161,56 @@ exports.exportRecords = function(objectType, criteria, callback) {
 		for(var i=0; i<criteria.length; i++) {
 			var cri = criteria[i];
 			var clause;
+			var isString = false;
+			var isDate = false;
+
+			if(util.defined(schema,cri.field + '.type')) {
+				var schemaType = schema[cri.field].type
+
+				console.log('~~~~~ schemaType: ' + schemaType);
+
+				if(schemaType == 'string')
+					isString = true;
+				if(schemaType == 'date')
+					isDate = true;
+			}
+
+			console.log('~~~~~ isString: ' + isString);
+			console.log('~~~~~ isDate: ' + isDate);
+
+			var val = cri.value;
+			if(isDate) {
+				val = moment(val).format("YYYY-MM-DD");
+			}
+			
 			if(cri.operator == 'equals') {
-				clause = strUtil.format("%s = '%s'", cri.field, cri.value);
+				if(isString)
+					clause = strUtil.format("%s = '%s'", cri.field, val);
+				else clause = strUtil.format("%s = %s", cri.field, val);
 			} else if(cri.operator == 'greater') {
-				clause = strUtil.format("%s > %s", cri.field, cri.value);
+				if(isString)
+					continue;
+				else if(isDate)
+					clause = strUtil.format("%s > '%s'", cri.field, val);
+				else clause = strUtil.format("%s > %s", cri.field, val);
 			} else if(cri.operator == 'less') {
-				clause = strUtil.format("%s < %s", cri.field, cri.value);
+				if(isString)
+					continue;
+				else if(isDate)
+					clause = strUtil.format("%s < '%s'", cri.field, val);
+				else clause = strUtil.format("%s < %s", cri.field, val);
 			} else if(cri.operator == 'contains') {
-				clause = cri.field + " like '%" + cri.value + "%'";
+				if(isString)
+					clause = cri.field + " like '%" + val + "%'";
+				else continue;
 			} else if(cri.operator == 'notequal') {
-				clause = strUtil.format("%s <> '%s'", cri.field, cri.value);
+				if(isString)
+					clause = strUtil.format("%s <> '%s'", cri.field, val);
+				else clause = strUtil.format("%s <> %s", cri.field, val);
 			} else if(cri.operator == 'notcontain') {
-				clause = strUtil.format("NOT %s like '\%%s\%'", cri.field, cri.value);
+				if(isString)
+					clause = strUtil.format("NOT %s like '\%%s\%'", cri.field, val);
+				else continue;
 			}
 			if(i != criteria.length-1) {
 				whereClause = clause + ' and ';
@@ -179,8 +218,12 @@ exports.exportRecords = function(objectType, criteria, callback) {
 				whereClause += clause;
 			}
 		}
-		console.log('whereClause:' + whereClause);		
-		query = strUtil.format("SELECT FROM %s where %s", objectType, whereClause);
+		console.log('whereClause:' + whereClause);	
+		if(whereClause.length > 0)	{
+			query = strUtil.format("SELECT FROM %s where %s", objectType, whereClause);
+		} else {
+			query = strUtil.format("SELECT FROM %s", objectType);
+		}
 	} else {
 		query = strUtil.format("SELECT FROM %s", objectType);
 	}

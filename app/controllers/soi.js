@@ -287,13 +287,16 @@ exports.exportRecords = function(req, res, next) {
 
 	var objectType = req.body.objectType;
 	var criteria = req.body.criteria;
+	var schema = req.body.schema;
 
 	console.log('*** exportRecords ***');
 	console.dir(objectType);
 	console.log('~~~~~~~~~~~~~~');
 	console.dir(criteria);
+	console.log('~~~~~~~~~~~~~~');
+	console.dir(schema);
 
-	soiServices.exportRecords(objectType, criteria, function(err, records) {
+	soiServices.exportRecords(objectType, criteria, schema, function(err, records) {
 		var strInfo;
 		if(util.defined(err)) {
 			console.log('Error Exporting:' + err);
