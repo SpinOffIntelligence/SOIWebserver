@@ -32,7 +32,8 @@ function toLower(inStr) {
 function getSchemaType(schema, field) {
   var retObj = {
     isString : false,
-    isDate : false
+    isDate : false,
+    isId : false
   }
   console.log('~~~~~ field: ' + field);
   if(defined(schema, field + '.type')) {
@@ -42,10 +43,16 @@ function getSchemaType(schema, field) {
       retObj.isString = true;
     if(schemaType == 'date')
       retObj.isDate = true;
+    if(field == 'id' || field == '@rid') 
+      retObj.isId == true;
   }
   return retObj;
 }
 
+
+function formatDBDate(strDate) {
+  return moment(strDate).format("YYYY-MM-DD");
+}
 
 function prepareInboudDate(obj) {
   console.log('prepareInboudDate:');
@@ -70,6 +77,53 @@ function prepareInboudDate(obj) {
   console.dir(obj);
   return obj;
 }
+
+
+function prepareOutboundData(schema, data) {
+
+  console.log('prepareOutboundData:');
+
+  for(var i=0; i<data.length; i++) {
+   for(var propertyName in data[i]) {
+    if(defined(schema,propertyName)) {
+      var schemaInfo = schema[propertyName];
+      if(schemaInfo.type == 'date') {
+       var mDate = moment(data[i][propertyName]).add(5, 'hours').format('YYYY-MM-DD'); 
+       data[i][propertyName] = mDate;
+
+       console.log('^^^^^ new date: ' + data[i][propertyName]);
+
+      }   
+    }
+   }     
+  }
+  return data;
+}
+
+function prepareInboudDate(obj) {
+  console.log('prepareInboudDate:');
+
+  for(var propertyName in obj) {
+    if(defined(obj,propertyName)) {
+      var val = obj[propertyName];
+
+      console.log(propertyName + ':' + val);
+
+      if(typeof val == 'string' && val.indexOf('.000Z') > -1) {
+        var x = moment(val);
+        var newDate = x.format('YYYY-MM-DD') + ' 00:00:00';
+        obj[propertyName] = newDate;
+
+        console.log('Fix Date:' + obj[propertyName]);
+
+      }
+    }
+  }
+  console.log('done:')
+  console.dir(obj);
+  return obj;
+}
+
 
 function cleanInBoundData(recordData) {
   var cleanData = {};
@@ -119,4 +173,5 @@ module.exports.prepareInboudDate = prepareInboudDate;
 module.exports.cleanInBoundData = cleanInBoundData;
 module.exports.logInfo = logInfo;
 module.exports.getSchemaType = getSchemaType;
-
+module.exports.formatDBDate = formatDBDate;
+module.exports.prepareOutboundData = prepareOutboundData;

@@ -25,7 +25,10 @@ exports.searchRecords = function(objectTypes, terms, callback) {
 			//console.log('Search Results:');
 			//console.dir(records);
 			callback(null,records);
-		});		
+		}).catch(function(error){
+	    console.error('Exception: ' + error); 
+	    callback(error,null);   
+  	});
 	}
 
 	var results=[];
@@ -118,7 +121,10 @@ exports.deleteLogInfo = function(file, callback) {
 	console.log('query:' + query);
 	odb.db.query(query).then(function(records){
 		callback(null,records);
-	});
+	}).catch(function(error){
+    console.error('Exception: ' + error); 
+    callback(error,null);   
+  });
 }
 
 exports.getAllLogInfo = function(callback) {
@@ -126,7 +132,10 @@ exports.getAllLogInfo = function(callback) {
 	console.log('query:' + query);
 	odb.db.query(query).then(function(records){
 		callback(null,records);
-	});
+	}).catch(function(error){
+    console.error('Exception: ' + error); 
+    callback(error,null);   
+  });
 }
 
 exports.getLogInfo = function(file, callback) {
@@ -135,7 +144,10 @@ exports.getLogInfo = function(file, callback) {
 	console.log('query:' + query);
 	odb.db.query(query).then(function(records){
 		callback(null,records);
-	});
+	}).catch(function(error){
+	    console.error('Exception: ' + error); 
+	    callback(error,null);   
+  });
 }
 
 exports.addLogInfo = function(mode, file, strInfo, startdateTime, callback) {
@@ -148,7 +160,10 @@ exports.addLogInfo = function(mode, file, strInfo, startdateTime, callback) {
 	odb.db.insert().into('BatchJob')
    .set(infoObj).all().then(function(returnObj){
       callback(null, returnObj);
-   });
+   }).catch(function(error){
+	    console.error('Exception: ' + error); 
+	    callback(error,null);   
+  });
 }
 
 
@@ -180,7 +195,7 @@ exports.exportRecords = function(objectType, criteria, schema, callback) {
 
 			var val = cri.value;
 			if(isDate) {
-				val = moment(val).format("YYYY-MM-DD");
+				val = util.formatDBDate(val);
 			}
 			
 			if(cri.operator == 'equals') {
@@ -233,65 +248,112 @@ exports.exportRecords = function(objectType, criteria, schema, callback) {
 		console.log('records:');
 		//console.dir(records);
 		callback(null,records);
-	});
+	}).catch(function(error){
+	    console.error('Exception: ' + error); 
+	    callback(error,null);   
+  });
 
 }
 
 
-// exports.updateRecordByProp = function(objectType, idField, idValue, updateObj, callback) {
-// 	var query = strUtil.format("SELECT FROM %s where %s = '%s'", objectType ,idField, idValue);
-// 	console.log('query:' + query);
-// 	odb.db.query(query).then(function(records){
-// 		console.log('records:' + records);
-// 		//console.dir(records);
-// 		if(records.length == 0) {
-// 			callback('Not Found!',null);
-// 			return;
-// 		} else if(records.length > 1) {
-// 			callback('Not Unqiue!',null);
-// 			return;
-// 		} else {
+exports.updateRecordByProp = function(objectType, idField, idValue, updateObj, schemas, callback) {
 
-// 			var updateStr = '';
-// 			for(var propertyName in updateObj) {
-// 				if(updateStr == '')
-// 					updateStr = strUtil.format("%s = '%s'", propertyName, updateObj[propertyName]);
-// 				else updateStr += ' , ' + strUtil.format("%s = '%s'", propertyName, updateObj[propertyName]);
-// 			}
-// 			var query = strUtil.format("UPDATE %s SET %s WHERE %s = '%s'", objectType, updateStr, idField, idValue);
-// 			console.log('query:' + query);
-// 			odb.db.query(query).then(function(records){
-// 				console.log('records:' + records);
-// 				callback(null,records);
-// 				return;				
-// 			});
-// 		}
-// 	});
-// }
+	console.log('*** updateRecordByProp ***');
 
-// exports.deleteVertexByProp = function(objectType, idField, idValue, callback) {
+	var schemaTypes = util.getSchemaType(schemas[objectType], idField);
 
-// 	var query = strUtil.format("SELECT FROM %s where %s = '%s'", objectType, idField, idValue);
-// 	console.log('query:' + query);
-// 	odb.db.query(query).then(function(records){
-// 		console.log('records:' + records);
-// 		//console.dir(records);
-// 		if(records.length == 0) {
-// 			callback('Not Found!',null);
-// 			return;
-// 		} else if(records.length > 1) {
-// 			callback('Not Unqiue!',null);
-// 			return;
-// 		} else {
-// 			var query = strUtil.format("DELETE VERTEX %s where %s = '%s'", objectType, idField, idValue);
-// 			console.log('query:' + query);
-// 			odb.db.query(query).then(function(records){
-// 				callback(null,records);
-// 				return;
-// 			});
-// 		}
-// 	});
-// }
+	var query;	
+	if(schemaTypes.isString == true || schemaTypes.isId == true) {
+		query = strUtil.format("SELECT FROM %s where %s = '%s'", objectType ,idField, idValue);	
+	} else if(schemaTypes.isDate == true) {
+		idValue = util.formatDBDate(idValue);
+		query = strUtil.format("SELECT FROM %s where %s between '%s' and '%s'", objectType ,idField, idValue, idValue);	
+	} else {
+		query = strUtil.format("SELECT FROM %s where %s = %s", objectType ,idField, idValue);	
+	}
+	
+	console.log('query:' + query);
+	odb.db.query(query).then(function(records){
+		console.log('records:' + records);
+		//console.dir(records);
+		if(records.length == 0) {
+			callback('Not Found!',null);
+			return;
+		} else if(records.length > 1) {
+			callback('Not Unqiue!',null);
+			return;
+		} else {
+
+			var updateStr = '';
+			for(var propertyName in updateObj) {
+				var schemaTypes = util.getSchemaType(schemas[objectType], propertyName);
+				if(schemaTypes.isString == true) {
+					updateStr += strUtil.format("%s = '%s'", propertyName, updateObj[propertyName]) + ' , ';
+				} else if(schemaTypes.isDate == true) {
+					var val =  updateObj[propertyName];
+					val = util.formatDBDate(val);
+					updateStr += strUtil.format("%s between '%s' and '%s'", propertyName, val, val) + ' , ';
+				} else {
+					updateStr += strUtil.format("%s = %s", propertyName, updateObj[propertyName]) + ' , ';
+				}
+			}
+			updateStr = updateStr.slice(0, -3);			
+
+			var query = strUtil.format("UPDATE %s SET %s WHERE %s = '%s'", objectType, updateStr, idField, idValue);
+			console.log('query:' + query);
+			odb.db.query(query).then(function(records){
+				console.log('records:' + records);
+				callback(null,records);
+				return;				
+			});
+		}
+	});
+}
+
+exports.deleteVertexByProp = function(objectType, idField, idValue, callback) {
+
+	console.log('*** updateRecordByProp ***');
+
+	var schemaTypes = util.getSchemaType(schemas[objectType], idField);
+
+	var query;	
+	if(schemaTypes.isString == true || schemaTypes.isId == true) {
+		query = strUtil.format("SELECT FROM %s where %s = '%s'", objectType ,idField, idValue);	
+	} else if(schemaTypes.isDate == true) {
+		idValue = util.formatDBDate(idValue);
+		query = strUtil.format("SELECT FROM %s where %s = '%s'", objectType ,idField, idValue);	
+	} else {
+		query = strUtil.format("SELECT FROM %s where %s = %s", objectType ,idField, idValue);	
+	}
+
+	console.log('query:' + query);
+	odb.db.query(query).then(function(records){
+		console.log('records:' + records);
+		//console.dir(records);
+		if(records.length == 0) {
+			callback('Not Found!',null);
+			return;
+		} else if(records.length > 1) {
+			callback('Not Unqiue!',null);
+			return;
+		} else {
+			var query;
+			if(schemaTypes.isString == true || schemaTypes.isId == true) {
+				query = strUtil.format("DELETE VERTEX %s where %s = '%s'", objectType ,idField, idValue);	
+			} else if(schemaTypes.isDate == true) {
+				idValue = util.formatDBDate(idValue);
+				query = strUtil.format("DELETE VERTEX %s where %s = '%s'", objectType ,idField, idValue);	
+			} else {
+				query = strUtil.format("DELETE VERTEX %s where %s = %s", objectType ,idField, idValue);	
+			}
+			console.log('query:' + query);
+			odb.db.query(query).then(function(records){
+				callback(null,records);
+				return;
+			});
+		}
+	});
+}
 
 exports.fetchRecordByProp = function(objectType, prod, value, schema, callback) {
 
@@ -299,7 +361,7 @@ exports.fetchRecordByProp = function(objectType, prod, value, schema, callback) 
 	if(schemaTypes.isString) {
 		var query = strUtil.format("SELECT FROM %s where %s = '%s'", objectType, prod, value);	
 	} else if(schemaTypes.isDate) {
-		value = moment(value).format('YYYY-MM-DD');
+		value = util.formatDBDate(value);
 		var query = strUtil.format("SELECT FROM %s where %s = '%s'", objectType, prod, value);
 	} else {
 		var query = strUtil.format("SELECT FROM %s where %s = '%s'", objectType, prod, value);
@@ -308,16 +370,19 @@ exports.fetchRecordByProp = function(objectType, prod, value, schema, callback) 
 	console.log('query:' + query);
 		odb.db.query(query).then(function(records){
 			callback(null,records);
-		});
+		}).catch(function(error){
+	    console.error('Exception: ' + error); 
+	    callback(error,null);   
+  });
 }
 
-// exports.fetchRecordByName = function(objectType, name, callback) {
-// 	var query = strUtil.format("SELECT FROM %s where name = '%s'", objectType, name);
-// 	console.log('query:' + query);
-// 		odb.db.query(query).then(function(records){
-// 			callback(null,records);
-// 		});
-// }
+exports.fetchRecordByName = function(objectType, name, callback) {
+	var query = strUtil.format("SELECT FROM %s where name = '%s'", objectType, name);
+	console.log('query:' + query);
+		odb.db.query(query).then(function(records){
+			callback(null,records);
+		});
+}
 
 exports.getRelationshipDetails = function(edgeObjectType, recordItemId, callback) {
 	var query = strUtil.format("select from %s where out = %s", edgeObjectType, recordItemId);
@@ -328,7 +393,10 @@ exports.getRelationshipDetails = function(edgeObjectType, recordItemId, callback
 			data: records
 		}
 		callback(null,obj);
-	});
+	}).catch(function(error){
+	    console.error('Exception: ' + error); 
+	    callback(error,null);   
+  });
 }
 
 
@@ -341,7 +409,10 @@ exports.getRelationship = function(edgeObjectType, recordItemId, callback) {
 			data: records
 		}
 		callback(null,obj);
-	});
+	}).catch(function(error){
+	    console.error('Exception: ' + error); 
+	    callback(error,null);   
+  });
 }
 
 exports.getEdge = function(edgeObjectType, edgeRecordItemId, callback) {
@@ -356,7 +427,10 @@ exports.getEdge = function(edgeObjectType, edgeRecordItemId, callback) {
 			recs.push(rec);
 		}
 		callback(null,records[0]);
-	});
+	}).catch(function(error){
+	    console.error('Exception: ' + error); 
+	    callback(error,null);   
+  });
 }
 
 exports.getEdgeBySource = function(edgeObjectType, recordItemId, callback) {
@@ -375,7 +449,10 @@ exports.deleteEdge = function(objectType, sourceId, targetId, callback) {
 	odb.db.query(query).then(function(results){
 		 console.log(results);
 		 callback(null, results);
-	});
+	}).catch(function(error){
+	    console.error('Exception: ' + error); 
+	    callback(error,null);   
+  });
 
 	// var query = 'update ' + outObjectType + ' remove out_' + objectType + ' where @rid = ' + outRecordId;
 	// console.log('^^^^^^^ query:' + query);
@@ -402,7 +479,10 @@ exports.updateEdge = function(objectType, recordData, sourceId, targetId, callba
 	odb.db.query(query).then(function(results){
 		 console.log(results);
 		 exports.addEdge(objectType, sendObj, sourceId, targetId, callback);
-	});		
+	}).catch(function(error){
+	    console.error('Exception: ' + error); 
+	    callback(error,null);   
+  });
 }
 
 exports.addEdge = function(objectType, recordData, sourceId, targetId, callback) {
@@ -474,7 +554,10 @@ exports.fetchGridRecords = function(objectType, gridFields, callback) {
 			recs.push(rec);
 		}
 		callback(null,records);
-	});
+	}).catch(function(error){
+	    console.error('Exception: ' + error); 
+	    callback(error,null);   
+  });
 }
 
 exports.fetchRecords = function(objectType, callback) {
@@ -489,7 +572,10 @@ exports.fetchRecords = function(objectType, callback) {
 			recs.push(rec);
 		}
 		callback(null,records);
-	});
+	}).catch(function(error){
+	    console.error('Exception: ' + error); 
+	    callback(error,null);   
+  });
 }
 
 exports.getRecordDetails = function(objectType, recordId, depth, callback) {
@@ -580,7 +666,10 @@ exports.getRecordDetails = function(objectType, recordId, depth, callback) {
 			returnObj[className].push(props);
    }
    callback(null,returnObj);
-	});
+	}).catch(function(error){
+    console.error('Exception: ' + error); 
+    callback(error,null);   
+  });
 }
 
 exports.addRecord = function(objectType, panelRecord, callback) {
@@ -594,7 +683,10 @@ exports.addRecord = function(objectType, panelRecord, callback) {
 	odb.db.insert().into(objectType)
    .set(sendObj).all().then(function(returnObj){
       callback(null, returnObj);
-   });
+   }).catch(function(error){
+	    console.error('Exception: ' + error); 
+	    callback(error,null);   
+  });
 }
 
 
@@ -615,7 +707,10 @@ exports.updateRecord = function(objectType, recordId, panelRecord, callback) {
       function(update){
          callback(null, update);
       }
-   );	
+   ).catch(function(error){
+	    console.error('Exception: ' + error); 
+	    callback(error,null);   
+  });
 }
 
 exports.deleteRecord = function(objectType, recordId, callback) {
@@ -636,7 +731,10 @@ exports.getRecords = function(objName, callback) {
 			recs.push(rec);
 		}
 		callback(null,records);
-	});
+	}).catch(function(error){
+	    console.error('Exception: ' + error); 
+	    callback(error,null);   
+  });
 }
 
 exports.getSchema = function(objName, callback) {
@@ -704,5 +802,8 @@ exports.getSchema = function(objName, callback) {
 	        }
 	      }
 	    );
-	});
+	}).catch(function(error){
+	    console.error('Exception: ' + error); 
+	    callback(error,null);   
+  });
 }

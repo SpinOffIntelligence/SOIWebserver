@@ -4,7 +4,7 @@ var odb = require('../../components/orientdb.js');
 var soiServices = require('../services/soi');
 var async = require('async');
 var util = require('../../components/utilities.js');
-
+var moment = require('moment');
 
 exports.searchRecords = function(req, res, next) {
 	var objectTypes = req.body.objectTypes;
@@ -278,12 +278,21 @@ exports.deletePanelRecord = function(req, res, next) {
 
 exports.fetchPanelRecords = function(req, res, next) {
 	var objectType = req.body.objectType;
+	var schema = req.body.schema;
 
 	console.log('*** fetchPanelRecords ***');
 	console.dir(objectType);
+	console.log('~~~~~~~~~~~~~~');
+	console.dir(schema);
 
 	soiServices.getRecords(objectType, function(err, data) {
-		res.json(data);
+
+		console.log('^^^^^^^^^^^^ fetchPanelRecords ');
+		console.dir(data);
+
+		var retObj = util.prepareOutboundData(schema, data);
+
+		res.json(retObj);
 	});
 }
 
