@@ -91,6 +91,9 @@ module.exports = function(app,express){
 			console.dir(filePath);
 
 			var idx = filePath.lastIndexOf("\\");
+			if(idx == -1) {
+				var idx = filePath.lastIndexOf("/");
+			}
 			var file = filePath.substring(idx+1, filePath.length)
 
 			console.log('**** File: ' + file);
