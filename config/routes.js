@@ -14,25 +14,15 @@ var moment = require('moment');
 
 module.exports = function(app,express){
 
+	//app.use(express.compress());
+  
 	app.use("/www", express.static(path.join(__dirname, '../public')));
 	app.use("/soiapp", express.static(path.join(__dirname, '../../soiapp')));
 	app.use("/dev", express.static(path.join(__dirname, '../../../dev')));
+	
 
-  app.use(bodyParser.json());  
-
-  var storage = multer.diskStorage({ //multers disk storage settings
-      destination: function (req, file, cb) {
-          cb(null, './uploads/');
-      },
-      filename: function (req, file, cb) {
-          var datetimestamp = Date.now();
-          cb(null, file.fieldname + '-' + datetimestamp + '.' + file.originalname.split('.')[file.originalname.split('.').length -1]);
-      }
-  });
-
-  var upload = multer({ //multer settings
-                  storage: storage
-              }).single('file');
+	// New call to compress content
+	app.use(bodyParser.json());  
 
   function getSourceTargetID(objectTypeSource, objectTypeTarget, sourceId, targetId, callback) {
 
@@ -73,8 +63,64 @@ module.exports = function(app,express){
 		});
   }
 
+
+  app.post('/uploadImage', function(req, res) {
+
+	  var storage = multer.diskStorage({ //multers disk storage settings
+	      destination: function (req, file, cb) {
+	          cb(null, './public/logos');
+	      },
+	      filename: function (req, file, cb) {
+	          var datetimestamp = Date.now();
+	          cb(null, file.fieldname + '-' + datetimestamp + '.' + file.originalname.split('.')[file.originalname.split('.').length -1]);
+	      }
+	  });
+
+	  var upload = multer({ //multer settings
+			storage: storage
+		}).single('file');
+
+		upload(req,res,function(err){
+
+			var formData = req.body.formData;
+			var filePath = res.req.file.path;
+
+			console.dir(filePath);
+
+			console.log('Upload Image: ');
+			console.dir(filePath);
+
+			var idx = filePath.lastIndexOf("\\");
+			var file = filePath.substring(idx+1, filePath.length)
+
+			console.log('**** File: ' + file);
+
+			soiServices.setRecordImage(formData.objectType, formData.logoField, formData.id, file, function(err, data) {
+				res.json({error_code: 0, file: res.req.file.path});
+				return;
+			})
+		});
+  });
+
+
   /** API path that will upload the files */
   app.post('/upload', function(req, res) {
+
+	  var storage = multer.diskStorage({ //multers disk storage settings
+	      destination: function (req, file, cb) {
+	          cb(null, './uploads/');
+	      },
+	      filename: function (req, file, cb) {
+	          var datetimestamp = Date.now();
+	          cb(null, file.fieldname + '-' + datetimestamp + '.' + file.originalname.split('.')[file.originalname.split('.').length -1]);
+	      }
+	  });
+
+	  var upload = multer({ //multer settings
+	                  storage: storage
+	              }).single('file');
+
+
     upload(req,res,function(err){
 		
 		if(err){

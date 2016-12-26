@@ -14,6 +14,26 @@ var schemaTypeMap = [
 ];
 
 
+exports.setRecordImage = function(objectType, logoField, idValue, file, callback) {
+  
+  console.log('*** setRecordImage ***');
+  console.dir(objectType);
+  console.log('~~~~~~~~~~~~~~');
+  console.dir(logoField);
+  console.log('~~~~~~~~~~~~~~');
+  console.dir(idValue);
+  console.log('~~~~~~~~~~~~~~');
+  console.dir(file);
+
+  var query = strUtil.format("UPDATE %s SET %s = '%s' WHERE @rid = %s", objectType, logoField, file, idValue);
+  console.log('query:' + query);
+  odb.db.query(query).then(function(records){
+    console.log('records:' + records);
+    callback(null,records);
+    return;       
+  });
+
+}
 
 exports.searchRecords = function(objectTypes, terms, callback) {
 
