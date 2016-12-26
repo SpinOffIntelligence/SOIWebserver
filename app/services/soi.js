@@ -14,6 +14,18 @@ var schemaTypeMap = [
 ];
 
 
+exports.removeImage = function(objectType, recordId, field, callback) {
+  
+  var query = strUtil.format("UPDATE %s SET %s = null WHERE @rid = %s", objectType, field, recordId);
+  console.log('query:' + query);
+  odb.db.query(query).then(function(records){
+    console.log('records:' + records);
+    callback(null,records);
+    return;       
+  });
+
+}
+
 exports.setRecordImage = function(objectType, logoField, idValue, file, callback) {
   
   console.log('*** setRecordImage ***');

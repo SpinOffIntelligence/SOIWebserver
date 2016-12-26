@@ -5,10 +5,10 @@ module.exports = function(app) {
 	var soiControllers = require('../controllers/soi');
 
 	app.post('/soi/getSchemas', soiControllers.getSchemas);
-
 	app.post('/soi/fetchGridRecords', soiControllers.fetchGridRecords);
-
 	app.post('/soi/searchRecords', soiControllers.searchRecords);
+
+	app.post('/soi/removeImage', soiControllers.removeImage);
 
 	app.post('/soi/getRecordDetails', soiControllers.getRecordDetails);
 	app.post('/soi/fetchPanelRecords', soiControllers.fetchPanelRecords);

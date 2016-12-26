@@ -21,6 +21,24 @@ exports.searchRecords = function(req, res, next) {
 }
 
 
+
+exports.removeImage = function(req, res, next) {
+	var objectType = req.body.objectType;
+	var recordId = req.body.recordId;
+	var field = req.body.field;
+
+	console.log('*** removeImage ***');
+	console.dir(objectType);
+	console.log('~~~~~~~~~~~~~~');
+	console.dir(recordId);
+	console.log('~~~~~~~~~~~~~~');
+	console.dir(field);
+
+	soiServices.removeImage(objectType, recordId, field, function(err, data) {
+		res.json(data);
+	});
+}
+
 exports.fetchGridRecords = function(req, res, next) {
 	var objectType = req.body.objectType;
 	var gridFields = req.body.gridFields;
