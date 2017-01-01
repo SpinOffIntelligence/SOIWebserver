@@ -791,6 +791,27 @@ exports.deleteRecord = function(objectType, recordId, callback) {
 }
 
 
+exports.getRecord = function(objectType, id, callback) {
+
+  var query = strUtil.format("SELECT FROM %s where @rid = '%s'", objectType, id);
+  console.log(query);
+  
+  odb.db.query(query).then(function(records){
+    var recs=[];
+    for(var i=0; i<records.length; i++) {
+      var rec = records[i];
+      var recId = rec['@rid'];
+      rec.id = '#'+ recId.cluster + ':' + recId.position;
+      recs.push(rec);
+    }
+    callback(null,records);
+  }).catch(function(error){
+      console.error('Exception: ' + error); 
+      callback(error,null);   
+  });
+}
+
+
 exports.getRecords = function(objectType, currentPage, pageSize, callback) {
 
   var skip = ((currentPage-1) * pageSize)

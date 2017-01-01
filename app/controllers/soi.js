@@ -370,6 +370,28 @@ exports.deletePanelRecord = function(req, res, next) {
 	});
 }
 
+exports.fetchPanelRecord = function(req, res, next) {
+	var objectType = req.body.objectType;
+	var schema = req.body.schema;
+	var id = req.body.id;
+
+	console.log('*** fetchPanelRecord ***');
+	console.dir(objectType);
+	console.log('~~~~~~~~~~~~~~');
+	console.dir(schema);
+	console.log('~~~~~~~~~~~~~~');
+	console.dir(id);
+
+	soiServices.getRecord(objectType, id, function(err, data) {
+
+		console.log('^^^^^^^^^^^^ fetchPanelRecord ');
+		console.dir(data);
+
+		var retObj = util.prepareOutboundData(schema, data);
+
+		res.json(retObj);
+	});
+}
 
 exports.fetchPanelRecords = function(req, res, next) {
 	var objectType = req.body.objectType;

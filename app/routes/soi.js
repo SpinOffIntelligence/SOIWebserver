@@ -17,6 +17,9 @@ module.exports = function(app) {
 
 	app.post('/soi/getRecordDetails', soiControllers.getRecordDetails);
 	app.post('/soi/fetchPanelRecords', soiControllers.fetchPanelRecords);
+
+	app.post('/soi/fetchPanelRecord', soiControllers.fetchPanelRecord);
+
 	app.post('/soi/updatePanelRecord', soiControllers.updatePanelRecord);
 	app.post('/soi/addPanelRecord', soiControllers.addPanelRecord);
 	app.post('/soi/deletePanelRecord', soiControllers.deletePanelRecord);
