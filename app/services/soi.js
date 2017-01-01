@@ -26,6 +26,48 @@ exports.removeImage = function(objectType, recordId, field, callback) {
 
 }
 
+exports.removePickListValues = function(typeName, callback) {
+
+  var query = strUtil.format("delete from PickList where type = '%s'", typeName);
+  console.log('query:' + query);
+  odb.db.query(query).then(function(records){
+    callback(null,records);
+  }).catch(function(error){
+    console.error('Exception: ' + error); 
+    callback(error,null);   
+  });  
+
+}
+
+exports.addPickListValue = function(typeName, name, description, callback) {
+  var infoObj = {
+    type: typeName,
+    name: name,
+    description: description
+  }
+
+  console.log('Insert:');
+  console.dir(infoObj);
+
+  odb.db.insert().into('PickList ')
+   .set(infoObj).all().then(function(returnObj){
+      callback(null, returnObj);
+   }).catch(function(error){
+      console.error('Exception: ' + error); 
+      callback(error,null);   
+  });
+}
+
+exports.getPickListValues = function(callback) {
+  var query = "SELECT FROM PickList";
+  console.log('query:' + query);
+  odb.db.query(query).then(function(records){
+    console.log('records:' + records);
+    callback(null,records);
+    return;       
+  });
+}
+
 exports.setRecordImage = function(objectType, logoField, idValue, file, callback) {
   
   console.log('*** setRecordImage ***');
@@ -197,8 +239,6 @@ exports.addLogInfo = function(mode, file, strInfo, startdateTime, callback) {
 	    callback(error,null);   
   });
 }
-
-
 
 exports.exportRecords = function(objectType, criteria, schema, callback) {
 
@@ -533,7 +573,7 @@ exports.addEdge = function(objectType, recordData, sourceId, targetId, callback)
 
 	var addedEdge;
 	if(fndProp) {
-		var query = strUtil.format("CREATE EDGE %s FROM %s TO %s CONTENT %s", objectType, sourceId, targetId, JSON.stringify(recordData));
+		var query = strUtil.format("CREATE EDGE %s FROM %s TO %s CONTENT %s", objectType, sourceId, targetId, JSON.stringify(sendObj));
 		console.log('query:' + query);
 		odb.db.query(query).then(function(records){
 	   		console.log('records:' + records);
@@ -751,8 +791,11 @@ exports.deleteRecord = function(objectType, recordId, callback) {
 }
 
 
-exports.getRecords = function(objName, callback) {
-	var query = strUtil.format("SELECT FROM %s", objName);
+exports.getRecords = function(objectType, currentPage, pageSize, callback) {
+
+  var skip = ((currentPage-1) * pageSize)
+
+	var query = strUtil.format("SELECT FROM %s SKIP %s LIMIT %s", objectType, skip, pageSize);
 
 	odb.db.query(query).then(function(records){
 		var recs=[];
@@ -762,7 +805,15 @@ exports.getRecords = function(objName, callback) {
 			rec.id = '#'+	recId.cluster + ':' + recId.position;
 			recs.push(rec);
 		}
-		callback(null,records);
+    var recs = records;
+    var query = strUtil.format("SELECT COUNT(*) as count FROM %s", objectType);
+    odb.db.query(query).then(function(records){   
+    var retObj = {
+      records: recs,
+      size: records[0].count
+    } 
+		  callback(null,retObj);
+    });
 	}).catch(function(error){
 	    console.error('Exception: ' + error); 
 	    callback(error,null);   

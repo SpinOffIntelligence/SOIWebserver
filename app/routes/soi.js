@@ -10,6 +10,11 @@ module.exports = function(app) {
 
 	app.post('/soi/removeImage', soiControllers.removeImage);
 
+
+	app.post('/soi/getPickListValues', soiControllers.getPickListValues);
+	app.post('/soi/addPickListValues', soiControllers.addPickListValues);
+	app.post('/soi/savePickListValues', soiControllers.savePickListValues);
+
 	app.post('/soi/getRecordDetails', soiControllers.getRecordDetails);
 	app.post('/soi/fetchPanelRecords', soiControllers.fetchPanelRecords);
 	app.post('/soi/updatePanelRecord', soiControllers.updatePanelRecord);

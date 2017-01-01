@@ -21,6 +21,83 @@ exports.searchRecords = function(req, res, next) {
 }
 
 
+exports.savePickListValues = function(req, res, next) {
+	var saveValues = req.body.saveValues;
+	var typeName = req.body.typeName;
+
+	console.log('*** savePickListValues ***');
+	console.log('~~~~~~~~~~~~~~');
+	console.dir(saveValues);
+	console.log('~~~~~~~~~~~~~~');
+	console.dir(typeName);
+
+	soiServices.removePickListValues(typeName, function(err, data) {
+
+		if(util.defined(err)) {
+			var retObj = {
+				err: err
+			};
+			res.json(retObj);			
+			return;
+		}
+
+		for(var i=0; i<saveValues.length; i++) {
+			var errSave = null;
+			var val = saveValues[i];
+			if(util.defined(val,'name')) {
+				console.log(val.name);
+				soiServices.addPickListValue(typeName, val.name, val.description, function(err, data) {
+					console.log('Return:' + data);
+					if(util.defined(err))
+						errSave = err;
+				});			
+			}
+		}
+		var retObj = {
+			err: errSave
+		};
+		res.json(retObj);
+	});
+
+}
+
+exports.addPickListValues = function(req, res, next) {
+	var addValues = req.body.addValues;
+	var typeName = req.body.typeName;
+
+	console.log('*** addPickListValues ***');
+	console.log('~~~~~~~~~~~~~~');
+	console.dir(addValues);
+	console.log('~~~~~~~~~~~~~~');
+	console.dir(typeName);
+
+	for(var i=0; i<addValues.length; i++) {
+		var errSave = null;
+		var val = addValues[i];
+		if(util.defined(val,'name')) {
+			console.log(val.name);
+			soiServices.addPickListValue(typeName, val.name, val.description, function(err, data) {
+				console.log('Return:' + data);
+				if(util.defined(err))
+					errSave = err;
+			});			
+		}
+	}
+	var retObj = {
+		err: errSave
+	};
+	res.json(retObj);
+}
+
+exports.getPickListValues = function(req, res, next) {
+
+	console.log('*** getPickListValues ***');
+
+	soiServices.getPickListValues(function(err, data) {
+		res.json(data);
+	});
+}
+
 
 exports.removeImage = function(req, res, next) {
 	var objectType = req.body.objectType;
@@ -297,13 +374,19 @@ exports.deletePanelRecord = function(req, res, next) {
 exports.fetchPanelRecords = function(req, res, next) {
 	var objectType = req.body.objectType;
 	var schema = req.body.schema;
+	var currentPage = req.body.currentPage;
+	var pageSize = req.body.pageSize;
 
 	console.log('*** fetchPanelRecords ***');
 	console.dir(objectType);
 	console.log('~~~~~~~~~~~~~~');
 	console.dir(schema);
+	console.log('~~~~~~~~~~~~~~');
+	console.dir(currentPage);
+	console.log('~~~~~~~~~~~~~~');
+	console.dir(pageSize);
 
-	soiServices.getRecords(objectType, function(err, data) {
+	soiServices.getRecords(objectType, currentPage, pageSize, function(err, data) {
 
 		console.log('^^^^^^^^^^^^ fetchPanelRecords ');
 		console.dir(data);
