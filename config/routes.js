@@ -193,7 +193,7 @@ module.exports = function(app,express){
 
 				if(mode.toLowerCase(mode) == 'add') {
 					if(isEdge==false) {						    			
-						var addObj = util.cleanInBoundData(lineData);
+						var addObj = util.cleanInBoundData(objectType, lineData, schemas);
 						console.dir(addObj);
 						soiServices.addRecord(objectType, addObj, function(err, returnObj) {
 								if(util.defined(err)) {
@@ -212,7 +212,7 @@ module.exports = function(app,express){
 						var targetId = lineData.targetid;							
 						delete lineData.sourceid;
 						delete lineData.targetid;
-						var addObj = util.cleanInBoundData(lineData);
+						var addObj = util.cleanInBoundData(objectType, lineData, schemas);
 						console.log('sourceId:' + sourceId);
 						console.log('targetId:' + targetId);
 						console.log('data:');
@@ -255,7 +255,9 @@ module.exports = function(app,express){
 					if(isEdge==false) {				
 						var idValue = lineData[idField];
 						delete lineData[idField];
-						var updateObj = util.cleanInBoundData(lineData);
+						var updateObj = util.cleanInBoundData(objectType, lineData, schemas);
+
+						console.log('updateObj:')
 						console.dir(updateObj);
 
 						var sendIdField = idField;
@@ -284,7 +286,7 @@ module.exports = function(app,express){
 						console.log('targetId:' + targetId);
 						delete lineData['sourceid'];
 						delete lineData['targetid'];
-						var updateObj = util.cleanInBoundData(lineData);
+						var updateObj = util.cleanInBoundData(objectType, lineData, schemas);
 
 						if(sourceId.indexOf('#') == -1) {
 							getSourceTargetID(objectTypeSource, objectTypeTarget, sourceId, targetId, function(err, data) {
@@ -378,7 +380,7 @@ module.exports = function(app,express){
 						console.log('idField:' + sendIdField);
 						console.log('idValue:' + idValue);
 
-						soiServices.deleteVertexByProp(objectType, sendIdField, idValue, function(err, records) {
+						soiServices.deleteVertexByProp(objectType, sendIdField, idValue, schemas, function(err, records) {
 							if(util.defined(err)) {
 								console.log('Error Deleting:' + err);
 								strInfo = 'Record Deleted Error on line ' + lineNum + ':' + err;

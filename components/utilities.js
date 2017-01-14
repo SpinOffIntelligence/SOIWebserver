@@ -54,28 +54,40 @@ function formatDBDate(strDate) {
   return moment(strDate).format("YYYY-MM-DD");
 }
 
-function prepareInboudDate(obj) {
+function prepareInboudDate(inDate) {
   console.log('prepareInboudDate:');
 
-  for(var propertyName in obj) {
-    if(defined(obj,propertyName)) {
-      var val = obj[propertyName];
+  var x = moment(inDate);
+  var newDate = x.format('YYYY-MM-DD') + ' 00:00:00';
 
-      console.log(propertyName + ':' + val);
+  console.log('Fix Date:' + newDate);
+  
+  return newDate;
+}
 
-      if(typeof val == 'string' && val.indexOf('.000Z') > -1) {
-        var x = moment(val);
-        var newDate = x.format('YYYY-MM-DD') + ' 00:00:00';
-        obj[propertyName] = newDate;
-
-        console.log('Fix Date:' + obj[propertyName]);
-
+function cleanString(input) {
+  var output = "";
+  for (var i=0; i<input.length; i++) {
+      if (input.charCodeAt(i) <= 127) {
+          output += input.charAt(i);
       }
-    }
   }
-  console.log('done:')
-  console.dir(obj);
-  return obj;
+  return output;
+}
+
+function prepareInboudString(inString) {
+  console.log('prepareInboudString:');
+
+  var cleanStr = cleanString(inString);
+  cleanStr = cleanStr.replace(/(\r\n|\n|\r)/gm," ");
+
+  cleanStr = cleanStr.replace(/\'/gm,"\\'");
+
+  cleanStr = cleanStr.trim()
+
+  console.log('Fix String:' + cleanStr);
+  
+  return cleanStr;
 }
 
 
@@ -125,7 +137,7 @@ function prepareInboudDate(obj) {
 }
 
 
-function cleanInBoundData(recordData) {
+function cleanInBoundData(objectType, recordData, schemas) {
   var cleanData = {};
   var sendObj = {};
   if(this.defined(recordData)) {
@@ -150,11 +162,21 @@ function cleanInBoundData(recordData) {
       } else if(!this.defined(recordData,propertyName)) {
         console.log('fail9');
       } else {
-        cleanData[propertyName] = recordData[propertyName];
+
+        var schemaTypes = getSchemaType(schemas[objectType], propertyName);
+        if(schemaTypes.isString) {
+          cleanData[propertyName] = prepareInboudString(recordData[propertyName]);
+        } else if(schemaTypes.isString) {
+          cleanData[propertyName] = prepareInboudDate(recordData[propertyName]);
+        } else {
+          cleanData[propertyName] = recordData[propertyName];  
+        }
+
+        
       }
     }
-    sendObj = this.prepareInboudDate(cleanData);
-    return sendObj;
+    //sendObj = this.prepareInboudDate(cleanData);
+    return cleanData;
   } else {
     return null;
   } 

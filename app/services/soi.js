@@ -382,7 +382,7 @@ exports.updateRecordByProp = function(objectType, idField, idValue, updateObj, s
 	});
 }
 
-exports.deleteVertexByProp = function(objectType, idField, idValue, callback) {
+exports.deleteVertexByProp = function(objectType, idField, idValue, schemas, callback) {
 
 	console.log('*** updateRecordByProp ***');
 
