@@ -553,11 +553,12 @@ exports.updateEdge = function(objectType, recordData, sourceId, targetId, callba
 	// Delete Edge
 	var query = strUtil.format("delete edge from %s to %s where @class = '%s'", sourceId, targetId, objectType);
 	console.log('query:' + query);
-	odb.db.query(query).then(function(results
-		 exports.addEdge(objectType, recordData, sourceId, targetId, callback);
+	odb.db.query(query).then(function(results){
+    console.log(results);
+		addEdge(objectType, recordData, sourceId, targetId, callback);
 	}).catch(function(error){
-	    console.error('Exception: ' + error); 
-	    callback(error,null);   
+	  console.error('Exception: ' + error); 
+	  callback(error,null);   
   });
 }
 
