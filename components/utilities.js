@@ -66,10 +66,17 @@ function prepareInboudDate(inDate) {
 }
 
 function cleanString(input) {
+  return input;
+  
   var output = "";
   for (var i=0; i<input.length; i++) {
-      if (input.charCodeAt(i) <= 127) {
+    var code = input.charCodeAt(i);
+      if (code <= 255) {
           output += input.charAt(i);
+      } else {
+        console.log('$$$$$$$>>' + code + ":" + input.charAt(i));
+        if(code == 65533)
+          output += String.fromCharCode(233);
       }
   }
   return output;
