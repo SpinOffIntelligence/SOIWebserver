@@ -541,16 +541,20 @@ exports.deleteEdge = function(objectType, sourceId, targetId, callback) {
 
 exports.updateEdge = function(objectType, recordData, sourceId, targetId, callback) {
 
-	var sendObj = util.cleanInBoundData(recordData);
-	console.log('^^^^ sendObj:');
-	console.dir(sendObj);
+  console.log('>>>> updateEdge <<<<');
+  console.dir(objectType);
+  console.log('~~~~~~~~~~~~~~');
+	console.dir(recordData);
+  console.log('~~~~~~~~~~~~~~');
+  console.dir(sourceId);
+  console.log('~~~~~~~~~~~~~~');
+  console.dir(targetId);
 
 	// Delete Edge
 	var query = strUtil.format("delete edge from %s to %s where @class = '%s'", sourceId, targetId, objectType);
 	console.log('query:' + query);
-	odb.db.query(query).then(function(results){
-		 console.log(results);
-		 exports.addEdge(objectType, sendObj, sourceId, targetId, callback);
+	odb.db.query(query).then(function(results
+		 exports.addEdge(objectType, recordData, sourceId, targetId, callback);
 	}).catch(function(error){
 	    console.error('Exception: ' + error); 
 	    callback(error,null);   
@@ -559,21 +563,25 @@ exports.updateEdge = function(objectType, recordData, sourceId, targetId, callba
 
 exports.addEdge = function(objectType, recordData, sourceId, targetId, callback) {
 
+  console.log('>>>> addEdge <<<<');
+  console.dir(objectType);
+  console.log('~~~~~~~~~~~~~~');
+  console.dir(recordData);
+  console.log('~~~~~~~~~~~~~~');
+  console.dir(sourceId);
+  console.log('~~~~~~~~~~~~~~');
+  console.dir(targetId);
+
 	var fndProp = false;
-	var sendObj = util.cleanInBoundData(recordData);
-
-	console.log('^^^ cleanInBoundData:');
-	console.dir(sendObj);
-
-	for(var propertyName in sendObj) {
+	for(var propertyName in recordData) {
 		fndProp = true;
 	}
 	console.log('^^^ Prep Data:' + fndProp);
-	console.dir(sendObj);
+	console.dir(recordData);
 
 	var addedEdge;
 	if(fndProp) {
-		var query = strUtil.format("CREATE EDGE %s FROM %s TO %s CONTENT %s", objectType, sourceId, targetId, JSON.stringify(sendObj));
+		var query = strUtil.format("CREATE EDGE %s FROM %s TO %s CONTENT %s", objectType, sourceId, targetId, JSON.stringify(recordData));
 		console.log('query:' + query);
 		odb.db.query(query).then(function(records){
 	   		console.log('records:' + records);
@@ -595,7 +603,7 @@ exports.addEdge = function(objectType, recordData, sourceId, targetId, callback)
 	}
 }
 
-exports.fetchGridRecords = function(objectType, gridFields, callback) {
+exports.fetchGridRecords = function(objectType, gridFields, currentPage, pageSize, sortField, sortOrder, callback) {
 
 	var props = '*, ';
 	for(var i=0; i<gridFields.length; i++) {
@@ -614,7 +622,9 @@ exports.fetchGridRecords = function(objectType, gridFields, callback) {
 	}
 	props = props.slice(0, -2);
 
-	var query = strUtil.format("SELECT %s FROM %s", props, objectType);
+  var skip = ((currentPage-1) * pageSize)
+
+	var query = strUtil.format("SELECT %s FROM %s SKIP %s LIMIT %s", props, objectType, skip, pageSize);
 	console.log('query: ' + query);
 
 	odb.db.query(query).then(function(records){
@@ -625,7 +635,17 @@ exports.fetchGridRecords = function(objectType, gridFields, callback) {
 			rec.id = '#'+	recId.cluster + ':' + recId.position;
 			recs.push(rec);
 		}
-		callback(null,records);
+
+    var query = strUtil.format("SELECT COUNT(*) as count FROM %s", objectType);
+    console.log('query: ' + query);
+    odb.db.query(query).then(function(ret){   
+      var retObj = {
+        records: recs,
+        size: ret[0].count
+      } 
+      callback(null,retObj);
+    });
+
 	}).catch(function(error){
 	    console.error('Exception: ' + error); 
 	    callback(error,null);   

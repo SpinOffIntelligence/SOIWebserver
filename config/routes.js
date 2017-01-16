@@ -208,8 +208,8 @@ module.exports = function(app,express){
 								}
 							});					    			
 					} else {
-						var sourceId = lineData.sourceid;
-						var targetId = lineData.targetid;							
+						var sourceId = util.prepareInboudString(lineData.sourceid);
+						var targetId = util.prepareInboudString(lineData.targetid);
 						delete lineData.sourceid;
 						delete lineData.targetid;
 						var addObj = util.cleanInBoundData(objectType, lineData, schemas);
@@ -227,7 +227,8 @@ module.exports = function(app,express){
 									res.json({error_code:2,err_desc:err});
 									return;
 								} else {
-									console.log('getSourceTargetID:' + data.sourceRecId + ":" + data.targetRecId);
+										console.log('getSourceTargetID:' + data.sourceRecId + ":" + data.targetRecId);
+										console.dir(addObj);
 										soiServices.addEdge(objectType, addObj, data.sourceRecId, data.targetRecId, function(err, records) {
 											console.log('Edge Added:' + records);
 											strInfo = 'Edge Added: ' + objectType + ':' + JSON.stringify(addObj) + ':' + data.sourceRecId + ':' + data.targetRecId;
@@ -253,7 +254,7 @@ module.exports = function(app,express){
 				} else if(mode.toLowerCase(mode) == 'update') {
 
 					if(isEdge==false) {				
-						var idValue = lineData[idField];
+						var idValue = util.prepareInboudString(lineData[idField]);
 						delete lineData[idField];
 						var updateObj = util.cleanInBoundData(objectType, lineData, schemas);
 
@@ -280,8 +281,8 @@ module.exports = function(app,express){
 								}
 							});					    			
 					} else {
-						var sourceId = lineData.sourceid;
-						var targetId = lineData.targetid;
+						var sourceId = util.prepareInboudString(lineData.sourceid);
+						var targetId = util.prepareInboudString(lineData.targetid);
 						console.log('sourceId:' + sourceId);
 						console.log('targetId:' + targetId);
 						delete lineData['sourceid'];
@@ -328,8 +329,8 @@ module.exports = function(app,express){
 					}
 				} else if(mode.toLowerCase(mode) == 'delete') {
 					if(isEdge) {
-						var sourceId = lineData.sourceid;
-						var targetId = lineData.targetid;
+						var sourceId = util.prepareInboudString(lineData.sourceid);
+						var targetId = util.prepareInboudString(lineData.targetid);
 						console.log('sourceId:' + sourceId);
 						console.log('targetId:' + targetId);
 
@@ -371,7 +372,7 @@ module.exports = function(app,express){
 						}
 					} else {
 						//var delObj = util.cleanInBoundData(lineData);
- 						var idValue = lineData[idField];
+ 						var idValue = util.prepareInboudString(lineData[idField]);
 
 						var sendIdField = idField;
 						if(idField.toLowerCase() == 'id')

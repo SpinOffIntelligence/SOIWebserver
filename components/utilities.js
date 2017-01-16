@@ -140,6 +140,10 @@ function prepareInboudDate(obj) {
 function cleanInBoundData(objectType, recordData, schemas) {
   var cleanData = {};
   var sendObj = {};
+
+  console.log('**** cleanInBoundData:');
+  console.dir(recordData);
+
   if(this.defined(recordData)) {
     for(var propertyName in recordData) {
       console.log('^^^^ propertyName:' + propertyName);
@@ -176,6 +180,10 @@ function cleanInBoundData(objectType, recordData, schemas) {
       }
     }
     //sendObj = this.prepareInboudDate(cleanData);
+
+    console.log('**** cleanInBoundData Done:');
+    console.dir(cleanData);
+
     return cleanData;
   } else {
     return null;
@@ -197,3 +205,4 @@ module.exports.logInfo = logInfo;
 module.exports.getSchemaType = getSchemaType;
 module.exports.formatDBDate = formatDBDate;
 module.exports.prepareOutboundData = prepareOutboundData;
+module.exports.prepareInboudString = prepareInboudString;

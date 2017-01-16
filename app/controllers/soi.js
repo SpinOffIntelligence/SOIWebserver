@@ -119,13 +119,25 @@ exports.removeImage = function(req, res, next) {
 exports.fetchGridRecords = function(req, res, next) {
 	var objectType = req.body.objectType;
 	var gridFields = req.body.gridFields;
+	var currentPage = req.body.currentPage;
+	var pageSize = req.body.pageSize;
+	var sortField = req.body.sortField;
+	var sortOrder = req.body.sortOrder;
 
 	console.log('*** fetchGridRecords ***');
 	console.dir(objectType);
 	console.log('~~~~~~~~~~~~~~');
 	console.dir(gridFields);
+	console.log('~~~~~~~~~~~~~~');
+	console.dir(currentPage);
+	console.log('~~~~~~~~~~~~~~');
+	console.dir(pageSize);
+	console.log('~~~~~~~~~~~~~~');
+	console.dir(sortField);
+	console.log('~~~~~~~~~~~~~~');
+	console.dir(sortOrder);
 
-	soiServices.fetchGridRecords(objectType, gridFields, function(err, data) {
+	soiServices.fetchGridRecords(objectType, gridFields, currentPage, pageSize, sortField, sortOrder, function(err, data) {
 		res.json(data);
 	});
 }
@@ -249,6 +261,7 @@ exports.updateEdge = function(req, res, next) {
 	console.log('~~~~~~~~~~~~~~');
 	console.dir(targetId);
 
+	recordData = cleanInBoundData(recordData);
 
 	soiServices.updateEdge(objectType, recordData, sourceId, targetId, function(err, data) {
 		res.json(data);
