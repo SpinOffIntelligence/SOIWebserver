@@ -1,6 +1,17 @@
 'use strict';
 var moment = require('moment');
 var soiServices = require('../app/services/soi');
+var config = require('../config/config');
+
+var schemas = [];
+
+var exports = module.exports = {};
+
+exports.schemas;
+
+exports.setSchemas = function(schemas) {
+  exports.schemas = schemas;
+}
 
 function defined(ref, strNames) {
     var name;
@@ -23,19 +34,26 @@ function defined(ref, strNames) {
     return true;
 }
 
+
 function toLower(inStr) {
   if(inStr !== null && typeof inStr !== "undefined")
     return inStr.toLowerCase();
   else return inStr;
 }
 
-function getSchemaType(schema, field) {
+function getSchemaType(objectType, field) {
+
+  console.log('~~~~~ objectType: ');
+  console.dir(objectType);
+
+  var schema = exports.schemas[objectType];
   var retObj = {
     isString : false,
     isDate : false,
     isId : false
   }
   console.log('~~~~~ field: ' + field);
+
   if(defined(schema, field + '.type')) {
     var schemaType = schema[field].type
     console.log('~~~~~ schemaType: ' + schemaType);
@@ -46,9 +64,22 @@ function getSchemaType(schema, field) {
     if(field == 'id' || field == '@rid') 
       retObj.isId == true;
   }
+  console.log('~~~~~ retObj: ');
+  console.dir(retObj);
+
   return retObj;
 }
 
+
+function logging(level, msg) {
+  if(config.loglevel == 'debug') {
+    console.dir(msg);
+  } else if(config.loglevel == 'trace' && (level == 'trace' || level == 'error')) {
+    console.dir(msg);
+  } else if(config.loglevel == 'error' && level == 'error') {
+    console.dir(msg);
+  }
+}
 
 function formatDBDate(strDate) {
   return moment(strDate).format("YYYY-MM-DD");
@@ -58,7 +89,7 @@ function prepareInboudDate(inDate) {
   console.log('prepareInboudDate:');
 
   var x = moment(inDate);
-  var newDate = x.format('YYYY-MM-DD') + ' 00:00:00';
+  var newDate = x.format('YYYY-MM-DD');
 
   console.log('Fix Date:' + newDate);
   
@@ -98,63 +129,76 @@ function prepareInboudString(inString) {
 }
 
 
-function prepareOutboundData(schema, data) {
+function prepareOutboundData(objectType, records) {
 
   console.log('prepareOutboundData:');
+  console.dir(records);
 
-  for(var i=0; i<data.length; i++) {
-   for(var propertyName in data[i]) {
-    if(defined(schema,propertyName)) {
-      var schemaInfo = schema[propertyName];
-      if(schemaInfo.type == 'date') {
-       var mDate = moment(data[i][propertyName]).add(5, 'hours').format('YYYY-MM-DD'); 
-       data[i][propertyName] = mDate;
+  var schema = exports.schemas[objectType];
 
-       console.log('^^^^^ new date: ' + data[i][propertyName]);
-
-      }   
-    }
-   }     
-  }
-  return data;
-}
-
-function prepareInboudDate(obj) {
-  console.log('prepareInboudDate:');
-
-  for(var propertyName in obj) {
-    if(defined(obj,propertyName)) {
-      var val = obj[propertyName];
-
-      console.log(propertyName + ':' + val);
-
-      if(typeof val == 'string' && val.indexOf('.000Z') > -1) {
-        var x = moment(val);
-        var newDate = x.format('YYYY-MM-DD') + ' 00:00:00';
-        obj[propertyName] = newDate;
-
-        console.log('Fix Date:' + obj[propertyName]);
-
+  for (var i = 0; i < records.length; i++) {
+    var rec = records[i];
+    for (var propertyName in rec) {
+      if (defined(schema, propertyName)) {
+        var schemaInfo = schema[propertyName];
+        if (schemaInfo.type == 'date') {
+          var mDate = moment(rec[propertyName]).add(5, 'hours').format('YYYY-MM-DD');
+          rec[propertyName] = mDate;
+          console.log('^^^^^ new date: ' + rec[propertyName]);
+        }
+      } else {
+        if (propertyName == '@rid') {
+          var recId = rec['@rid'];
+          rec.id = '#' + recId.cluster + ':' + recId.position;
+        }
       }
     }
   }
-  console.log('done:')
-  console.dir(obj);
-  return obj;
+
+  console.log('prepareOutboundData Done:');
+  console.dir(records);  
+  return records;
 }
 
 
-function cleanInBoundData(objectType, recordData, schemas) {
+// function prepareInboudDate(obj) {
+//   console.log('prepareInboudDate:');
+
+//   for(var propertyName in obj) {
+//     if(defined(obj,propertyName)) {
+//       var val = obj[propertyName];
+
+//       console.log(propertyName + ':' + val);
+
+//       if(typeof val == 'string' && val.indexOf('.000Z') > -1) {
+//         var x = moment(val);
+//         var newDate = x.format('YYYY-MM-DD') + ' 00:00:00';
+//         obj[propertyName] = newDate;
+
+//         console.log('Fix Date:' + obj[propertyName]);
+
+//       }
+//     }
+//   }
+//   console.log('done:')
+//   console.dir(obj);
+//   return obj;
+// }
+
+
+function prepareInboundData(objectType, recordData) {
   var cleanData = {};
   var sendObj = {};
+  var schema = exports.schemas[objectType];
 
-  console.log('**** cleanInBoundData:');
+  console.log('**** prepareInboundData *****');
   console.dir(recordData);
 
   if(this.defined(recordData)) {
     for(var propertyName in recordData) {
       console.log('^^^^ propertyName:' + propertyName);
-      if(recordData[propertyName] == null) {
+      var val = recordData[propertyName];
+      if(val == null) {
         console.log('fail1');
       } else if(propertyName == 'in') {
         console.log('fail2');
@@ -172,15 +216,18 @@ function cleanInBoundData(objectType, recordData, schemas) {
         console.log('fail8');
       } else if(!this.defined(recordData,propertyName)) {
         console.log('fail9');
+      } else if(this.defined(val,"length") && val.length == 0) {
+        console.log('fail10');
       } else {
 
-        var schemaTypes = getSchemaType(schemas[objectType], propertyName);
+        var schemaTypes = getSchemaType(objectType, propertyName);
+
         if(schemaTypes.isString) {
-          cleanData[propertyName] = prepareInboudString(recordData[propertyName]);
-        } else if(schemaTypes.isString) {
-          cleanData[propertyName] = prepareInboudDate(recordData[propertyName]);
+          cleanData[propertyName] = prepareInboudString(val);
+        } else if(schemaTypes.isDate) {
+          cleanData[propertyName] = prepareInboudDate(val);
         } else {
-          cleanData[propertyName] = recordData[propertyName];  
+          cleanData[propertyName] = val;  
         }
 
         
@@ -188,7 +235,7 @@ function cleanInBoundData(objectType, recordData, schemas) {
     }
     //sendObj = this.prepareInboudDate(cleanData);
 
-    console.log('**** cleanInBoundData Done:');
+    console.log('**** prepareInboundData Done:');
     console.dir(cleanData);
 
     return cleanData;
@@ -204,12 +251,12 @@ function logInfo(mode, file, strInfo) {
   });
 }
 
-
 module.exports.defined = defined;
+module.exports.prepareOutboundData = prepareOutboundData;
+module.exports.prepareInboundData = prepareInboundData;
 module.exports.prepareInboudDate = prepareInboudDate;
-module.exports.cleanInBoundData = cleanInBoundData;
+module.exports.prepareInboudString = prepareInboudString;
 module.exports.logInfo = logInfo;
 module.exports.getSchemaType = getSchemaType;
 module.exports.formatDBDate = formatDBDate;
-module.exports.prepareOutboundData = prepareOutboundData;
-module.exports.prepareInboudString = prepareInboudString;
+module.exports.logging = logging;

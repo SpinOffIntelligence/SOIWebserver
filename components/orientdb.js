@@ -30,4 +30,6 @@ exports.init = function(callback) {
 	   password: 'admin'
 	});
 
+	callback(null,dbs);
+
 };

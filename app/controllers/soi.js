@@ -142,6 +142,65 @@ exports.fetchGridRecords = function(req, res, next) {
 	});
 }
 
+
+exports.getSchemasServer = function(callback) {
+  var schemas = [ { objectType: 'EAcquired' },
+  { objectType: 'EAcquirer' },
+  { objectType: 'EBoardMember' },
+  { objectType: 'EAdvisor' },
+  { objectType: 'EFunded' },
+  { objectType: 'EInvestor' },
+  { objectType: 'ECoApplicant' },
+  { objectType: 'EApplicant' },
+  { objectType: 'EInventor' },
+  { objectType: 'ESupplier' },
+  { objectType: 'ECustomer' },
+  { objectType: 'EPartner' },
+  { objectType: 'EFounded' },
+  { objectType: 'ESpinOff' },
+  { objectType: 'ETeaches' },
+  { objectType: 'EWorksfor' },
+  { objectType: 'VAcquisition' },
+  { objectType: 'VInvestment' },
+  { objectType: 'VPatent' },
+  { objectType: 'VInvestmentFirm' },
+  { objectType: 'VCompany' },
+  { objectType: 'VUniversity' },
+  { objectType: 'VPerson' } ];
+
+	console.log('*** getSchemasServer ***');
+	console.dir(schemas);  
+
+	function getInfo(infoObj, callback) {
+		var mode = infoObj.mode;
+		var objectType = infoObj.objectType;
+		soiServices.getSchema(objectType, function(err, data) {
+			var obj = {
+				objectType: objectType,
+				data: data
+			}
+			callback(null,obj);
+		});
+	}
+
+	async.map(schemas, getInfo, function(err, results){
+    // results is now an array of stats for each file
+    var returnObj={};
+
+    for(var i=0; i<results.length; i++) {
+   		returnObj[results[i].objectType] = results[i].data;
+    }
+
+		console.log('*** getSchemasServer done ***');
+		//console.dir(returnObj);  
+
+
+    callback(null, returnObj);
+	});
+
+}
+
+
 exports.getSchemas = function(req, res, next) {
 	var schemas = req.body.schemas
 
@@ -261,8 +320,6 @@ exports.updateEdge = function(req, res, next) {
 	console.log('~~~~~~~~~~~~~~');
 	console.dir(targetId);
 
-	recordData = cleanInBoundData(recordData);
-
 	soiServices.updateEdge(objectType, recordData, sourceId, targetId, function(err, data) {
 		res.json(data);
 	});
@@ -301,10 +358,8 @@ exports.fetchRecordByProp = function(req, res, next) {
 	console.dir(prop);
 	console.log('~~~~~~~~~~~~~~');
 	console.dir(value);
-	console.log('~~~~~~~~~~~~~~');
-	console.dir(schema);
 
-	soiServices.fetchRecordByProp(objectType, prop, value, schema, function(err, data) {
+	soiServices.fetchRecordByProp(objectType, prop, value, function(err, data) {
 		res.json(data);
 	});
 }
@@ -396,13 +451,7 @@ exports.fetchPanelRecord = function(req, res, next) {
 	console.dir(id);
 
 	soiServices.getRecord(objectType, id, function(err, data) {
-
-		console.log('^^^^^^^^^^^^ fetchPanelRecord ');
-		console.dir(data);
-
-		var retObj = util.prepareOutboundData(schema, data);
-
-		res.json(retObj);
+		res.json(data);
 	});
 }
 
@@ -422,13 +471,7 @@ exports.fetchPanelRecords = function(req, res, next) {
 	console.dir(pageSize);
 
 	soiServices.getRecords(objectType, currentPage, pageSize, function(err, data) {
-
-		console.log('^^^^^^^^^^^^ fetchPanelRecords ');
-		console.dir(data);
-
-		var retObj = util.prepareOutboundData(schema, data);
-
-		res.json(retObj);
+		res.json(data);
 	});
 }
 

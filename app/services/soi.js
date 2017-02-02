@@ -98,6 +98,7 @@ exports.searchRecords = function(objectTypes, terms, callback) {
 		odb.db.query(query).then(function(records){
 			//console.log('Search Results:');
 			//console.dir(records);
+      //recordData = util.prepareOutboundData(recordData);
 			callback(null,records);
 		}).catch(function(error){
 	    console.error('Exception: ' + error); 
@@ -332,7 +333,7 @@ exports.updateRecordByProp = function(objectType, idField, idValue, updateObj, s
 
 	console.log('*** updateRecordByProp ***');
 
-	var schemaTypes = util.getSchemaType(schemas[objectType], idField);
+	var schemaTypes = util.getSchemaType(objectType, idField);
 
 	var query;	
 	if(schemaTypes.isString == true || schemaTypes.isId == true) {
@@ -358,7 +359,7 @@ exports.updateRecordByProp = function(objectType, idField, idValue, updateObj, s
 
 			var updateStr = '';
 			for(var propertyName in updateObj) {
-				var schemaTypes = util.getSchemaType(schemas[objectType], propertyName);
+				var schemaTypes = util.getSchemaType(objectType, propertyName);
 				if(schemaTypes.isString == true) {
 					updateStr += strUtil.format("%s = '%s'", propertyName, updateObj[propertyName]) + ' , ';
 				} else if(schemaTypes.isDate == true) {
@@ -386,7 +387,7 @@ exports.deleteVertexByProp = function(objectType, idField, idValue, schemas, cal
 
 	console.log('*** updateRecordByProp ***');
 
-	var schemaTypes = util.getSchemaType(schemas[objectType], idField);
+	var schemaTypes = util.getSchemaType(objectType, idField);
 
 	var query;	
 	if(schemaTypes.isString == true || schemaTypes.isId == true) {
@@ -427,9 +428,9 @@ exports.deleteVertexByProp = function(objectType, idField, idValue, schemas, cal
 	});
 }
 
-exports.fetchRecordByProp = function(objectType, prod, value, schema, callback) {
+exports.fetchRecordByProp = function(objectType, prod, value, callback) {
 
-	var schemaTypes = util.getSchemaType(schema, prod);
+	var schemaTypes = util.getSchemaType(objectType, prod);
 	if(schemaTypes.isString) {
 		var query = strUtil.format("SELECT FROM %s where %s = '%s'", objectType, prod, value);	
 	} else if(schemaTypes.isDate) {
@@ -441,6 +442,7 @@ exports.fetchRecordByProp = function(objectType, prod, value, schema, callback) 
 	
 	console.log('query:' + query);
 		odb.db.query(query).then(function(records){
+      records = util.prepareOutboundData(objectType, records);
 			callback(null,records);
 		}).catch(function(error){
 	    console.error('Exception: ' + error); 
@@ -452,6 +454,7 @@ exports.fetchRecordByName = function(objectType, name, callback) {
 	var query = strUtil.format("SELECT FROM %s where name = '%s'", objectType, name);
 	console.log('query:' + query);
 		odb.db.query(query).then(function(records){
+      records = util.prepareOutboundData(objectType, records);
 			callback(null,records);
 		});
 }
@@ -491,13 +494,14 @@ exports.getEdge = function(edgeObjectType, edgeRecordItemId, callback) {
 	var query = strUtil.format("SELECT FROM %s where @rid = %s", edgeObjectType, edgeRecordItemId);
 	console.log('query:' + query);
 	odb.db.query(query).then(function(records){
-		var recs=[];
-		for(var i=0; i<records.length; i++) {
-			var rec = records[i];
-			var recId = rec['@rid'];
-			rec.id = '#'+	recId.cluster + ':' + recId.position;
-			recs.push(rec);
-		}
+    records = util.prepareOutboundData(edgeObjectType, records);
+		// var recs=[];
+		// for(var i=0; i<records.length; i++) {
+		// 	var rec = records[i];
+		// 	var recId = rec['@rid'];
+		// 	rec.id = '#'+	recId.cluster + ':' + recId.position;
+		// 	recs.push(rec);
+		// }
 		callback(null,records[0]);
 	}).catch(function(error){
 	    console.error('Exception: ' + error); 
@@ -509,6 +513,7 @@ exports.getEdgeBySource = function(edgeObjectType, recordItemId, callback) {
 	var query = strUtil.format("select from %s where out = %s", edgeObjectType, recordItemId);
 	console.log('query:' + query);
 	odb.db.query(query).then(function(records){
+    records = util.prepareOutboundData(edgeObjectType, records);
 		callback(null,records);
 	});
 }
@@ -577,8 +582,9 @@ exports.addEdge = function(objectType, recordData, sourceId, targetId, callback)
 	for(var propertyName in recordData) {
 		fndProp = true;
 	}
-	console.log('^^^ Prep Data:' + fndProp);
-	console.dir(recordData);
+	console.log('^^^ fndProp:' + fndProp);
+
+  recordData = util.prepareInboundData(objectType, recordData);
 
 	var addedEdge;
 	if(fndProp) {
@@ -629,19 +635,22 @@ exports.fetchGridRecords = function(objectType, gridFields, currentPage, pageSiz
 	console.log('query: ' + query);
 
 	odb.db.query(query).then(function(records){
-		var recs=[];
-		for(var i=0; i<records.length; i++) {
-			var rec = records[i];
-			var recId = rec['@rid'];
-			rec.id = '#'+	recId.cluster + ':' + recId.position;
-			recs.push(rec);
-		}
+
+    records = util.prepareOutboundData(objectType, records);
+
+		// var recs=[];
+		// for(var i=0; i<records.length; i++) {
+		// 	var rec = records[i];
+		// 	var recId = rec['@rid'];
+		// 	rec.id = '#'+	recId.cluster + ':' + recId.position;
+		// 	recs.push(rec);
+		// }
 
     var query = strUtil.format("SELECT COUNT(*) as count FROM %s", objectType);
     console.log('query: ' + query);
     odb.db.query(query).then(function(ret){   
       var retObj = {
-        records: recs,
+        records: records,
         size: ret[0].count
       } 
       callback(null,retObj);
@@ -657,13 +666,7 @@ exports.fetchRecords = function(objectType, callback) {
 	var query = strUtil.format("SELECT FROM %s", objectType);
 
 	odb.db.query(query).then(function(records){
-		var recs=[];
-		for(var i=0; i<records.length; i++) {
-			var rec = records[i];
-			var recId = rec['@rid'];
-			rec.id = '#'+	recId.cluster + ':' + recId.position;
-			recs.push(rec);
-		}
+    records = util.prepareOutboundData(objectType, records);
 		callback(null,records);
 	}).catch(function(error){
 	    console.error('Exception: ' + error); 
@@ -766,15 +769,20 @@ exports.getRecordDetails = function(objectType, recordId, depth, callback) {
 }
 
 exports.addRecord = function(objectType, panelRecord, callback) {
-	var updateObj = {};
-	for(var propertyName in panelRecord) {
-		if(propertyName.indexOf('@') == -1 && propertyName != 'id' && propertyName != 'backup' && util.defined(panelRecord,propertyName) && panelRecord[propertyName].length > 0) {
-			updateObj[propertyName] = panelRecord[propertyName];
-		}
-	}
-	var sendObj = util.prepareInboudDate(updateObj);
+	// var updateObj = {};
+	// for(var propertyName in panelRecord) {
+	// 	if(propertyName.indexOf('@') == -1 && propertyName != 'id' && propertyName != 'backup' && util.defined(panelRecord,propertyName) && panelRecord[propertyName].length > 0) {
+	// 		updateObj[propertyName] = panelRecord[propertyName];
+	// 	}
+	// }
+
+  console.log('** addRecord **');
+  console.dir(panelRecord);
+
+	var panelRecord = util.prepareInboundData(objectType, panelRecord);
+
 	odb.db.insert().into(objectType)
-   .set(sendObj).all().then(function(returnObj){
+   .set(panelRecord).all().then(function(returnObj){
       callback(null, returnObj);
    }).catch(function(error){
 	    console.error('Exception: ' + error); 
@@ -784,18 +792,22 @@ exports.addRecord = function(objectType, panelRecord, callback) {
 
 
 exports.updateRecord = function(objectType, recordId, panelRecord, callback) {
-	var updateObj = {};
-	var rid = panelRecord['@rid'];
-	for(var propertyName in panelRecord) {
-		var val = updateObj[propertyName];
-		if(propertyName.indexOf('@') == -1 && propertyName != 'id' && propertyName != 'backup' && util.defined(panelRecord,propertyName)) {
-			updateObj[propertyName] = panelRecord[propertyName];
-		}
-	}
-	var sendObj = util.prepareInboudDate(updateObj);
+
+  console.log('** addRecord **');
+  console.dir(panelRecord);
+
+	// var updateObj = {};
+	// var rid = panelRecord['@rid'];
+	// for(var propertyName in panelRecord) {
+	// 	var val = updateObj[propertyName];
+	// 	if(propertyName.indexOf('@') == -1 && propertyName != 'id' && propertyName != 'backup' && util.defined(panelRecord,propertyName)) {
+	// 		updateObj[propertyName] = panelRecord[propertyName];
+	// 	}
+	// }
+  panelRecord = util.prepareInboundData(objectType, panelRecord);
 
 	odb.db.update(recordId)
-   .set(sendObj).one()
+   .set(panelRecord).one()
    .then(
       function(update){
          callback(null, update);
@@ -818,13 +830,14 @@ exports.getRecord = function(objectType, id, callback) {
   console.log(query);
   
   odb.db.query(query).then(function(records){
-    var recs=[];
-    for(var i=0; i<records.length; i++) {
-      var rec = records[i];
-      var recId = rec['@rid'];
-      rec.id = '#'+ recId.cluster + ':' + recId.position;
-      recs.push(rec);
-    }
+    // var recs=[];
+    // for(var i=0; i<records.length; i++) {
+    //   var rec = records[i];
+    //   var recId = rec['@rid'];
+    //   rec.id = '#'+ recId.cluster + ':' + recId.position;
+    //   recs.push(rec);
+    // }
+    records = util.prepareOutboundData(objectType, records);
     callback(null,records);
   }).catch(function(error){
       console.error('Exception: ' + error); 
@@ -840,13 +853,14 @@ exports.getRecords = function(objectType, currentPage, pageSize, callback) {
 	var query = strUtil.format("SELECT FROM %s SKIP %s LIMIT %s", objectType, skip, pageSize);
 
 	odb.db.query(query).then(function(records){
-		var recs=[];
-		for(var i=0; i<records.length; i++) {
-			var rec = records[i];
-			var recId = rec['@rid'];
-			rec.id = '#'+	recId.cluster + ':' + recId.position;
-			recs.push(rec);
-		}
+		// var recs=[];
+		// for(var i=0; i<records.length; i++) {
+		// 	var rec = records[i];
+		// 	var recId = rec['@rid'];
+		// 	rec.id = '#'+	recId.cluster + ':' + recId.position;
+		// 	recs.push(rec);
+		// }
+    records = util.prepareOutboundData(objectType, records);
     var recs = records;
     var query = strUtil.format("SELECT COUNT(*) as count FROM %s", objectType);
     odb.db.query(query).then(function(records){   

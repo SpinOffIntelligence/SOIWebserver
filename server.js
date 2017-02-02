@@ -9,6 +9,9 @@
     var bodyParser = require('body-parser');
     var multer = require('multer');
 
+    var soiControllers = require('./app/controllers/soi');
+    var util = require('./components/utilities.js');
+
     app.use(function(req, res, next) { //allow cross origin requests
       res.setHeader("Access-Control-Allow-Methods", "POST, PUT, OPTIONS, DELETE, GET");
       res.header("Access-Control-Allow-Origin", "http://localhost");
@@ -44,6 +47,15 @@
     walk(routes_path);  
     
     odb.init(function(err, res) {
+      console.log('^^^^')
+      soiControllers.getSchemasServer(function(err, data) {
+        util.setSchemas(data);
+
+        console.log('$$$$ schemas:');
+        console.dir(util.schemas)
+      });
+
+
     });
 
     app.listen('8080', function(){

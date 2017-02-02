@@ -170,12 +170,17 @@ module.exports = function(app,express){
 			}
 
 			var file = res.req.file.path;
+			var processInfo = [];
 			var strInfo;
 
 			fs.createReadStream(file).pipe(csv()).on('data', function (lineData) {
 
 				console.log('****Line of data:');
 				console.dir(lineData);
+				var processInfoLine = {
+					lineData: lineData
+				};
+
 					
 				if(isEdge && !lineData.hasOwnProperty('sourceid')) {
 					err='Header sourceid missing!';
@@ -193,9 +198,9 @@ module.exports = function(app,express){
 
 				if(mode.toLowerCase(mode) == 'add') {
 					if(isEdge==false) {						    			
-						var addObj = util.cleanInBoundData(objectType, lineData, schemas);
-						console.dir(addObj);
-						soiServices.addRecord(objectType, addObj, function(err, returnObj) {
+						// var addObj = util.prepareInboudData(objectType, lineData, schemas);
+						// console.dir(addObj);
+						soiServices.addRecord(objectType, lineData, function(err, returnObj) {
 								if(util.defined(err)) {
 									console.log('Error:' + err);
 									strInfo = 'Record Added Error on line ' + lineNum + ':' + err;
@@ -212,11 +217,11 @@ module.exports = function(app,express){
 						var targetId = util.prepareInboudString(lineData.targetid);
 						delete lineData.sourceid;
 						delete lineData.targetid;
-						var addObj = util.cleanInBoundData(objectType, lineData, schemas);
+						//var addObj = util.prepareInboudData(objectType, lineData, schemas);
 						console.log('sourceId:' + sourceId);
 						console.log('targetId:' + targetId);
 						console.log('data:');
-						console.dir(addObj);
+						console.dir(lineData);
 
 						if(sourceId.indexOf('#') == -1) {
 							getSourceTargetID(objectTypeSource, objectTypeTarget, sourceId, targetId, function(err, data) {
@@ -228,24 +233,24 @@ module.exports = function(app,express){
 									return;
 								} else {
 										console.log('getSourceTargetID:' + data.sourceRecId + ":" + data.targetRecId);
-										console.dir(addObj);
-										soiServices.addEdge(objectType, addObj, data.sourceRecId, data.targetRecId, function(err, records) {
+
+										soiServices.addEdge(objectType, lineData, data.sourceRecId, data.targetRecId, function(err, records) {
 											console.log('Edge Added:' + records);
-											strInfo = 'Edge Added: ' + objectType + ':' + JSON.stringify(addObj) + ':' + data.sourceRecId + ':' + data.targetRecId;
+											strInfo = 'Edge Added: ' + objectType + ':' + JSON.stringify(lineData) + ':' + data.sourceRecId + ':' + data.targetRecId;
 											util.logInfo(mode, file, strInfo);
 									});
 								}
 							})
 
 						} else {
-							soiServices.addEdge(objectType, addObj, sourceId, targetId, function(err, records) {
+							soiServices.addEdge(objectType, lineData, sourceId, targetId, function(err, records) {
 								if(util.defined(err)) {
 									console.log('Error:' + err);
 									strInfo = 'Edge Added Error on line ' + lineNum + ':' + err;
 									util.logInfo(mode, file, strInfo);								
 								} else {								
 									console.log('Edge Added:' + records);
-									strInfo = 'Edge Added: ' + objectType + ':' + JSON.stringify(addObj) + ':' + sourceId + ':' + targetId;
+									strInfo = 'Edge Added: ' + objectType + ':' + JSON.stringify(lineData) + ':' + sourceId + ':' + targetId;
 									util.logInfo(mode, file, strInfo);	
 								}
 							});
@@ -256,10 +261,10 @@ module.exports = function(app,express){
 					if(isEdge==false) {				
 						var idValue = util.prepareInboudString(lineData[idField]);
 						delete lineData[idField];
-						var updateObj = util.cleanInBoundData(objectType, lineData, schemas);
+						//var updateObj = util.prepareInboudData(objectType, lineData, schemas);
 
-						console.log('updateObj:')
-						console.dir(updateObj);
+						//console.log('updateObj:')
+						//console.dir(updateObj);
 
 						var sendIdField = idField;
 						if(idField.toLowerCase() == 'id')
@@ -268,7 +273,7 @@ module.exports = function(app,express){
 						console.log('idField:' + sendIdField);
 						console.log('idValue:' + idValue);
 
-						soiServices.updateRecordByProp(objectType, sendIdField, idValue, updateObj, schemas, function(err, returnObj) {
+						soiServices.updateRecordByProp(objectType, sendIdField, idValue, lineData, schemas, function(err, returnObj) {
 								if(util.defined(err)) {
 									console.log('Error:' + err);
 									strInfo = 'Record Updated Error on line ' + lineNum + ':' + err;
@@ -287,7 +292,7 @@ module.exports = function(app,express){
 						console.log('targetId:' + targetId);
 						delete lineData['sourceid'];
 						delete lineData['targetid'];
-						var updateObj = util.cleanInBoundData(objectType, lineData, schemas);
+						//var updateObj = util.prepareInboudData(objectType, lineData, schemas);
 
 						if(sourceId.indexOf('#') == -1) {
 							getSourceTargetID(objectTypeSource, objectTypeTarget, sourceId, targetId, function(err, data) {
@@ -299,8 +304,8 @@ module.exports = function(app,express){
 									return;
 								} else {
 									console.log('getSourceTargetID:' + data.sourceRecId + ":" + data.targetRecId);
-									console.dir(updateObj);
-										soiServices.updateEdge(objectType, updateObj, data.sourceRecId, data.targetRecId, function(err, records) {
+
+										soiServices.updateEdge(objectType, lineData, data.sourceRecId, data.targetRecId, function(err, records) {
 											if(util.defined(err)) {
 												console.log('Error:' + err);
 												strInfo = 'Edge Update Error on line ' + lineNum + ':' + err;
@@ -314,7 +319,7 @@ module.exports = function(app,express){
 								}
 							})
 						} else {
-							soiServices.updateEdge(objectType, updateObj, sourceId, targetId, function(err, records) {
+							soiServices.updateEdge(objectType, lineData, sourceId, targetId, function(err, records) {
 								if(util.defined(err)) {
 									console.log('Error:' + err);
 									strInfo = 'Edge Update Error on line ' + lineNum + ':' + err;
@@ -371,7 +376,7 @@ module.exports = function(app,express){
 							});
 						}
 					} else {
-						//var delObj = util.cleanInBoundData(lineData);
+						//var delObj = util.prepareInboudData(lineData);
  						var idValue = util.prepareInboudString(lineData[idField]);
 
 						var sendIdField = idField;
