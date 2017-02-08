@@ -689,7 +689,7 @@ exports.getRecordDetails = function(objectType, recordId, depth, callback) {
 	odb.db.query(query).then(function(recordDetails){
 
 		console.log('** traverse **');
-		//console.dir(recordDetails);
+		console.dir(recordDetails);
 
    var returnObj = {};
    for(var i=0; i<recordDetails.length; i++) {
@@ -705,19 +705,19 @@ exports.getRecordDetails = function(objectType, recordId, depth, callback) {
 			var props={};
 			for(var propertyName in obj) {
 
-				//console.log('** propertyName:' + propertyName);
+				console.log('** propertyName:' + propertyName);
 
-				if(propertyName.indexOf('in') != 0 && propertyName.indexOf('out') != 0 && propertyName.indexOf('@') != 0 && propertyName != 'id' && propertyName != 'backup' && typeof propertyName != 'object' && typeof propertyName != 'array') {					
-					//console.log('>>Add');
+				if(propertyName != 'in' && propertyName.indexOf('in_') == -1 && propertyName != 'out' && propertyName.indexOf('out_') == -1 && propertyName.indexOf('@') != 0 && propertyName != 'id' && propertyName != 'backup' && typeof propertyName != 'object' && typeof propertyName != 'array') {					
+					console.log('>>Add');
 					props[propertyName] = obj[propertyName];
 				} else if(propertyName.indexOf('@rid') == 0) {
-					//console.log('>>Add');
+					console.log('>>Add');
 					var idobj = obj[propertyName];
 					props.id = '#' + idobj.cluster + ':' + idobj.position;
 				} else if(propertyName.indexOf('in') == 0 && propertyName.indexOf('_') != 0) {
 
-					//console.log('>>Add');
-					//console.log('** IN:');
+					console.log('>>Add');
+					console.log('** IN:');
 
 					var inobj = obj[propertyName];
 					var inprops={};
@@ -754,8 +754,8 @@ exports.getRecordDetails = function(objectType, recordId, depth, callback) {
 						}
 					}
 
-					//console.log('** OUT OBJ:');
-					////console.dir(outprops)
+					console.log('** OUT OBJ:');
+					console.dir(outprops)
 					props['out'] = outprops;
 				}
 			}
