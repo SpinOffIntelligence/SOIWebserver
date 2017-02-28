@@ -2,6 +2,7 @@
 var moment = require('moment');
 var soiServices = require('../app/services/soi');
 var config = require('../config/config');
+var strUtil = require('util');
 
 var schemas = [];
 
@@ -39,6 +40,84 @@ function toLower(inStr) {
   if(inStr !== null && typeof inStr !== "undefined")
     return inStr.toLowerCase();
   else return inStr;
+}
+
+function createWhereClause(criteria, objectType) {
+
+  console.log('~~~~~ createWhereClause: ' + objectType);
+  console.dir(criteria);
+
+  var whereClause='';
+  var query;
+  var schema = this.schemas[objectType];
+
+  console.log('~~~~~ schema: ' + schema);
+  console.dir(schema);
+
+  if(this.defined(criteria,'length') && criteria.length > 0) {
+    for(var i=0; i<criteria.length; i++) {
+      var cri = criteria[i];
+      var clause;
+      var isString = false;
+      var isDate = false;
+
+      if(this.defined(schema,cri.field + '.type')) {
+        var schemaType = schema[cri.field].type
+
+        console.log('~~~~~ schemaType: ' + schemaType);
+
+        if(schemaType == 'string')
+          isString = true;
+        if(schemaType == 'date')
+          isDate = true;
+      }
+
+      console.log('~~~~~ isString: ' + isString);
+      console.log('~~~~~ isDate: ' + isDate);
+
+      var val = cri.value;
+      if(isDate) {
+        val = this.formatDBDate(val);
+      }
+      
+      if(cri.operator == 'equals') {
+        if(isString)
+          clause = strUtil.format("%s = '%s'", cri.field, val);
+        else clause = strUtil.format("%s = %s", cri.field, val);
+      } else if(cri.operator == 'greater') {
+        if(isString)
+          continue;
+        else if(isDate)
+          clause = strUtil.format("%s > '%s'", cri.field, val);
+        else clause = strUtil.format("%s > %s", cri.field, val);
+      } else if(cri.operator == 'less') {
+        if(isString)
+          continue;
+        else if(isDate)
+          clause = strUtil.format("%s < '%s'", cri.field, val);
+        else clause = strUtil.format("%s < %s", cri.field, val);
+      } else if(cri.operator == 'contains') {
+        if(isString)
+          clause = cri.field + " like '%" + val + "%'";
+        else continue;
+      } else if(cri.operator == 'notequal') {
+        if(isString)
+          clause = strUtil.format("%s <> '%s'", cri.field, val);
+        else clause = strUtil.format("%s <> %s", cri.field, val);
+      } else if(cri.operator == 'notcontain') {
+        if(isString)
+          clause = strUtil.format("NOT %s like '\%%s\%'", cri.field, val);
+        else continue;
+      }
+      if(i != criteria.length-1) {
+        whereClause = clause + ' and ';
+      } else {
+        whereClause += clause;
+      }
+    }
+    console.log('~~~~~~~~~~ whereClause:' + whereClause);
+  }
+  return whereClause;
 }
 
 function getSchemaType(objectType, field) {
@@ -260,3 +339,4 @@ module.exports.logInfo = logInfo;
 module.exports.getSchemaType = getSchemaType;
 module.exports.formatDBDate = formatDBDate;
 module.exports.logging = logging;
+module.exports.createWhereClause = createWhereClause;

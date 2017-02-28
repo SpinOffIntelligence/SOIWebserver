@@ -20,6 +20,28 @@ exports.searchRecords = function(req, res, next) {
 	});
 }
 
+exports.deletePickListItem = function(req, res, next) {
+	var typeName = req.body.typeName;
+	var itemId = req.body.itemId;
+
+	console.log('*** deletePickListItem ***');
+	console.log('~~~~~~~~~~~~~~');
+	console.dir(typeName);
+	console.log('~~~~~~~~~~~~~~');
+	console.dir(itemId);
+
+	soiServices.removePickListItem(typeName, itemId, function(err, data) {
+		if(util.defined(err)) {
+			var retObj = {
+				err: err
+			};
+			res.json(retObj);			
+			return;
+		}		
+		res.json(null, 200);			
+		return;
+	});
+}
 
 exports.savePickListValues = function(req, res, next) {
 	var saveValues = req.body.saveValues;
@@ -123,6 +145,7 @@ exports.fetchGridRecords = function(req, res, next) {
 	var pageSize = req.body.pageSize;
 	var sortField = req.body.sortField;
 	var sortOrder = req.body.sortOrder;
+	var criteria = req.body.criteria;
 
 	console.log('*** fetchGridRecords ***');
 	console.dir(objectType);
@@ -136,8 +159,10 @@ exports.fetchGridRecords = function(req, res, next) {
 	console.dir(sortField);
 	console.log('~~~~~~~~~~~~~~');
 	console.dir(sortOrder);
+	console.log('~~~~~~~~~~~~~~');
+	console.dir(criteria);
 
-	soiServices.fetchGridRecords(objectType, gridFields, currentPage, pageSize, sortField, sortOrder, function(err, data) {
+	soiServices.fetchGridRecords(objectType, gridFields, currentPage, pageSize, sortField, sortOrder, criteria, function(err, data) {
 		res.json(data);
 	});
 }
@@ -160,13 +185,17 @@ exports.getSchemasServer = function(callback) {
   { objectType: 'ESpinOff' },
   { objectType: 'ETeaches' },
   { objectType: 'EWorksfor' },
+	{ objectType: 'EMediaTarget' },  
   { objectType: 'VAcquisition' },
   { objectType: 'VInvestment' },
   { objectType: 'VPatent' },
   { objectType: 'VInvestmentFirm' },
   { objectType: 'VCompany' },
+  { objectType: 'VSpinOff' },
   { objectType: 'VUniversity' },
-  { objectType: 'VPerson' } ];
+  { objectType: 'VPerson' },
+  { objectType: 'VMedia' },
+   ];
 
 	console.log('*** getSchemasServer ***');
 	console.dir(schemas);  
@@ -367,11 +396,14 @@ exports.fetchRecordByProp = function(req, res, next) {
 
 exports.fetchRecords = function(req, res, next) {
 	var objectType = req.body.objectType;
+	var criteria = req.body.criteria;
 
 	console.log('*** fetchRecords ***');
 	console.dir(objectType);
+	console.log('~~~~~~~~~~~~~~');
+	console.dir(criteria);
 
-	soiServices.fetchRecords(objectType, function(err, data) {
+	soiServices.fetchRecords(objectType, criteria, function(err, data) {
 		res.json(data);
 	});
 }

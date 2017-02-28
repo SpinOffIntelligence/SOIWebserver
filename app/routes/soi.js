@@ -15,6 +15,8 @@ module.exports = function(app) {
 	app.post('/soi/addPickListValues', soiControllers.addPickListValues);
 	app.post('/soi/savePickListValues', soiControllers.savePickListValues);
 
+	app.post('/soi/pickListItem', soiControllers.deletePickListItem);
+
 	app.post('/soi/getRecordDetails', soiControllers.getRecordDetails);
 	app.post('/soi/fetchPanelRecords', soiControllers.fetchPanelRecords);
 

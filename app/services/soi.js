@@ -26,6 +26,18 @@ exports.removeImage = function(objectType, recordId, field, callback) {
 
 }
 
+exports.removePickListItem = function(typeName, itemId, callback) {
+
+  var query = strUtil.format("delete from PickList where type = '%s' and @rid = '%s'", typeName, itemId);
+  console.log('query:' + query);
+  odb.db.query(query).then(function(records){
+    callback(null,records);
+  }).catch(function(error){
+    console.error('Exception: ' + error); 
+    callback(error,null);   
+  });  
+}
+
 exports.removePickListValues = function(typeName, callback) {
 
   var query = strUtil.format("delete from PickList where type = '%s'", typeName);
@@ -116,6 +128,18 @@ exports.searchRecords = function(objectTypes, terms, callback) {
         		}
 						// console.log('VPerson Search Results:');
 						// console.dir(data);        		
+            results.push(obj);
+            callback();
+        });
+    },
+    function(callback) { //This is the second task, and `callback` is its callback task
+        searchRecs('VSpinOff', terms, function(err, data) {
+            var obj = {
+              objectType: 'VSpinOff',
+              results: data
+            }
+            console.log('VSpinOff Search Results:');
+            console.dir(data);            
             results.push(obj);
             callback();
         });
@@ -242,71 +266,9 @@ exports.addLogInfo = function(mode, file, strInfo, startdateTime, callback) {
 }
 
 exports.exportRecords = function(objectType, criteria, schema, callback) {
-
-	var whereClause='';
-	var query;
-	if(util.defined(criteria,'length') && criteria.length > 0) {
-		for(var i=0; i<criteria.length; i++) {
-			var cri = criteria[i];
-			var clause;
-			var isString = false;
-			var isDate = false;
-
-			if(util.defined(schema,cri.field + '.type')) {
-				var schemaType = schema[cri.field].type
-
-				console.log('~~~~~ schemaType: ' + schemaType);
-
-				if(schemaType == 'string')
-					isString = true;
-				if(schemaType == 'date')
-					isDate = true;
-			}
-
-			console.log('~~~~~ isString: ' + isString);
-			console.log('~~~~~ isDate: ' + isDate);
-
-			var val = cri.value;
-			if(isDate) {
-				val = util.formatDBDate(val);
-			}
-			
-			if(cri.operator == 'equals') {
-				if(isString)
-					clause = strUtil.format("%s = '%s'", cri.field, val);
-				else clause = strUtil.format("%s = %s", cri.field, val);
-			} else if(cri.operator == 'greater') {
-				if(isString)
-					continue;
-				else if(isDate)
-					clause = strUtil.format("%s > '%s'", cri.field, val);
-				else clause = strUtil.format("%s > %s", cri.field, val);
-			} else if(cri.operator == 'less') {
-				if(isString)
-					continue;
-				else if(isDate)
-					clause = strUtil.format("%s < '%s'", cri.field, val);
-				else clause = strUtil.format("%s < %s", cri.field, val);
-			} else if(cri.operator == 'contains') {
-				if(isString)
-					clause = cri.field + " like '%" + val + "%'";
-				else continue;
-			} else if(cri.operator == 'notequal') {
-				if(isString)
-					clause = strUtil.format("%s <> '%s'", cri.field, val);
-				else clause = strUtil.format("%s <> %s", cri.field, val);
-			} else if(cri.operator == 'notcontain') {
-				if(isString)
-					clause = strUtil.format("NOT %s like '\%%s\%'", cri.field, val);
-				else continue;
-			}
-			if(i != criteria.length-1) {
-				whereClause = clause + ' and ';
-			} else {
-				whereClause += clause;
-			}
-		}
-		console.log('whereClause:' + whereClause);	
+  var whereClause = util.createWhereClause(criteria, objectType);
+  var query;
+  if(whereClause != '')	{
 		if(whereClause.length > 0)	{
 			query = strUtil.format("SELECT FROM %s where %s", objectType, whereClause);
 		} else {
@@ -610,7 +572,7 @@ exports.addEdge = function(objectType, recordData, sourceId, targetId, callback)
 	}
 }
 
-exports.fetchGridRecords = function(objectType, gridFields, currentPage, pageSize, sortField, sortOrder, callback) {
+exports.fetchGridRecords = function(objectType, gridFields, currentPage, pageSize, sortField, sortOrder, criteria, callback) {
 
 	var props = '*, ';
 	for(var i=0; i<gridFields.length; i++) {
@@ -632,6 +594,10 @@ exports.fetchGridRecords = function(objectType, gridFields, currentPage, pageSiz
   var skip = ((currentPage-1) * pageSize)
 
 	var query = strUtil.format("SELECT %s FROM %s SKIP %s LIMIT %s", props, objectType, skip, pageSize);
+  if(util.defined(criteria,"length") && criteria.length > 0) {
+    var whereClause = util.createWhereClause(criteria, objectType);
+    var query = strUtil.format("SELECT %s FROM %s WHERE %s SKIP %s LIMIT %s", props, objectType, whereClause, skip, pageSize);
+  }
 	console.log('query: ' + query);
 
 	odb.db.query(query).then(function(records){
@@ -647,6 +613,10 @@ exports.fetchGridRecords = function(objectType, gridFields, currentPage, pageSiz
 		// }
 
     var query = strUtil.format("SELECT COUNT(*) as count FROM %s", objectType);
+    if(util.defined(criteria,"length") && criteria.length > 0) {
+      var whereClause = util.createWhereClause(criteria, objectType);
+      query = strUtil.format("SELECT COUNT(*) as count FROM %s WHERE %s", objectType, whereClause);
+    }
     console.log('query: ' + query);
     odb.db.query(query).then(function(ret){   
       var retObj = {
@@ -662,8 +632,14 @@ exports.fetchGridRecords = function(objectType, gridFields, currentPage, pageSiz
   });
 }
 
-exports.fetchRecords = function(objectType, callback) {
-	var query = strUtil.format("SELECT FROM %s", objectType);
+exports.fetchRecords = function(objectType, criteria, callback) {
+
+  var whereClause = util.createWhereClause(criteria, objectType);
+  var query = strUtil.format("SELECT FROM %s", objectType);
+  if(whereClause != '') {
+    query = strUtil.format("SELECT FROM %s where %s", objectType, whereClause);
+  }
+	
 
 	odb.db.query(query).then(function(records){
     records = util.prepareOutboundData(objectType, records);
