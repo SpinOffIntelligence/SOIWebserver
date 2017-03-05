@@ -104,8 +104,8 @@ exports.setRecordImage = function(objectType, logoField, idValue, file, callback
 exports.searchRecords = function(objectTypes, terms, callback) {
 
 	function searchRecs(object, terms,callback) {
-		var query = strUtil.format("select from %s where any() like '%s", object, terms);
-		query = query + "%'";
+		var query = strUtil.format("select from %s where any() like ",object);
+		query += "'%" + terms + "%'";
 		console.log('search query:' + query);
 		odb.db.query(query).then(function(records){
 			//console.log('Search Results:');
@@ -202,6 +202,16 @@ exports.searchRecords = function(objectTypes, terms, callback) {
         			objectType: 'VUniversity',
         			results: data
         		}
+            results.push(obj);
+            callback();
+        });
+    },
+    function(callback) { //This is the first task, and `callback` is its callback task
+        searchRecs('VMedia', terms, function(err, data) {
+            var obj = {
+              objectType: 'VMedia',
+              results: data
+            }
             results.push(obj);
             callback();
         });

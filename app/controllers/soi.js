@@ -178,8 +178,6 @@ exports.getSchemasServer = function(callback) {
   { objectType: 'ECoApplicant' },
   { objectType: 'EApplicant' },
   { objectType: 'EInventor' },
-  { objectType: 'ESupplier' },
-  { objectType: 'ECustomer' },
   { objectType: 'EPartner' },
   { objectType: 'EFounded' },
   { objectType: 'ESpinOff' },
