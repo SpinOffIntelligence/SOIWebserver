@@ -450,7 +450,7 @@ exports.getRelationshipDetails = function(edgeObjectType, recordItemId, callback
 
 exports.getRelationship = function(edgeObjectType, recordItemId, callback) {
 	var query = strUtil.format("traverse out('%s') from %s", edgeObjectType, recordItemId);
-	//console.log'query:' + query);
+	console.log('query:' + query);
 	odb.db.query(query).then(function(records){
 		var obj = {
 			edgeObjectType: edgeObjectType,

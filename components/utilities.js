@@ -18,14 +18,14 @@ function defined(ref, strNames) {
     var name;
 
     if(ref === null || typeof ref === "undefined") {
-      //console.log('defined, ref null!');
+      ////console.log('defined, ref null!');
       return false;
     }
 
     if(strNames !== null && typeof strNames !== "undefined") {
       var arrNames = strNames.split('.');
       while (name = arrNames.shift()) {
-          //console.log('defined, name:' + name);
+          ////console.log('defined, name:' + name);
           if (ref[name] === null || typeof ref[name] === "undefined") {
             return false;
           }
@@ -44,14 +44,14 @@ function toLower(inStr) {
 
 function createWhereClause(criteria, objectType) {
 
-  console.log('~~~~~ createWhereClause: ' + objectType);
+  //console.log('~~~~~ createWhereClause: ' + objectType);
   console.dir(criteria);
 
   var whereClause='';
   var query;
   var schema = this.schemas[objectType];
 
-  console.log('~~~~~ schema: ' + schema);
+  //console.log('~~~~~ schema: ' + schema);
   console.dir(schema);
 
   if(this.defined(criteria,'length') && criteria.length > 0) {
@@ -64,7 +64,7 @@ function createWhereClause(criteria, objectType) {
       if(this.defined(schema,cri.field + '.type')) {
         var schemaType = schema[cri.field].type
 
-        console.log('~~~~~ schemaType: ' + schemaType);
+        //console.log('~~~~~ schemaType: ' + schemaType);
 
         if(schemaType == 'string')
           isString = true;
@@ -72,8 +72,8 @@ function createWhereClause(criteria, objectType) {
           isDate = true;
       }
 
-      console.log('~~~~~ isString: ' + isString);
-      console.log('~~~~~ isDate: ' + isDate);
+      //console.log('~~~~~ isString: ' + isString);
+      //console.log('~~~~~ isDate: ' + isDate);
 
       var val = cri.value;
       if(isDate) {
@@ -115,14 +115,14 @@ function createWhereClause(criteria, objectType) {
         whereClause += clause;
       }
     }
-    console.log('~~~~~~~~~~ whereClause:' + whereClause);
+    //console.log('~~~~~~~~~~ whereClause:' + whereClause);
   }
   return whereClause;
 }
 
 function getSchemaType(objectType, field) {
 
-  console.log('~~~~~ objectType: ');
+  //console.log('~~~~~ objectType: ');
   console.dir(objectType);
 
   var schema = exports.schemas[objectType];
@@ -131,11 +131,11 @@ function getSchemaType(objectType, field) {
     isDate : false,
     isId : false
   }
-  console.log('~~~~~ field: ' + field);
+  //console.log('~~~~~ field: ' + field);
 
   if(defined(schema, field + '.type')) {
     var schemaType = schema[field].type
-    console.log('~~~~~ schemaType: ' + schemaType);
+    //console.log('~~~~~ schemaType: ' + schemaType);
     if(schemaType == 'string')
       retObj.isString = true;
     if(schemaType == 'date')
@@ -143,7 +143,7 @@ function getSchemaType(objectType, field) {
     if(field == 'id' || field == '@rid') 
       retObj.isId == true;
   }
-  console.log('~~~~~ retObj: ');
+  //console.log('~~~~~ retObj: ');
   console.dir(retObj);
 
   return retObj;
@@ -165,12 +165,12 @@ function formatDBDate(strDate) {
 }
 
 function prepareInboudDate(inDate) {
-  console.log('prepareInboudDate:');
+  //console.log('prepareInboudDate:');
 
   var x = moment(inDate);
   var newDate = x.format('YYYY-MM-DD');
 
-  console.log('Fix Date:' + newDate);
+  //console.log('Fix Date:' + newDate);
   
   return newDate;
 }
@@ -184,7 +184,7 @@ function cleanString(input) {
       if (code <= 255) {
           output += input.charAt(i);
       } else {
-        console.log('$$$$$$$>>' + code + ":" + input.charAt(i));
+        //console.log('$$$$$$$>>' + code + ":" + input.charAt(i));
         if(code == 65533)
           output += String.fromCharCode(233);
       }
@@ -193,7 +193,7 @@ function cleanString(input) {
 }
 
 function prepareInboudString(inString) {
-  console.log('prepareInboudString:');
+  //console.log('prepareInboudString:');
 
   var cleanStr = cleanString(inString);
   cleanStr = cleanStr.replace(/(\r\n|\n|\r)/gm," ");
@@ -202,7 +202,7 @@ function prepareInboudString(inString) {
 
   cleanStr = cleanStr.trim()
 
-  console.log('Fix String:' + cleanStr);
+  //console.log('Fix String:' + cleanStr);
   
   return cleanStr;
 }
@@ -210,7 +210,7 @@ function prepareInboudString(inString) {
 
 function prepareOutboundData(objectType, records) {
 
-  console.log('prepareOutboundData:');
+  //console.log('prepareOutboundData:');
   console.dir(records);
 
   var schema = exports.schemas[objectType];
@@ -223,7 +223,7 @@ function prepareOutboundData(objectType, records) {
         if (schemaInfo.type == 'date') {
           var mDate = moment(rec[propertyName]).add(5, 'hours').format('YYYY-MM-DD');
           rec[propertyName] = mDate;
-          console.log('^^^^^ new date: ' + rec[propertyName]);
+          //console.log('^^^^^ new date: ' + rec[propertyName]);
         }
       } else {
         if (propertyName == '@rid') {
@@ -234,32 +234,32 @@ function prepareOutboundData(objectType, records) {
     }
   }
 
-  console.log('prepareOutboundData Done:');
+  //console.log('prepareOutboundData Done:');
   console.dir(records);  
   return records;
 }
 
 
 // function prepareInboudDate(obj) {
-//   console.log('prepareInboudDate:');
+//   //console.log('prepareInboudDate:');
 
 //   for(var propertyName in obj) {
 //     if(defined(obj,propertyName)) {
 //       var val = obj[propertyName];
 
-//       console.log(propertyName + ':' + val);
+//       //console.log(propertyName + ':' + val);
 
 //       if(typeof val == 'string' && val.indexOf('.000Z') > -1) {
 //         var x = moment(val);
 //         var newDate = x.format('YYYY-MM-DD') + ' 00:00:00';
 //         obj[propertyName] = newDate;
 
-//         console.log('Fix Date:' + obj[propertyName]);
+//         //console.log('Fix Date:' + obj[propertyName]);
 
 //       }
 //     }
 //   }
-//   console.log('done:')
+//   //console.log('done:')
 //   console.dir(obj);
 //   return obj;
 // }
@@ -270,33 +270,33 @@ function prepareInboundData(objectType, recordData) {
   var sendObj = {};
   var schema = exports.schemas[objectType];
 
-  console.log('**** prepareInboundData *****');
+  //console.log('**** prepareInboundData *****');
   console.dir(recordData);
 
   if(this.defined(recordData)) {
     for(var propertyName in recordData) {
-      console.log('^^^^ propertyName:' + propertyName);
+      //console.log('^^^^ propertyName:' + propertyName);
       var val = recordData[propertyName];
       if(val == null) {
-        console.log('fail1');
+        //console.log('fail1');
       } else if(propertyName == 'in') {
-        console.log('fail2');
+        //console.log('fail2');
       } else if(propertyName == 'out') {
-        console.log('fail3');
+        //console.log('fail3');
       } else if(propertyName.indexOf('@') != -1) { 
-        console.log('fail4');
+        //console.log('fail4');
       } else if(propertyName == 'id') {
-        console.log('fail5');
+        //console.log('fail5');
       } else if(propertyName == 'backup') {
-        console.log('fail6');
+        //console.log('fail6');
       } else if(typeof propertyName == 'object') {
-        console.log('fail7');
+        //console.log('fail7');
       } else if(typeof propertyName == 'array') {
-        console.log('fail8');
+        //console.log('fail8');
       } else if(!this.defined(recordData,propertyName)) {
-        console.log('fail9');
+        //console.log('fail9');
       } else if(this.defined(val,"length") && val.length == 0) {
-        console.log('fail10');
+        //console.log('fail10');
       } else {
 
         var schemaTypes = getSchemaType(objectType, propertyName);
@@ -314,7 +314,7 @@ function prepareInboundData(objectType, recordData) {
     }
     //sendObj = this.prepareInboudDate(cleanData);
 
-    console.log('**** prepareInboundData Done:');
+    //console.log('**** prepareInboundData Done:');
     console.dir(cleanData);
 
     return cleanData;
@@ -325,7 +325,7 @@ function prepareInboundData(objectType, recordData) {
 
 function logInfo(mode, file, strInfo) {
   var strDateTime = moment().format('YYYY-MM-DD HH:mm:ss');
-  console.log('Log Info: ' + mode + ':' + file + ':' + strInfo + ':' + strDateTime);
+  //console.log('Log Info: ' + mode + ':' + file + ':' + strInfo + ':' + strDateTime);
   soiServices.addLogInfo(mode, file, strInfo, strDateTime,function(err, data) {
   });
 }

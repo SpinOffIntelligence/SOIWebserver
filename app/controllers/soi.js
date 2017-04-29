@@ -170,6 +170,7 @@ exports.fetchGridRecords = function(req, res, next) {
 
 exports.getSchemasServer = function(callback) {
   var schemas = [ { objectType: 'EAcquired' },
+  { objectType: 'EEntrepreneurialResourcesProvider' },
   { objectType: 'EAcquirer' },
   { objectType: 'EBoardMember' },
   { objectType: 'EAdvisor' },
@@ -184,15 +185,15 @@ exports.getSchemasServer = function(callback) {
   { objectType: 'ETeaches' },
   { objectType: 'EWorksfor' },
 	{ objectType: 'EMediaTarget' },  
-  { objectType: 'VAcquisition' },
   { objectType: 'VInvestment' },
   { objectType: 'VPatent' },
   { objectType: 'VInvestmentFirm' },
   { objectType: 'VCompany' },
   { objectType: 'VSpinOff' },
-  { objectType: 'VUniversity' },
+  { objectType: 'VResearchInstitution' },
   { objectType: 'VPerson' },
   { objectType: 'VMedia' },
+  { objectType: 'VEntrepreneurialResource' },
    ];
 
 	//console.log'*** getSchemasServer ***');
