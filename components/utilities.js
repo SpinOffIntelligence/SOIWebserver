@@ -42,6 +42,18 @@ function toLower(inStr) {
   else return inStr;
 }
 
+function arrayToList(arrayValues) {
+  var retVal = "";
+  if(this.defined(arrayValues,"length") && arrayValues.length > 0) {
+    for(var i=0; i<arrayValues.length; i++) {
+      if(i==0)
+        retVal = arrayValues[i];
+      else retVal += "|" + arrayValues[i];
+    }    
+  }
+  return retVal;
+}
+
 function createWhereClause(criteria, objectType) {
 
   //console.log('~~~~~ createWhereClause: ' + objectType);
@@ -340,3 +352,4 @@ module.exports.getSchemaType = getSchemaType;
 module.exports.formatDBDate = formatDBDate;
 module.exports.logging = logging;
 module.exports.createWhereClause = createWhereClause;
+module.exports.arrayToList = arrayToList;

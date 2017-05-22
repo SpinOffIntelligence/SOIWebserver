@@ -670,8 +670,53 @@ exports.getRecordDetails = function(objectType, recordId, depth, callback) {
 		deep+=(depth*2);
 	}
 
+  var filters = [
+    {
+      className : 'EPartner',
+      propName : 'type',
+      propValues : ['Customer','Supplier']
+    }
+  ];
+
+
+  var whereClause = '';
+  var whereCnt=0;
+
+  var filterClause = '';
+  var filterCnt=0;
+  for(var propertyName in util.schemas) {
+    console.log('util.schemas:'+ propertyName);
+    var fnd = _.findWhere(filters, {className: propertyName});
+    if(util.defined(fnd)) {
+      if(filterCnt == 0)
+          filterClause = strUtil.format("(@rid in (select @rid from %s where type matches '(%s)'))", fnd.className, util.arrayToList(fnd.propValues));
+      else filterClause += strUtil.format(" or (@rid in (select @rid from %s where type in '(%s)'))", fnd.className, util.arrayToList(fnd.propValues));
+      filterCnt++;
+    } else {
+      if(whereCnt==0)
+        whereClause = strUtil.format("@class = '%s'", propertyName);
+      whereClause = whereClause + strUtil.format(" or @class = '%s'", propertyName);
+      whereCnt++;      
+    }
+  }
+  console.log('whereClause:' + whereClause)
+  console.log('filterClause:' + filterClause)
+
 	var query = strUtil.format("traverse * from  %s while $depth < %s", recordId, deep);
-	//console.log"query: " + query);
+  if(whereClause.length > 0 || filterClause.length > 0) {
+
+    query = query + " and "
+
+    if(whereClause.length > 0)
+      query += "(" + whereClause + ")";
+
+    if(filterClause.length > 0)
+      query += " or (" + filterClause + ")";
+
+  }
+
+
+	console.log("query: " + query);
 
 	odb.db.query(query).then(function(recordDetails){
 
