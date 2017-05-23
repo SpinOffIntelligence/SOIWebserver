@@ -411,6 +411,8 @@ exports.getRecordDetails = function(req, res, next) {
 	var objectType = req.body.objectType;
 	var recordId = req.body.recordId;
 	var depth = req.body.depth;
+	var filters = req.body.filters;
+
 
 	//console.log'*** getRecordDetails ***');
 	//console.dirobjectType);
@@ -418,8 +420,10 @@ exports.getRecordDetails = function(req, res, next) {
 	//console.dirrecordId);
 	//console.log'~~~~~~~~~~~~~~');
 	//console.dirdepth);
+	console.log('~~~~~~~~~~~~~~');
+	console.dir(filters);
 
-	soiServices.getRecordDetails(objectType, recordId, depth, function(err, data) {
+	soiServices.getRecordDetails(objectType, recordId, depth, filters, function(err, data) {
 		res.json(data);
 	});
 }

@@ -661,7 +661,7 @@ exports.fetchRecords = function(objectType, criteria, callback) {
   });
 }
 
-exports.getRecordDetails = function(objectType, recordId, depth, callback) {
+exports.getRecordDetails = function(objectType, recordId, depth, filters, callback) {
 	//var panelRecord={};
 	//panelRecord.id = '#13:1';
 
@@ -670,13 +670,13 @@ exports.getRecordDetails = function(objectType, recordId, depth, callback) {
 		deep+=(depth*2);
 	}
 
-  var filters = [
-    {
-      className : 'EPartner',
-      propName : 'type',
-      propValues : ['Customer','Supplier']
-    }
-  ];
+	// var filters = [];
+  //   {
+  //     objectType : 'EPartner',
+  //     fieldName : 'type',
+  //     filters : ['Customer','Supplier']
+  //   }
+  // ];
 
 
   var whereClause = '';
@@ -686,24 +686,35 @@ exports.getRecordDetails = function(objectType, recordId, depth, callback) {
   var filterCnt=0;
   for(var propertyName in util.schemas) {
     console.log('util.schemas:'+ propertyName);
-    var fnd = _.findWhere(filters, {className: propertyName});
-    if(util.defined(fnd)) {
-      if(filterCnt == 0)
-          filterClause = strUtil.format("(@rid in (select @rid from %s where type matches '(%s)'))", fnd.className, util.arrayToList(fnd.propValues));
-      else filterClause += strUtil.format(" or (@rid in (select @rid from %s where type in '(%s)'))", fnd.className, util.arrayToList(fnd.propValues));
-      filterCnt++;
-    } else {
-      if(whereCnt==0)
-        whereClause = strUtil.format("@class = '%s'", propertyName);
-      whereClause = whereClause + strUtil.format(" or @class = '%s'", propertyName);
-      whereCnt++;      
-    }
-  }
-  console.log('whereClause:' + whereClause)
-  console.log('filterClause:' + filterClause)
 
-	var query = strUtil.format("traverse * from  %s while $depth < %s", recordId, deep);
-  if(whereClause.length > 0 || filterClause.length > 0) {
+    if(util.defined(filters)) {
+	    var fnd = util.whereProp(filters, 'objectType', propertyName);
+	    console.log('fnd:' + fnd);
+	    console.dir(fnd);
+	    if(util.defined(fnd,"filters.length") && fnd.filters.length > 0) {
+
+
+	    	console.log('``````' + util.arrayToList(fnd.filters));
+
+
+	      if(filterCnt == 0)
+	          filterClause = strUtil.format("(@rid in (select @rid from %s where %s matches '(%s)'))", fnd.objectType, fnd.fieldName, util.arrayToList(fnd.filters));
+	      else filterClause += strUtil.format(" or (@rid in (select @rid from %s where %s in '(%s)'))", fnd.objectType, fnd.fieldName, util.arrayToList(fnd.filters));
+	      filterCnt++;
+	    } else {
+	      if(whereCnt==0)
+	        whereClause = strUtil.format("@class = '%s'", propertyName);
+	      whereClause = whereClause + strUtil.format(" or @class = '%s'", propertyName);
+	      whereCnt++;      
+	    }
+	}
+  }
+
+	console.log('whereClause:' + whereClause)
+	console.log('filterClause:' + filterClause)
+
+  var query = strUtil.format("traverse * from  %s while $depth < %s", recordId, deep);
+  if(filterClause.length > 0) {
 
     query = query + " and "
 

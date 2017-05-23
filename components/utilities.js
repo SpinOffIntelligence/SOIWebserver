@@ -47,8 +47,8 @@ function arrayToList(arrayValues) {
   if(this.defined(arrayValues,"length") && arrayValues.length > 0) {
     for(var i=0; i<arrayValues.length; i++) {
       if(i==0)
-        retVal = arrayValues[i];
-      else retVal += "|" + arrayValues[i];
+        retVal = arrayValues[i].name;
+      else retVal += "|" + arrayValues[i].name;
     }    
   }
   return retVal;
@@ -335,6 +335,16 @@ function prepareInboundData(objectType, recordData) {
   } 
 }
 
+function whereProp(obj, name, value) {
+  for(var propertyName in obj) {
+    var objItem = obj[propertyName];
+    if(objItem[name] == value)
+      return objItem;
+  }
+  return null;
+}
+
+
 function logInfo(mode, file, strInfo) {
   var strDateTime = moment().format('YYYY-MM-DD HH:mm:ss');
   //console.log('Log Info: ' + mode + ':' + file + ':' + strInfo + ':' + strDateTime);
@@ -353,3 +363,4 @@ module.exports.formatDBDate = formatDBDate;
 module.exports.logging = logging;
 module.exports.createWhereClause = createWhereClause;
 module.exports.arrayToList = arrayToList;
+module.exports.whereProp = whereProp;
