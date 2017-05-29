@@ -41,6 +41,8 @@ module.exports = function(app) {
 	app.post('/soi/deleteLogInfo', soiControllers.deleteLogInfo);
 
 	app.post('/soi/exportRecords', soiControllers.exportRecords);
+
+	app.post('/soi/importStats', soiControllers.importStats);
 	
  };
 

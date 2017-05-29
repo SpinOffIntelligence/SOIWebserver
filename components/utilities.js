@@ -251,6 +251,26 @@ function prepareOutboundData(objectType, records) {
   return records;
 }
 
+function prepareOutboundIDs(records) {
+
+  //console.log('prepareOutboundData:');
+  console.dir(records);
+
+  for (var i = 0; i < records.length; i++) {
+    var rec = records[i];
+    for (var propertyName in rec) {
+      if (propertyName == '@rid') {
+        var recId = rec['@rid'];
+        rec.id = '#' + recId.cluster + ':' + recId.position;
+      }
+    }
+  }
+
+  //console.log('prepareOutboundData Done:');
+  console.dir(records);  
+  return records;
+}
+
 
 // function prepareInboudDate(obj) {
 //   //console.log('prepareInboudDate:');
@@ -354,6 +374,8 @@ function logInfo(mode, file, strInfo) {
 
 module.exports.defined = defined;
 module.exports.prepareOutboundData = prepareOutboundData;
+module.exports.prepareOutboundIDs = prepareOutboundIDs;
+
 module.exports.prepareInboundData = prepareInboundData;
 module.exports.prepareInboudDate = prepareInboudDate;
 module.exports.prepareInboudString = prepareInboudString;

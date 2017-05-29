@@ -6,14 +6,29 @@ var async = require('async');
 var util = require('../../components/utilities.js');
 var moment = require('moment');
 
+
+
+
+exports.importStats = function(req, res, next) {
+	var dataStr = req.body.dataStr;
+
+	console.log('****');
+	console.dir(req.body);
+
+	// soiServices.importStats(objectTypes, terms, function(err, data) {
+	// 	res.json(data);
+	// });
+}
+
+
 exports.searchRecords = function(req, res, next) {
 	var objectTypes = req.body.objectTypes;
 	var terms = req.body.terms;
 
-	//console.log'*** searchRecords ***');
-	//console.dirobjectTypes);
-	//console.log'~~~~~~~~~~~~~~');
-	//console.dirterms);
+	console.log('*** searchRecords ***');
+	console.dir(objectTypes);
+	console.log('~~~~~~~~~~~~~~');
+	console.dir(terms);
 
 	soiServices.searchRecords(objectTypes, terms, function(err, data) {
 		res.json(data);
