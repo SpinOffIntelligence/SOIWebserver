@@ -9,6 +9,7 @@ var util = require('./components/utilities.js');
 
 odb.init(function(err, res) {
   console.log('^^^^')
+  var statsItem = 'statsdegreecentrality';
 
   fs = require('fs')
   fs.readFile('./stats.txt', 'utf8', function (err,data) {
@@ -52,14 +53,23 @@ odb.init(function(err, res) {
             //console.log(records);
 
             _.each(records, function(obj) {
-              console.log("ID: " + obj.id);
+              var id = obj.id;
+              console.log("ID: " + id);
 
-              var statsVal = dataValues[obj.id];
+              if(util.defined(dataValues, id)) {
+                var statsVal = dataValues[id];  
 
-              console.log("statsVal: " + statsVal);              
+                var query = strUtil.format("UPDATE %s SET %s = %s WHERE @rid = '%s'", propertyName, statsItem, statsVal, id);
+                console.log('query:' + query);
+                odb.db.query(query).then(function(records){
+                  console.log('Updated records:' + records);
+                  //process.exit(1);
+                });
+
+              }
             })            
 
-            process.exit(1);
+            //process.exit(1);
           }).catch(function(error){
             console.error('Exception: ' + error); 
             process.exit(1);
