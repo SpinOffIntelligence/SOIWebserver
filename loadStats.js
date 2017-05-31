@@ -49,6 +49,24 @@ odb.init(function(err, res) {
       });
     }
 
+    function setInfo(infoObj, callback) {
+      var objectType = infoObj.objectType;
+      var statsItem = infoObj.statsItem;
+      var statsVal = infoObj.statsVal;
+      var id = infoObj.id;
+
+      var query = strUtil.format("UPDATE %s SET %s = %s WHERE @rid = '%s'", objectType, statsItem, statsVal, id);
+      console.log('query:' + query);
+      odb.db.query(query).then(function(records){
+        console.log('Updated records:' + records);
+        var obj = {
+          objectType: objectType,
+          data: records
+        }
+        callback(null,obj);
+      });
+    }
+
     soiControllers.getSchemasServer(function(err, data) {
       console.log('$$$$ schemas:');
       //console.dir(data)
@@ -73,6 +91,7 @@ odb.init(function(err, res) {
           console.log('Process Result: ' + objectType + '~' + records.length);
           records = util.prepareOutboundIDs(records);
 
+          var mapSetObjs = [];
           _.each(records, function(obj) {
             var id = obj.id;
             console.log("ID: " + id);
@@ -80,14 +99,21 @@ odb.init(function(err, res) {
             if(util.defined(dataValues, id)) {
               var statsVal = dataValues[id];  
 
-              var query = strUtil.format("UPDATE %s SET %s = %s WHERE @rid = '%s'", objectType, statsItem, statsVal, id);
-              console.log('query:' + query);
-              odb.db.query(query).then(function(records){
-                console.log('Updated records:' + records);
-                //process.exit(1);
+              mapSetObjs.push({
+                objectType:objectType,
+                statsItem:statsItem,
+                statsVal:statsVal,
+                id:id
               });
             }
-          });            
+          });
+          console.log('mapSetObjs:');
+          console.dir(mapSetObjs);
+
+          async.map(mapSetObjs, setInfo, function(err, results){
+            console.log('mapSetObjs done!')
+            process.exit(1);
+          });
         }
       });
     });
