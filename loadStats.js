@@ -5,6 +5,7 @@ var strUtil = require('util');
 var _ = require('underscore');
 var soiControllers = require('./app/controllers/soi');
 var util = require('./components/utilities.js');
+var async = require('async');
 
 
 odb.init(function(err, res) {
@@ -29,54 +30,66 @@ odb.init(function(err, res) {
 
         //console.log('key:' + key);
         //console.log('value:' + value);
-
-        dataValues[key] = value;
-
-        
+        dataValues[key] = value;        
       }
     });
+
+
+    function getInfo(infoObj, callback) {
+      var objectType = infoObj.objectType;
+
+      var query = strUtil.format("select from " + objectType);
+      console.log('query:' + query);
+      odb.db.query(query).then(function(records){
+        var obj = {
+          objectType: objectType,
+          data: records
+        }
+        callback(null,obj);
+      });
+    }
 
     soiControllers.getSchemasServer(function(err, data) {
       console.log('$$$$ schemas:');
       //console.dir(data)
 
-      //for (var propertyName in data) {
-      var propertyName = 'VInvestment';
+      var mapObjs = [];
+      for (var propertyName in data) {
+      //var propertyName = 'VSpinOff';
         if(propertyName[0] == 'V') {
           console.log('propertyName:' + propertyName);  
-
-          var query = strUtil.format("select from " + propertyName);
-          console.log('query:' + query);
-          odb.db.query(query).then(function(records){
-
-            records = util.prepareOutboundIDs(records);
-            //console.log(records);
-
-            _.each(records, function(obj) {
-              var id = obj.id;
-              console.log("ID: " + id);
-
-              if(util.defined(dataValues, id)) {
-                var statsVal = dataValues[id];  
-
-                var query = strUtil.format("UPDATE %s SET %s = %s WHERE @rid = '%s'", propertyName, statsItem, statsVal, id);
-                console.log('query:' + query);
-                odb.db.query(query).then(function(records){
-                  console.log('Updated records:' + records);
-                  //process.exit(1);
-                });
-
-              }
-            })            
-
-            //process.exit(1);
-          }).catch(function(error){
-            console.error('Exception: ' + error); 
-            process.exit(1);
-          });
-          //process.exit(1);
+          mapObjs.push({objectType: propertyName});
         }
-      //}
+      }
+      console.log('Map Objs:');
+      console.dir(mapObjs);
+
+      async.map(mapObjs, getInfo, function(err, results){
+
+        for(var i=0; i<results.length; i++) {
+          var objectType = results[i].objectType;
+          var records = results[i].data;
+          
+          console.log('Process Result: ' + objectType + '~' + records.length);
+          records = util.prepareOutboundIDs(records);
+
+          _.each(records, function(obj) {
+            var id = obj.id;
+            console.log("ID: " + id);
+
+            if(util.defined(dataValues, id)) {
+              var statsVal = dataValues[id];  
+
+              var query = strUtil.format("UPDATE %s SET %s = %s WHERE @rid = '%s'", objectType, statsItem, statsVal, id);
+              console.log('query:' + query);
+              odb.db.query(query).then(function(records){
+                console.log('Updated records:' + records);
+                //process.exit(1);
+              });
+            }
+          });            
+        }
+      });
     });
   });
 });

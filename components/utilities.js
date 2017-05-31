@@ -254,7 +254,7 @@ function prepareOutboundData(objectType, records) {
 function prepareOutboundIDs(records) {
 
   //console.log('prepareOutboundData:');
-  console.dir(records);
+  //console.dir(records);
 
   for (var i = 0; i < records.length; i++) {
     var rec = records[i];
@@ -267,7 +267,7 @@ function prepareOutboundIDs(records) {
   }
 
   //console.log('prepareOutboundData Done:');
-  console.dir(records);  
+  //console.dir(records);  
   return records;
 }
 
