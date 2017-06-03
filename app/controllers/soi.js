@@ -39,11 +39,11 @@ exports.deletePickListItem = function(req, res, next) {
 	var typeName = req.body.typeName;
 	var itemId = req.body.itemId;
 
-	//console.log'*** deletePickListItem ***');
-	//console.log'~~~~~~~~~~~~~~');
-	//console.dirtypeName);
-	//console.log'~~~~~~~~~~~~~~');
-	//console.diritemId);
+	//console.log('*** deletePickListItem ***');
+	//console.log('~~~~~~~~~~~~~~');
+	//console.dir(typeName);
+	//console.log('~~~~~~~~~~~~~~');
+	//console.dir(itemId);
 
 	soiServices.removePickListItem(typeName, itemId, function(err, data) {
 		if(util.defined(err)) {
@@ -62,11 +62,11 @@ exports.savePickListValues = function(req, res, next) {
 	var saveValues = req.body.saveValues;
 	var typeName = req.body.typeName;
 
-	//console.log'*** savePickListValues ***');
-	//console.log'~~~~~~~~~~~~~~');
-	//console.dirsaveValues);
-	//console.log'~~~~~~~~~~~~~~');
-	//console.dirtypeName);
+	//console.log('*** savePickListValues ***');
+	//console.log('~~~~~~~~~~~~~~');
+	//console.dir(saveValues);
+	//console.log('~~~~~~~~~~~~~~');
+	//console.dir(typeName);
 
 	soiServices.removePickListValues(typeName, function(err, data) {
 
@@ -84,7 +84,7 @@ exports.savePickListValues = function(req, res, next) {
 			if(util.defined(val,'name')) {
 				//console.logval.name);
 				soiServices.addPickListValue(typeName, val.name, val.description, val.color, function(err, data) {
-					//console.log'Return:' + data);
+					//console.log('Return:' + data);
 					if(util.defined(err))
 						errSave = err;
 				});			
@@ -102,11 +102,11 @@ exports.addPickListValues = function(req, res, next) {
 	var addValues = req.body.addValues;
 	var typeName = req.body.typeName;
 
-	//console.log'*** addPickListValues ***');
-	//console.log'~~~~~~~~~~~~~~');
-	//console.diraddValues);
-	//console.log'~~~~~~~~~~~~~~');
-	//console.dirtypeName);
+	//console.log('*** addPickListValues ***');
+	//console.log('~~~~~~~~~~~~~~');
+	//console.dir(addValues);
+	//console.log('~~~~~~~~~~~~~~');
+	//console.dir(typeName);
 
 	for(var i=0; i<addValues.length; i++) {
 		var errSave = null;
@@ -114,7 +114,7 @@ exports.addPickListValues = function(req, res, next) {
 		if(util.defined(val,'name')) {
 			//console.logval.name);
 			soiServices.addPickListValue(typeName, val.name, val.description, function(err, data) {
-				//console.log'Return:' + data);
+				//console.log('Return:' + data);
 				if(util.defined(err))
 					errSave = err;
 			});			
@@ -128,7 +128,7 @@ exports.addPickListValues = function(req, res, next) {
 
 exports.getPickListValues = function(req, res, next) {
 
-	//console.log'*** getPickListValues ***');
+	//console.log('*** getPickListValues ***');
 
 	soiServices.getPickListValues(function(err, data) {
 		res.json(data);
@@ -141,12 +141,12 @@ exports.removeImage = function(req, res, next) {
 	var recordId = req.body.recordId;
 	var field = req.body.field;
 
-	//console.log'*** removeImage ***');
-	//console.dirobjectType);
-	//console.log'~~~~~~~~~~~~~~');
-	//console.dirrecordId);
-	//console.log'~~~~~~~~~~~~~~');
-	//console.dirfield);
+	//console.log('*** removeImage ***');
+	//console.dir(objectType);
+	//console.log('~~~~~~~~~~~~~~');
+	//console.dir(recordId);
+	//console.log('~~~~~~~~~~~~~~');
+	//console.dir(field);
 
 	soiServices.removeImage(objectType, recordId, field, function(err, data) {
 		res.json(data);
@@ -162,20 +162,20 @@ exports.fetchGridRecords = function(req, res, next) {
 	var sortOrder = req.body.sortOrder;
 	var criteria = req.body.criteria;
 
-	//console.log'*** fetchGridRecords ***');
-	//console.dirobjectType);
-	//console.log'~~~~~~~~~~~~~~');
-	//console.dirgridFields);
-	//console.log'~~~~~~~~~~~~~~');
-	//console.dircurrentPage);
-	//console.log'~~~~~~~~~~~~~~');
-	//console.dirpageSize);
-	//console.log'~~~~~~~~~~~~~~');
-	//console.dirsortField);
-	//console.log'~~~~~~~~~~~~~~');
-	//console.dirsortOrder);
-	//console.log'~~~~~~~~~~~~~~');
-	//console.dircriteria);
+	console.log('*** fetchGridRecords ***');
+	console.dir(objectType);
+	console.log('~~~~~~~~~~~~~~');
+	console.dir(gridFields);
+	console.log('~~~~~~~~~~~~~~');
+	console.dir(currentPage);
+	console.log('~~~~~~~~~~~~~~');
+	console.dir(pageSize);
+	console.log('~~~~~~~~~~~~~~');
+	console.dir(sortField);
+	console.log('~~~~~~~~~~~~~~');
+	console.dir(sortOrder);
+	console.log('~~~~~~~~~~~~~~');
+	console.dir(criteria);
 
 	soiServices.fetchGridRecords(objectType, gridFields, currentPage, pageSize, sortField, sortOrder, criteria, function(err, data) {
 		res.json(data);
@@ -211,8 +211,8 @@ exports.getSchemasServer = function(callback) {
   { objectType: 'VEntrepreneurialResource' },
    ];
 
-	//console.log'*** getSchemasServer ***');
-	//console.dirschemas);  
+	//console.log('*** getSchemasServer ***');
+	//console.dir(schemas);  
 
 	function getInfo(infoObj, callback) {
 		var mode = infoObj.mode;
@@ -234,8 +234,8 @@ exports.getSchemasServer = function(callback) {
    		returnObj[results[i].objectType] = results[i].data;
     }
 
-		//console.log'*** getSchemasServer done ***');
-		////console.dirreturnObj);  
+		//console.log('*** getSchemasServer done ***');
+		////console.dir(returnObj);  
 
 
     callback(null, returnObj);
@@ -247,8 +247,8 @@ exports.getSchemasServer = function(callback) {
 exports.getSchemas = function(req, res, next) {
 	var schemas = req.body.schemas
 
-	//console.log'*** getSchemas ***');
-	//console.dirschemas);
+	//console.log('*** getSchemas ***');
+	//console.dir(schemas);
 
 	function getInfo(infoObj, callback) {
 		var mode = infoObj.mode;
@@ -277,10 +277,10 @@ exports.getRelationship = function(req, res, next) {
 	var edgeObjectType = req.body.edgeObjectType;
 	var recordItemId = req.body.recordItemId;
 
-	//console.log'*** getEdge ***');
-	//console.diredgeObjectType);
-	//console.log'~~~~~~~~~~~~~~');
-	//console.dirrecordItemId);
+	//console.log('*** getEdge ***');
+	//console.dir(edgeObjectType);
+	//console.log('~~~~~~~~~~~~~~');
+	//console.dir(recordItemId);
 
 	soiServices.getRelationship(edgeObjectType, recordItemId, function(err, data) {
 		res.json(data);
@@ -292,10 +292,10 @@ exports.getRelationshipDetails = function(req, res, next) {
 	var edgeObjectType = req.body.edgeObjectType;
 	var recordItemId = req.body.recordItemId;
 
-	//console.log'*** getRelationshipDetails ***');
-	//console.diredgeObjectType);
-	//console.log'~~~~~~~~~~~~~~');
-	//console.dirrecordItemId);
+	//console.log('*** getRelationshipDetails ***');
+	//console.dir(edgeObjectType);
+	//console.log('~~~~~~~~~~~~~~');
+	//console.dir(recordItemId);
 
 	soiServices.getRelationshipDetails(edgeObjectType, recordItemId, function(err, data) {
 		res.json(data);
@@ -306,10 +306,10 @@ exports.getEdge = function(req, res, next) {
 	var edgeObjectType = req.body.edgeObjectType;
 	var edgeRecordItemId = req.body.edgeRecordItemId;
 
-	//console.log'*** getEdge ***');
-	//console.diredgeObjectType);
-	//console.log'~~~~~~~~~~~~~~');
-	//console.diredgeRecordItemId);
+	//console.log('*** getEdge ***');
+	//console.dir(edgeObjectType);
+	//console.log('~~~~~~~~~~~~~~');
+	//console.dir(edgeRecordItemId);
 
 	soiServices.getEdge(edgeObjectType, edgeRecordItemId, function(err, data) {
 		res.json(data);
@@ -321,10 +321,10 @@ exports.getEdgeBySource = function(req, res, next) {
 	var edgeObjectType = req.body.edgeObjectType;
 	var recordItemId = req.body.recordItemId;
 
-	//console.log'*** getEdge ***');
-	//console.diredgeObjectType);
-	//console.log'~~~~~~~~~~~~~~');
-	//console.dirrecordItemId);
+	//console.log('*** getEdge ***');
+	//console.dir(edgeObjectType);
+	//console.log('~~~~~~~~~~~~~~');
+	//console.dir(recordItemId);
 
 	soiServices.getEdgeBySource(edgeObjectType, recordItemId, function(err, data) {
 		res.json(data);
@@ -336,12 +336,12 @@ exports.deleteEdge = function(req, res, next) {
 	var sourceId = req.body.sourceId;
 	var targetId = req.body.targetId;
 
-	//console.log'*** updateEdge ***');
-	//console.dirobjectType);
-	//console.log'~~~~~~~~~~~~~~');
-	//console.dirsourceId);
-	//console.log'~~~~~~~~~~~~~~');
-	//console.dirtargetId);
+	//console.log('*** updateEdge ***');
+	//console.dir(objectType);
+	//console.log('~~~~~~~~~~~~~~');
+	//console.dir(sourceId);
+	//console.log('~~~~~~~~~~~~~~');
+	//console.dir(targetId);
 
 	soiServices.deleteEdge(objectType, sourceId, targetId, function(err, data) {
 		res.json(data);
@@ -354,14 +354,14 @@ exports.updateEdge = function(req, res, next) {
 	var sourceId = req.body.sourceId;
 	var targetId = req.body.targetId;
 
-	//console.log'*** updateEdge ***');
-	//console.dirobjectType);
-	//console.log'~~~~~~~~~~~~~~');
-	//console.dirrecordData);
-	//console.log'~~~~~~~~~~~~~~');
-	//console.dirsourceId);
-	//console.log'~~~~~~~~~~~~~~');
-	//console.dirtargetId);
+	//console.log('*** updateEdge ***');
+	//console.dir(objectType);
+	//console.log('~~~~~~~~~~~~~~');
+	//console.dir(recordData);
+	//console.log('~~~~~~~~~~~~~~');
+	//console.dir(sourceId);
+	//console.log('~~~~~~~~~~~~~~');
+	//console.dir(targetId);
 
 	soiServices.updateEdge(objectType, recordData, sourceId, targetId, function(err, data) {
 		res.json(data);
@@ -374,14 +374,14 @@ exports.addEdge = function(req, res, next) {
 	var sourceId = req.body.sourceId;
 	var targetId = req.body.targetId;
 
-	//console.log'*** addEdge ***');
-	//console.dirobjectType);
-	//console.log'~~~~~~~~~~~~~~');
-	//console.dirrecordData);
-	//console.log'~~~~~~~~~~~~~~');
-	//console.dirsourceId);
-	//console.log'~~~~~~~~~~~~~~');
-	//console.dirtargetId);
+	//console.log('*** addEdge ***');
+	//console.dir(objectType);
+	//console.log('~~~~~~~~~~~~~~');
+	//console.dir(recordData);
+	//console.log('~~~~~~~~~~~~~~');
+	//console.dir(sourceId);
+	//console.log('~~~~~~~~~~~~~~');
+	//console.dir(targetId);
 
 	soiServices.addEdge(objectType, recordData, sourceId, targetId, function(err, data) {
 		res.json(data);
@@ -395,12 +395,12 @@ exports.fetchRecordByProp = function(req, res, next) {
 	var schema = req.body.schema;
 
 
-	//console.log'*** fetchRecords ***');
-	//console.dirobjectType);
-	//console.log'~~~~~~~~~~~~~~');
-	//console.dirprop);
-	//console.log'~~~~~~~~~~~~~~');
-	//console.dirvalue);
+	//console.log('*** fetchRecords ***');
+	//console.dir(objectType);
+	//console.log('~~~~~~~~~~~~~~');
+	//console.dir(prop);
+	//console.log('~~~~~~~~~~~~~~');
+	//console.dir(value);
 
 	soiServices.fetchRecordByProp(objectType, prop, value, function(err, data) {
 		res.json(data);
@@ -412,10 +412,10 @@ exports.fetchRecords = function(req, res, next) {
 	var objectType = req.body.objectType;
 	var criteria = req.body.criteria;
 
-	//console.log'*** fetchRecords ***');
-	//console.dirobjectType);
-	//console.log'~~~~~~~~~~~~~~');
-	//console.dircriteria);
+	//console.log('*** fetchRecords ***');
+	//console.dir(objectType);
+	//console.log('~~~~~~~~~~~~~~');
+	//console.dir(criteria);
 
 	soiServices.fetchRecords(objectType, criteria, function(err, data) {
 		res.json(data);
@@ -429,12 +429,12 @@ exports.getRecordDetails = function(req, res, next) {
 	var filters = req.body.filters;
 
 
-	//console.log'*** getRecordDetails ***');
-	//console.dirobjectType);
-	//console.log'~~~~~~~~~~~~~~');
-	//console.dirrecordId);
-	//console.log'~~~~~~~~~~~~~~');
-	//console.dirdepth);
+	//console.log('*** getRecordDetails ***');
+	//console.dir(objectType);
+	//console.log('~~~~~~~~~~~~~~');
+	//console.dir(recordId);
+	//console.log('~~~~~~~~~~~~~~');
+	//console.dir(depth);
 	console.log('~~~~~~~~~~~~~~');
 	console.dir(filters);
 
@@ -447,10 +447,10 @@ exports.addPanelRecord = function(req, res, next) {
 	var objectType = req.body.objectType;
 	var panelRecord = req.body.panelRecord;
 
-	//console.log'*** addPanelRecord ***');
-	//console.dirobjectType);
-	//console.log'~~~~~~~~~~~~~~');
-	//console.dirpanelRecord);
+	//console.log('*** addPanelRecord ***');
+	//console.dir(objectType);
+	//console.log('~~~~~~~~~~~~~~');
+	//console.dir(panelRecord);
 
 	soiServices.addRecord(objectType, panelRecord, function(err, data) {
 		res.json(data);
@@ -462,12 +462,12 @@ exports.updatePanelRecord = function(req, res, next) {
 	var recordId = req.body.recordId;
 	var panelRecord = req.body.panelRecord;
 
-	//console.log'*** updatePanelRecord ***');
-	//console.dirobjectType);
-	//console.log'~~~~~~~~~~~~~~');
-	//console.dirrecordId);
-	//console.log'~~~~~~~~~~~~~~');
-	//console.dirpanelRecord);
+	//console.log('*** updatePanelRecord ***');
+	//console.dir(objectType);
+	//console.log('~~~~~~~~~~~~~~');
+	//console.dir(recordId);
+	//console.log('~~~~~~~~~~~~~~');
+	//console.dir(panelRecord);
 
 	soiServices.updateRecord(objectType, recordId, panelRecord, function(err, data) {
 		res.json(data);
@@ -478,10 +478,10 @@ exports.deletePanelRecord = function(req, res, next) {
 	var objectType = req.body.objectType;
 	var recordId = req.body.recordId;
 
-	//console.log'*** deletePanelRecord ***');
-	//console.dirobjectType);
-	//console.log'~~~~~~~~~~~~~~');
-	//console.dirrecordId);
+	//console.log('*** deletePanelRecord ***');
+	//console.dir(objectType);
+	//console.log('~~~~~~~~~~~~~~');
+	//console.dir(recordId);
 
 	soiServices.deleteRecord(objectType, recordId, function(err, data) {
 		res.json(data);
@@ -493,12 +493,12 @@ exports.fetchPanelRecord = function(req, res, next) {
 	var schema = req.body.schema;
 	var id = req.body.id;
 
-	//console.log'*** fetchPanelRecord ***');
-	//console.dirobjectType);
-	//console.log'~~~~~~~~~~~~~~');
-	//console.dirschema);
-	//console.log'~~~~~~~~~~~~~~');
-	//console.dirid);
+	//console.log('*** fetchPanelRecord ***');
+	//console.dir(objectType);
+	//console.log('~~~~~~~~~~~~~~');
+	//console.dir(schema);
+	//console.log('~~~~~~~~~~~~~~');
+	//console.dir(id);
 
 	soiServices.getRecord(objectType, id, function(err, data) {
 		res.json(data);
@@ -511,14 +511,14 @@ exports.fetchPanelRecords = function(req, res, next) {
 	var currentPage = req.body.currentPage;
 	var pageSize = req.body.pageSize;
 
-	//console.log'*** fetchPanelRecords ***');
-	//console.dirobjectType);
-	//console.log'~~~~~~~~~~~~~~');
-	//console.dirschema);
-	//console.log'~~~~~~~~~~~~~~');
-	//console.dircurrentPage);
-	//console.log'~~~~~~~~~~~~~~');
-	//console.dirpageSize);
+	//console.log('*** fetchPanelRecords ***');
+	//console.dir(objectType);
+	//console.log('~~~~~~~~~~~~~~');
+	//console.dir(schema);
+	//console.log('~~~~~~~~~~~~~~');
+	//console.dir(currentPage);
+	//console.log('~~~~~~~~~~~~~~');
+	//console.dir(pageSize);
 
 	soiServices.getRecords(objectType, currentPage, pageSize, function(err, data) {
 		res.json(data);
@@ -531,21 +531,21 @@ exports.exportRecords = function(req, res, next) {
 	var criteria = req.body.criteria;
 	var schema = req.body.schema;
 
-	//console.log'*** exportRecords ***');
-	//console.dirobjectType);
-	//console.log'~~~~~~~~~~~~~~');
-	//console.dircriteria);
-	//console.log'~~~~~~~~~~~~~~');
-	//console.dirschema);
+	//console.log('*** exportRecords ***');
+	//console.dir(objectType);
+	//console.log('~~~~~~~~~~~~~~');
+	//console.dir(criteria);
+	//console.log('~~~~~~~~~~~~~~');
+	//console.dir(schema);
 
 	soiServices.exportRecords(objectType, criteria, schema, function(err, records) {
 		var strInfo;
 		if(util.defined(err)) {
-			//console.log'Error Exporting:' + err);
+			//console.log('Error Exporting:' + err);
 			strInfo = 'Error Exporting:' + err;
 			util.logInfo('Export', 'n/a', strInfo);
 		} else {
-			//console.log'Exporting:' + records);	
+			//console.log('Exporting:' + records);	
 			strInfo = 'Exporting: ' + objectType + ':' + records.length;
 			util.logInfo('Export', 'n/a', strInfo);	
 			res.json({error_code:0,err_desc:null,strLog: strInfo, file: 'n/a', exportData: records});			
@@ -556,8 +556,8 @@ exports.exportRecords = function(req, res, next) {
 exports.deleteLogInfo = function(req, res, next) {
 
 	var file = req.body.file;
-	//console.log'*** getLogInfo ***');
-	//console.dirfile);
+	//console.log('*** getLogInfo ***');
+	//console.dir(file);
 	soiServices.deleteLogInfo(file, function(err, data) {
 		res.json(data);
 	});	
@@ -565,10 +565,10 @@ exports.deleteLogInfo = function(req, res, next) {
 
 exports.getLogInfo = function(req, res, next) {
 
-	//console.log'*** getLogInfo ***');
+	//console.log('*** getLogInfo ***');
 	if(util.defined(req,"body.file")) {
 		var file = req.body.file;
-		//console.dirfile);
+		//console.dir(file);
 		soiServices.getLogInfo(file, function(err, data) {
 			res.json(data);
 		});	

@@ -17,9 +17,9 @@ var schemaTypeMap = [
 exports.removeImage = function(objectType, recordId, field, callback) {
   
   var query = strUtil.format("UPDATE %s SET %s = null WHERE @rid = %s", objectType, field, recordId);
-  //console.log'query:' + query);
+  //console.log('query:' + query);
   odb.db.query(query).then(function(records){
-    //console.log'records:' + records);
+    //console.log('records:' + records);
     callback(null,records);
     return;       
   });
@@ -29,7 +29,7 @@ exports.removeImage = function(objectType, recordId, field, callback) {
 exports.removePickListItem = function(typeName, itemId, callback) {
 
   var query = strUtil.format("delete from PickList where type = '%s' and @rid = '%s'", typeName, itemId);
-  //console.log'query:' + query);
+  //console.log('query:' + query);
   odb.db.query(query).then(function(records){
     callback(null,records);
   }).catch(function(error){
@@ -41,7 +41,7 @@ exports.removePickListItem = function(typeName, itemId, callback) {
 exports.removePickListValues = function(typeName, callback) {
 
   var query = strUtil.format("delete from PickList where type = '%s'", typeName);
-  //console.log'query:' + query);
+  //console.log('query:' + query);
   odb.db.query(query).then(function(records){
     callback(null,records);
   }).catch(function(error){
@@ -59,7 +59,7 @@ exports.addPickListValue = function(typeName, name, description, color, callback
     color: color
   }
 
-  //console.log'Insert:');
+  //console.log('Insert:');
   //console.dirinfoObj);
 
   odb.db.insert().into('PickList ')
@@ -73,9 +73,9 @@ exports.addPickListValue = function(typeName, name, description, color, callback
 
 exports.getPickListValues = function(callback) {
   var query = "SELECT FROM PickList";
-  //console.log'query:' + query);
+  //console.log('query:' + query);
   odb.db.query(query).then(function(records){
-    //console.log'records:' + records);
+    //console.log('records:' + records);
     callback(null,records);
     return;       
   });
@@ -83,19 +83,19 @@ exports.getPickListValues = function(callback) {
 
 exports.setRecordImage = function(objectType, logoField, idValue, file, callback) {
   
-  //console.log'*** setRecordImage ***');
+  //console.log('*** setRecordImage ***');
   //console.dirobjectType);
-  //console.log'~~~~~~~~~~~~~~');
+  //console.log('~~~~~~~~~~~~~~');
   //console.dirlogoField);
-  //console.log'~~~~~~~~~~~~~~');
+  //console.log('~~~~~~~~~~~~~~');
   //console.diridValue);
-  //console.log'~~~~~~~~~~~~~~');
+  //console.log('~~~~~~~~~~~~~~');
   //console.dirfile);
 
   var query = strUtil.format("UPDATE %s SET %s = '%s' WHERE @rid = %s", objectType, logoField, file, idValue);
-  //console.log'query:' + query);
+  //console.log('query:' + query);
   odb.db.query(query).then(function(records){
-    //console.log'records:' + records);
+    //console.log('records:' + records);
     callback(null,records);
     return;       
   });
@@ -107,9 +107,9 @@ exports.searchRecords = function(objectTypes, terms, callback) {
 	function searchRecs(object, terms,callback) {
 		var query = strUtil.format("select from %s where any() like ",object);
 		query += "'%" + terms + "%'";
-		//console.log'search query:' + query);
+		//console.log('search query:' + query);
 		odb.db.query(query).then(function(records){
-			////console.log'Search Results:');
+			////console.log('Search Results:');
 			////console.dirrecords);
       //recordData = util.prepareOutboundData(recordData);
 			callback(null,records);
@@ -127,7 +127,7 @@ exports.searchRecords = function(objectTypes, terms, callback) {
         			objectType: 'VPerson',
         			results: data
         		}
-						// //console.log'VPerson Search Results:');
+						// //console.log('VPerson Search Results:');
 						// //console.dirdata);        		
             results.push(obj);
             callback();
@@ -139,7 +139,7 @@ exports.searchRecords = function(objectTypes, terms, callback) {
               objectType: 'VSpinOff',
               results: data
             }
-            //console.log'VSpinOff Search Results:');
+            //console.log('VSpinOff Search Results:');
             //console.dirdata);            
             results.push(obj);
             callback();
@@ -151,7 +151,7 @@ exports.searchRecords = function(objectTypes, terms, callback) {
         			objectType: 'VCompany',
         			results: data
         		}
-						//console.log'VCompany Search Results:');
+						//console.log('VCompany Search Results:');
 						//console.dirdata);        		
             results.push(obj);
             callback();
@@ -218,7 +218,7 @@ exports.searchRecords = function(objectTypes, terms, callback) {
         });
     }
 	], function(err) { //This is the final callback
-    //console.log'All Done');
+    //console.log('All Done');
     //console.dirresults);
     callback(null, results);
 	});
@@ -228,7 +228,7 @@ exports.searchRecords = function(objectTypes, terms, callback) {
 exports.deleteLogInfo = function(file, callback) {
 	file = file.replace('\\','\\\\')
 	var query = strUtil.format("delete from BatchJob where file = '%s'", file);
-	//console.log'query:' + query);
+	//console.log('query:' + query);
 	odb.db.query(query).then(function(records){
 		callback(null,records);
 	}).catch(function(error){
@@ -239,7 +239,7 @@ exports.deleteLogInfo = function(file, callback) {
 
 exports.getAllLogInfo = function(callback) {
 	var query = "select from BatchJob";
-	//console.log'query:' + query);
+	//console.log('query:' + query);
 	odb.db.query(query).then(function(records){
 		callback(null,records);
 	}).catch(function(error){
@@ -251,7 +251,7 @@ exports.getAllLogInfo = function(callback) {
 exports.getLogInfo = function(file, callback) {
 	file = file.replace('\\','\\\\')
 	var query = strUtil.format("select from BatchJob where file = '%s'", file);
-	//console.log'query:' + query);
+	//console.log('query:' + query);
 	odb.db.query(query).then(function(records){
 		callback(null,records);
 	}).catch(function(error){
@@ -289,9 +289,9 @@ exports.exportRecords = function(objectType, criteria, schema, callback) {
 		query = strUtil.format("SELECT FROM %s", objectType);
 	}
 
-	//console.log'query:' + query);
+	//console.log('query:' + query);
 	odb.db.query(query).then(function(records){
-		//console.log'records:');
+		//console.log('records:');
 		////console.dirrecords);
 		callback(null,records);
 	}).catch(function(error){
@@ -304,7 +304,7 @@ exports.exportRecords = function(objectType, criteria, schema, callback) {
 
 exports.updateRecordByProp = function(objectType, idField, idValue, updateObj, schemas, callback) {
 
-	//console.log'*** updateRecordByProp ***');
+	//console.log('*** updateRecordByProp ***');
 
 	var schemaTypes = util.getSchemaType(objectType, idField);
 
@@ -318,9 +318,9 @@ exports.updateRecordByProp = function(objectType, idField, idValue, updateObj, s
 		query = strUtil.format("SELECT FROM %s where %s = %s", objectType ,idField, idValue);	
 	}
 	
-	//console.log'query:' + query);
+	//console.log('query:' + query);
 	odb.db.query(query).then(function(records){
-		//console.log'records:' + records);
+		//console.log('records:' + records);
 		////console.dirrecords);
 		if(records.length == 0) {
 			callback('Not Found!',null);
@@ -346,9 +346,9 @@ exports.updateRecordByProp = function(objectType, idField, idValue, updateObj, s
 			updateStr = updateStr.slice(0, -3);			
 
 			var query = strUtil.format("UPDATE %s SET %s WHERE %s = '%s'", objectType, updateStr, idField, idValue);
-			//console.log'query:' + query);
+			//console.log('query:' + query);
 			odb.db.query(query).then(function(records){
-				//console.log'records:' + records);
+				//console.log('records:' + records);
 				callback(null,records);
 				return;				
 			});
@@ -358,7 +358,7 @@ exports.updateRecordByProp = function(objectType, idField, idValue, updateObj, s
 
 exports.deleteVertexByProp = function(objectType, idField, idValue, schemas, callback) {
 
-	//console.log'*** updateRecordByProp ***');
+	//console.log('*** updateRecordByProp ***');
 
 	var schemaTypes = util.getSchemaType(objectType, idField);
 
@@ -372,9 +372,9 @@ exports.deleteVertexByProp = function(objectType, idField, idValue, schemas, cal
 		query = strUtil.format("SELECT FROM %s where %s = %s", objectType ,idField, idValue);	
 	}
 
-	//console.log'query:' + query);
+	//console.log('query:' + query);
 	odb.db.query(query).then(function(records){
-		//console.log'records:' + records);
+		//console.log('records:' + records);
 		////console.dirrecords);
 		if(records.length == 0) {
 			callback('Not Found!',null);
@@ -392,7 +392,7 @@ exports.deleteVertexByProp = function(objectType, idField, idValue, schemas, cal
 			} else {
 				query = strUtil.format("DELETE VERTEX %s where %s = %s", objectType ,idField, idValue);	
 			}
-			//console.log'query:' + query);
+			//console.log('query:' + query);
 			odb.db.query(query).then(function(records){
 				callback(null,records);
 				return;
@@ -413,7 +413,7 @@ exports.fetchRecordByProp = function(objectType, prod, value, callback) {
 		var query = strUtil.format("SELECT FROM %s where %s = '%s'", objectType, prod, value);
 	}
 	
-	//console.log'query:' + query);
+	//console.log('query:' + query);
 		odb.db.query(query).then(function(records){
       records = util.prepareOutboundData(objectType, records);
 			callback(null,records);
@@ -425,7 +425,7 @@ exports.fetchRecordByProp = function(objectType, prod, value, callback) {
 
 exports.fetchRecordByName = function(objectType, name, callback) {
 	var query = strUtil.format("SELECT FROM %s where name = '%s'", objectType, name);
-	//console.log'query:' + query);
+	//console.log('query:' + query);
 		odb.db.query(query).then(function(records){
       records = util.prepareOutboundData(objectType, records);
 			callback(null,records);
@@ -434,7 +434,7 @@ exports.fetchRecordByName = function(objectType, name, callback) {
 
 exports.getRelationshipDetails = function(edgeObjectType, recordItemId, callback) {
 	var query = strUtil.format("select from %s where out = %s", edgeObjectType, recordItemId);
-	//console.log'query:' + query);
+	//console.log('query:' + query);
 	odb.db.query(query).then(function(records){
 		var obj = {
 			edgeObjectType: edgeObjectType,
@@ -465,7 +465,7 @@ exports.getRelationship = function(edgeObjectType, recordItemId, callback) {
 
 exports.getEdge = function(edgeObjectType, edgeRecordItemId, callback) {
 	var query = strUtil.format("SELECT FROM %s where @rid = %s", edgeObjectType, edgeRecordItemId);
-	//console.log'query:' + query);
+	//console.log('query:' + query);
 	odb.db.query(query).then(function(records){
     records = util.prepareOutboundData(edgeObjectType, records);
 		// var recs=[];
@@ -484,7 +484,7 @@ exports.getEdge = function(edgeObjectType, edgeRecordItemId, callback) {
 
 exports.getEdgeBySource = function(edgeObjectType, recordItemId, callback) {
 	var query = strUtil.format("select from %s where out = %s", edgeObjectType, recordItemId);
-	//console.log'query:' + query);
+	//console.log('query:' + query);
 	odb.db.query(query).then(function(records){
     records = util.prepareOutboundData(edgeObjectType, records);
 		callback(null,records);
@@ -495,7 +495,7 @@ exports.deleteEdge = function(objectType, sourceId, targetId, callback) {
 
 	var query = strUtil.format("delete edge from %s to %s where @class = '%s'", sourceId, targetId, objectType);
 
-	//console.log'query:' + query);
+	//console.log('query:' + query);
 	odb.db.query(query).then(function(results){
 		 //console.logresults);
 		 callback(null, results);
@@ -505,11 +505,11 @@ exports.deleteEdge = function(objectType, sourceId, targetId, callback) {
   });
 
 	// var query = 'update ' + outObjectType + ' remove out_' + objectType + ' where @rid = ' + outRecordId;
-	// //console.log'^^^^^^^ query:' + query);
+	// //console.log('^^^^^^^ query:' + query);
 	// odb.db.query(query).then(function(hitters){
  //   //console.loghitters);
  //   var query1 = 'update ' + inObjectType + ' remove in_' + objectType + ' where @rid = ' + inRecordId;
- //   //console.log'^^^^^^^ query1:' + query1);
+ //   //console.log('^^^^^^^ query1:' + query1);
 	// 	odb.db.query(query1).then(function(hitters){
 	// 	   //console.loghitters)
 	// 	   callback(null, true);
@@ -519,18 +519,18 @@ exports.deleteEdge = function(objectType, sourceId, targetId, callback) {
 
 exports.updateEdge = function(objectType, recordData, sourceId, targetId, callback) {
 
-  //console.log'>>>> updateEdge <<<<');
+  //console.log('>>>> updateEdge <<<<');
   //console.dirobjectType);
-  //console.log'~~~~~~~~~~~~~~');
+  //console.log('~~~~~~~~~~~~~~');
 	//console.dirrecordData);
-  //console.log'~~~~~~~~~~~~~~');
+  //console.log('~~~~~~~~~~~~~~');
   //console.dirsourceId);
-  //console.log'~~~~~~~~~~~~~~');
+  //console.log('~~~~~~~~~~~~~~');
   //console.dirtargetId);
 
 	// Delete Edge
 	var query = strUtil.format("delete edge from %s to %s where @class = '%s'", sourceId, targetId, objectType);
-	//console.log'query:' + query);
+	//console.log('query:' + query);
 	odb.db.query(query).then(function(results){
     //console.logresults);
 		addEdge(objectType, recordData, sourceId, targetId, callback);
@@ -542,42 +542,42 @@ exports.updateEdge = function(objectType, recordData, sourceId, targetId, callba
 
 exports.addEdge = function(objectType, recordData, sourceId, targetId, callback) {
 
-  //console.log'>>>> addEdge <<<<');
+  //console.log('>>>> addEdge <<<<');
   //console.dirobjectType);
-  //console.log'~~~~~~~~~~~~~~');
+  //console.log('~~~~~~~~~~~~~~');
   //console.dirrecordData);
-  //console.log'~~~~~~~~~~~~~~');
+  //console.log('~~~~~~~~~~~~~~');
   //console.dirsourceId);
-  //console.log'~~~~~~~~~~~~~~');
+  //console.log('~~~~~~~~~~~~~~');
   //console.dirtargetId);
 
 	var fndProp = false;
 	for(var propertyName in recordData) {
 		fndProp = true;
 	}
-	//console.log'^^^ fndProp:' + fndProp);
+	//console.log('^^^ fndProp:' + fndProp);
 
   recordData = util.prepareInboundData(objectType, recordData);
 
 	var addedEdge;
 	if(fndProp) {
 		var query = strUtil.format("CREATE EDGE %s FROM %s TO %s CONTENT %s", objectType, sourceId, targetId, JSON.stringify(recordData));
-		//console.log'query:' + query);
+		//console.log('query:' + query);
 		odb.db.query(query).then(function(records){
-	   		//console.log'records:' + records);
+	   		//console.log('records:' + records);
    			callback(null, records);
 		}).catch(function(e) {
-			//console.log'error:' + e);
+			//console.log('error:' + e);
 			callback(e, null);
 	  });			
 	} else {
 		var query = strUtil.format("CREATE EDGE %s FROM %s TO %s", objectType, sourceId, targetId);
-		//console.log'query:' + query);
+		//console.log('query:' + query);
 		odb.db.query(query).then(function(records){
-	   		//console.log'records:' + records);
+	   		//console.log('records:' + records);
    			callback(null, records);
 		}).catch(function(e) {
-			//console.log'error:' + e);
+			//console.log('error:' + e);
 			callback(e, null);
 	  });			
 	}
@@ -604,12 +604,21 @@ exports.fetchGridRecords = function(objectType, gridFields, currentPage, pageSiz
 
   var skip = ((currentPage-1) * pageSize)
 
-	var query = strUtil.format("SELECT %s FROM %s SKIP %s LIMIT %s", props, objectType, skip, pageSize);
+  var sortClause='';
+  if(util.defined(sortField)) {
+    var order = 'DESC';
+    if(util.defined(sortField)) {
+      sortClause = strUtil.format('order by %s %s',sortField, sortOrder);
+    } else {
+      sortClause = strUtil.format('order by %s',sortField);
+    }
+  }
+	var query = strUtil.format("SELECT %s FROM %s %s SKIP %s LIMIT %s", props, objectType, sortClause, skip, pageSize);
   if(util.defined(criteria,"length") && criteria.length > 0) {
     var whereClause = util.createWhereClause(criteria, objectType);
-    var query = strUtil.format("SELECT %s FROM %s WHERE %s SKIP %s LIMIT %s", props, objectType, whereClause, skip, pageSize);
+    var query = strUtil.format("SELECT %s FROM %s %s WHERE %s SKIP %s LIMIT %s", props, objectType, sortClause, whereClause, skip, pageSize);
   }
-	//console.log'query: ' + query);
+	console.log('query: ' + query);
 
 	odb.db.query(query).then(function(records){
 
@@ -628,7 +637,7 @@ exports.fetchGridRecords = function(objectType, gridFields, currentPage, pageSiz
       var whereClause = util.createWhereClause(criteria, objectType);
       query = strUtil.format("SELECT COUNT(*) as count FROM %s WHERE %s", objectType, whereClause);
     }
-    //console.log'query: ' + query);
+    //console.log('query: ' + query);
     odb.db.query(query).then(function(ret){   
       var retObj = {
         records: records,
@@ -731,7 +740,7 @@ exports.getRecordDetails = function(objectType, recordId, depth, filters, callba
 
 	odb.db.query(query).then(function(recordDetails){
 
-		//console.log'** traverse **');
+		//console.log('** traverse **');
 		//console.dirrecordDetails);
 
    var returnObj = {};
@@ -739,7 +748,7 @@ exports.getRecordDetails = function(objectType, recordId, depth, filters, callba
 			var obj = recordDetails[i];
 			var className = obj['@class'];
 
-			////console.log'** Class:' + className);
+			////console.log('** Class:' + className);
 
 			if(!util.defined(returnObj,className)) {
 				returnObj[className]=[];
@@ -748,43 +757,43 @@ exports.getRecordDetails = function(objectType, recordId, depth, filters, callba
 			var props={};
 			for(var propertyName in obj) {
 
-				//console.log'** propertyName:' + propertyName);
+				//console.log('** propertyName:' + propertyName);
 
 				if(propertyName != 'in' && propertyName.indexOf('in_') == -1 && propertyName != 'out' && propertyName.indexOf('out_') == -1 && propertyName.indexOf('@') != 0 && propertyName != 'id' && propertyName != 'backup' && typeof propertyName != 'object' && typeof propertyName != 'array') {					
-					//console.log'>>Add');
+					//console.log('>>Add');
 					props[propertyName] = obj[propertyName];
 				} else if(propertyName.indexOf('@rid') == 0) {
-					//console.log'>>Add');
+					//console.log('>>Add');
 					var idobj = obj[propertyName];
 					props.id = '#' + idobj.cluster + ':' + idobj.position;
 				} else if(propertyName.indexOf('in') == 0 && propertyName.indexOf('_') != 0) {
 
-					//console.log'>>Add');
-					//console.log'** IN:');
+					//console.log('>>Add');
+					//console.log('** IN:');
 
 					var inobj = obj[propertyName];
 					var inprops={};
 					for(var propertyName in inobj) {
 						
-						////console.log'** IN propertyName:' + propertyName);
+						////console.log('** IN propertyName:' + propertyName);
 
 						if(propertyName.indexOf('in') != 0 && propertyName.indexOf('out') != 0 && propertyName.indexOf('@') != 0 && propertyName != 'id' && propertyName != 'backup' && typeof propertyName != 'object' && typeof propertyName != 'array') {
 							inprops[propertyName] = inobj[propertyName];
-							////console.log'>>Add In' + inprops[propertyName]);
+							////console.log('>>Add In' + inprops[propertyName]);
 
 						} else if(propertyName.indexOf('@rid') == 0) {
 							var idobj = inobj[propertyName];
 							inprops.inId = '#' + idobj.cluster + ':' + idobj.position;
-							////console.log'>>Add In' + inprops.inId);
+							////console.log('>>Add In' + inprops.inId);
 						}
 					}
-					////console.log'** IN OBJ DONE:');
+					////console.log('** IN OBJ DONE:');
 					////console.dirinprops)
 					props['in'] = inprops;
 				} else if(propertyName.indexOf('out') == 0 && propertyName.indexOf('_') != 0) {
 
-					////console.log'>>Add');
-					////console.log'** IN:');
+					////console.log('>>Add');
+					////console.log('** IN:');
 
 					var outobj = obj[propertyName];
 					var outprops={};
@@ -797,7 +806,7 @@ exports.getRecordDetails = function(objectType, recordId, depth, filters, callba
 						}
 					}
 
-					//console.log'** OUT OBJ:');
+					//console.log('** OUT OBJ:');
 					//console.diroutprops)
 					props['out'] = outprops;
 				}
@@ -819,7 +828,7 @@ exports.addRecord = function(objectType, panelRecord, callback) {
 	// 	}
 	// }
 
-  //console.log'** addRecord **');
+  //console.log('** addRecord **');
   //console.dirpanelRecord);
 
 	var panelRecord = util.prepareInboundData(objectType, panelRecord);
@@ -836,7 +845,7 @@ exports.addRecord = function(objectType, panelRecord, callback) {
 
 exports.updateRecord = function(objectType, recordId, panelRecord, callback) {
 
-  //console.log'** addRecord **');
+  //console.log('** addRecord **');
   //console.dirpanelRecord);
 
 	// var updateObj = {};
@@ -921,7 +930,7 @@ exports.getRecords = function(objectType, currentPage, pageSize, callback) {
 
 exports.getSchema = function(objName, callback) {
 
-	//console.log'^^^^^^^^^ getSchema ^^^^^^^^^^^' + objName);
+	//console.log('^^^^^^^^^ getSchema ^^^^^^^^^^^' + objName);
 	function getSchemaProperties(properties) {
 		var props={};
 		var superClass=null;
@@ -957,7 +966,7 @@ exports.getSchema = function(objName, callback) {
 	   .then(
 	      function(properties){
 	        var props=getSchemaProperties(properties);
-	        //console.log'^^^^^^^^^ props ^^^^^^^^^^^' + objName);
+	        //console.log('^^^^^^^^^ props ^^^^^^^^^^^' + objName);
 	        ////console.dirprops);
 
 	        if(util.defined(props,"superClass")) {
@@ -967,13 +976,13 @@ exports.getSchema = function(objName, callback) {
 							.then(
 							function(properties){	        	
 								var subProps=getSchemaProperties(properties);
-								//console.log'^^^^^^^^^ subProps ^^^^^^^^^^^' + props.superClass);
+								//console.log('^^^^^^^^^ subProps ^^^^^^^^^^^' + props.superClass);
 								////console.dirsubProps);
 
 								for(var propertyName in subProps) {
 									props[propertyName] = subProps[propertyName];
 								}
-								//console.log'^^^^^^^^^ final props ^^^^^^^^^^^');
+								//console.log('^^^^^^^^^ final props ^^^^^^^^^^^');
 								////console.dirprops);
 								delete props.superClass;
 								callback(null,props);	        	

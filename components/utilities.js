@@ -222,8 +222,8 @@ function prepareInboudString(inString) {
 
 function prepareOutboundData(objectType, records) {
 
-  //console.log('prepareOutboundData:');
-  console.dir(records);
+  console.log('prepareOutboundData:');
+  //console.dir(records);
 
   var schema = exports.schemas[objectType];
 
@@ -247,7 +247,7 @@ function prepareOutboundData(objectType, records) {
   }
 
   //console.log('prepareOutboundData Done:');
-  console.dir(records);  
+  //console.dir(records);  
   return records;
 }
 

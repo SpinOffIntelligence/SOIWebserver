@@ -8,9 +8,7 @@ var util = require('./components/utilities.js');
 var async = require('async');
 
 
-odb.init(function(err, res) {
-  console.log('^^^^')
-  var statsItem = 'statsdegreecentrality';
+function processStats(statsItem, callback) {
 
   fs = require('fs')
   fs.readFile('./stats.txt', 'utf8', function (err,data) {
@@ -41,6 +39,7 @@ odb.init(function(err, res) {
       var query = strUtil.format("select from " + objectType);
       console.log('query:' + query);
       odb.db.query(query).then(function(records){
+        //console.dir(records);
         var obj = {
           objectType: objectType,
           data: records
@@ -67,6 +66,19 @@ odb.init(function(err, res) {
       });
     }
 
+    function setDefaultInfo(infoObj, callback) {
+
+      // var objectType = infoObj.objectType;
+      // var statsItem = infoObj.statsItem;
+
+      // var defaultVal = 1;
+      // var query1 = strUtil.format("UPDATE %s SET %s = %s", objectType, statsItem, defaultVal);
+      // console.log('query1:' + query1);
+      // odb.db.query(query1).then(function(records){
+        callback(null, null);
+      // });
+    }
+
     soiControllers.getSchemasServer(function(err, data) {
       console.log('$$$$ schemas:');
       //console.dir(data)
@@ -76,7 +88,7 @@ odb.init(function(err, res) {
       //var propertyName = 'VSpinOff';
         if(propertyName[0] == 'V') {
           console.log('propertyName:' + propertyName);  
-          mapObjs.push({objectType: propertyName});
+          mapObjs.push({objectType: propertyName, statsItem: statsItem});
         }
       }
       console.log('Map Objs:');
@@ -84,39 +96,62 @@ odb.init(function(err, res) {
 
       async.map(mapObjs, getInfo, function(err, results){
 
-        for(var i=0; i<results.length; i++) {
-          var objectType = results[i].objectType;
-          var records = results[i].data;
-          
-          console.log('Process Result: ' + objectType + '~' + records.length);
-          records = util.prepareOutboundIDs(records);
+        var res = results;
 
-          var mapSetObjs = [];
-          _.each(records, function(obj) {
-            var id = obj.id;
-            console.log("ID: " + id);
+        async.map(mapObjs, setDefaultInfo, function(err, results){
 
-            if(util.defined(dataValues, id)) {
-              var statsVal = dataValues[id];  
 
-              mapSetObjs.push({
-                objectType:objectType,
-                statsItem:statsItem,
-                statsVal:statsVal,
-                id:id
-              });
-            }
-          });
-          console.log('mapSetObjs:');
-          console.dir(mapSetObjs);
+          //process.exit(1);
 
-          async.map(mapSetObjs, setInfo, function(err, results){
-            console.log('mapSetObjs done!')
-            process.exit(1);
-          });
-        }
+          for(var i=0; i<res.length; i++) {
+            var objectType = res[i].objectType;
+            var records = res[i].data;
+            
+            console.log('Process Result: ' + objectType + '~' + records.length);
+            records = util.prepareOutboundIDs(records);
+
+            var mapSetObjs = [];
+            _.each(records, function(obj) {
+              var id = obj.id;
+              console.log("ID: " + id);
+
+              if(util.defined(dataValues, id)) {
+                var statsVal = dataValues[id];  
+
+                if(statsVal > 1) {
+                  mapSetObjs.push({
+                    objectType:objectType,
+                    statsItem:statsItem,
+                    statsVal:statsVal,
+                    id:id
+                  });                  
+                }
+              }
+            });
+            console.log('mapSetObjs:');
+            console.dir(mapSetObjs);
+
+            async.map(mapSetObjs, setInfo, function(err, results){
+              console.log('mapSetObjs done!')
+              callback(null, results);
+              
+            });
+          }
+
+        });
       });
     });
   });
+
+}
+
+
+odb.init(function(err, res) {
+  console.log('^^^^')
+  var statsItem = 'statsdegreecentrality';
+  processStats(statsItem, function(err, data) {
+    //process.exit(1);
+  });
+
 });
 
