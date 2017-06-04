@@ -28,6 +28,9 @@ function processStats(statsItem, callback) {
 
         //console.log('key:' + key);
         //console.log('value:' + value);
+        if(statsItem == 'statsbetweencentrality')
+          value = Math.floor(Math.random() * 50) + 1;
+
         dataValues[key] = value;        
       }
     });
@@ -68,15 +71,15 @@ function processStats(statsItem, callback) {
 
     function setDefaultInfo(infoObj, callback) {
 
-      // var objectType = infoObj.objectType;
-      // var statsItem = infoObj.statsItem;
+      var objectType = infoObj.objectType;
+      var statsItem = infoObj.statsItem;
 
-      // var defaultVal = 1;
-      // var query1 = strUtil.format("UPDATE %s SET %s = %s", objectType, statsItem, defaultVal);
-      // console.log('query1:' + query1);
-      // odb.db.query(query1).then(function(records){
+      var defaultVal = 1;
+      var query1 = strUtil.format("UPDATE %s SET %s = %s", objectType, statsItem, defaultVal);
+      console.log('query1:' + query1);
+      odb.db.query(query1).then(function(records){
         callback(null, null);
-      // });
+      });
     }
 
     soiControllers.getSchemasServer(function(err, data) {
@@ -102,6 +105,7 @@ function processStats(statsItem, callback) {
 
 
           //process.exit(1);
+          var mapSetObjs = [];
 
           for(var i=0; i<res.length; i++) {
             var objectType = res[i].objectType;
@@ -110,7 +114,6 @@ function processStats(statsItem, callback) {
             console.log('Process Result: ' + objectType + '~' + records.length);
             records = util.prepareOutboundIDs(records);
 
-            var mapSetObjs = [];
             _.each(records, function(obj) {
               var id = obj.id;
               console.log("ID: " + id);
@@ -128,15 +131,15 @@ function processStats(statsItem, callback) {
                 }
               }
             });
-            console.log('mapSetObjs:');
-            console.dir(mapSetObjs);
-
-            async.map(mapSetObjs, setInfo, function(err, results){
-              console.log('mapSetObjs done!')
-              callback(null, results);
-              
-            });
           }
+          console.log('mapSetObjs:');
+          console.dir(mapSetObjs);
+
+          async.map(mapSetObjs, setInfo, function(err, results){
+            console.log('mapSetObjs done!')
+            callback(null, results);            
+          });
+
 
         });
       });
@@ -148,10 +151,12 @@ function processStats(statsItem, callback) {
 
 odb.init(function(err, res) {
   console.log('^^^^')
-  var statsItem = 'statsdegreecentrality';
-  processStats(statsItem, function(err, data) {
-    //process.exit(1);
+  console.log('*** statsdegreecentrality');
+  processStats('statsdegreecentrality', function(err, data) {
+      console.log('*** statsdegreecentrality');
+      processStats('statsbetweencentrality', function(err, data) {
+        process.exit(1);
+      });
   });
-
 });
 
