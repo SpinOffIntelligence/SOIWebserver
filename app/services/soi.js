@@ -707,8 +707,8 @@ exports.getRecordDetails = function(objectType, recordId, depth, filters, callba
 
 
 	      if(filterCnt == 0)
-	          filterClause = strUtil.format("(@rid in (select @rid from %s where %s matches '(%s)'))", fnd.objectType, fnd.fieldName, util.arrayToList(fnd.filters));
-	      else filterClause += strUtil.format(" or (@rid in (select @rid from %s where %s in '(%s)'))", fnd.objectType, fnd.fieldName, util.arrayToList(fnd.filters));
+	          filterClause = strUtil.format("(@rid in (select @rid from %s where %s matches '.*(%s).*'))", fnd.objectType, fnd.fieldName, util.arrayToList(fnd.filters));
+	      else filterClause += strUtil.format(" or (@rid in (select @rid from %s where %s matches '.*(%s).*'))", fnd.objectType, fnd.fieldName, util.arrayToList(fnd.filters));
 	      filterCnt++;
 	    } else {
 	      if(whereCnt==0)
