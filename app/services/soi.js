@@ -670,7 +670,7 @@ exports.fetchRecords = function(objectType, criteria, callback) {
   });
 }
 
-exports.getRecordDetails = function(objectType, recordId, depth, filters, callback) {
+exports.getRecordDetails = function(objectType, recordId, depth, filters, searchTerms, schemas, callback) {
 	//var panelRecord={};
 	//panelRecord.id = '#13:1';
 
@@ -693,19 +693,30 @@ exports.getRecordDetails = function(objectType, recordId, depth, filters, callba
 
   var filterClause = '';
   var filterCnt=0;
+
+  var hideCnt=0;
+
   for(var propertyName in util.schemas) {
     console.log('util.schemas:'+ propertyName);
 
-    if(util.defined(filters)) {
+    var showObject = true;
+    if(util.defined(schemas,"length")) {
+      var fndSchema = _.findWhere(schemas,  {objectType : propertyName})
+      if(util.defined(fndSchema,"selected")) {
+        console.log('fndSchema:'+ fndSchema.selected);
+        if(fndSchema.selected == false) {
+          showObject = fndSchema.selected;
+          hideCnt++;
+        }
+      }
+    }
+
+    if(showObject) {
 	    var fnd = util.whereProp(filters, 'objectType', propertyName);
 	    console.log('fnd:' + fnd);
 	    console.dir(fnd);
 	    if(util.defined(fnd,"filters.length") && fnd.filters.length > 0) {
-
-
 	    	console.log('``````' + util.arrayToList(fnd.filters));
-
-
 	      if(filterCnt == 0)
 	          filterClause = strUtil.format("(@rid in (select @rid from %s where %s matches '.*(%s).*'))", fnd.objectType, fnd.fieldName, util.arrayToList(fnd.filters));
 	      else filterClause += strUtil.format(" or (@rid in (select @rid from %s where %s matches '.*(%s).*'))", fnd.objectType, fnd.fieldName, util.arrayToList(fnd.filters));
@@ -716,23 +727,31 @@ exports.getRecordDetails = function(objectType, recordId, depth, filters, callba
 	      whereClause = whereClause + strUtil.format(" or @class = '%s'", propertyName);
 	      whereCnt++;      
 	    }
-	}
+    }
   }
 
 	console.log('whereClause:' + whereClause)
 	console.log('filterClause:' + filterClause)
 
   var query = strUtil.format("traverse * from  %s while $depth < %s", recordId, deep);
-  if(filterClause.length > 0) {
+  if(filterClause.length > 0 || hideCnt > 0 || util.defined(searchTerms)) {
 
-    query = query + " and "
+    query = "select from (" + query + ") where "
 
-    if(whereClause.length > 0)
+    if(whereClause.length > 0) {
       query += "(" + whereClause + ")";
+      if(util.defined(searchTerms)) {
+        whereClause += 'and ()'
+      }
+    }
+      
 
     if(filterClause.length > 0)
       query += " or (" + filterClause + ")";
 
+    if(util.defined(searchTerms)) {
+      whereClause + " or any() like " + "'%" + searchTerms + "%'"
+    }
   }
 
 

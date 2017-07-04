@@ -427,6 +427,8 @@ exports.getRecordDetails = function(req, res, next) {
 	var recordId = req.body.recordId;
 	var depth = req.body.depth;
 	var filters = req.body.filters;
+	var searchTerms = req.body.searchTerms;
+	var schemas = req.body.schemas
 
 
 	//console.log('*** getRecordDetails ***');
@@ -437,8 +439,13 @@ exports.getRecordDetails = function(req, res, next) {
 	//console.dir(depth);
 	console.log('~~~~~~~~~~~~~~');
 	console.dir(filters);
+	console.log('~~~~~~~~~~~~~~');
+	console.dir(searchTerms);
+	console.log('~~~~~~~~~~~~~~');
+	console.dir(schemas);
 
-	soiServices.getRecordDetails(objectType, recordId, depth, filters, function(err, data) {
+
+	soiServices.getRecordDetails(objectType, recordId, depth, filters, searchTerms, schemas, function(err, data) {
 		res.json(data);
 	});
 }
