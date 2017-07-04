@@ -740,9 +740,6 @@ exports.getRecordDetails = function(objectType, recordId, depth, filters, search
 
     if(whereClause.length > 0) {
       query += "(" + whereClause + ")";
-      if(util.defined(searchTerms)) {
-        whereClause += 'and ()'
-      }
     }
       
 
@@ -750,7 +747,7 @@ exports.getRecordDetails = function(objectType, recordId, depth, filters, search
       query += " or (" + filterClause + ")";
 
     if(util.defined(searchTerms)) {
-      whereClause + " or any() like " + "'%" + searchTerms + "%'"
+      whereClause + " and any() like " + "'%" + searchTerms + "%'"
     }
   }
 
