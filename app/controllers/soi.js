@@ -431,7 +431,7 @@ exports.getRecordDetails = function(req, res, next) {
 	var schemas = req.body.schemas
 
 
-	//console.log('*** getRecordDetails ***');
+	console.log('*** getRecordDetails ***');
 	//console.dir(objectType);
 	//console.log('~~~~~~~~~~~~~~');
 	//console.dir(recordId);

@@ -734,21 +734,20 @@ exports.getRecordDetails = function(objectType, recordId, depth, filters, search
 	console.log('filterClause:' + filterClause)
 
   var query = strUtil.format("traverse * from  %s while $depth < %s", recordId, deep);
-  if(filterClause.length > 0 || hideCnt > 0 || util.defined(searchTerms)) {
+  if(filterClause.length > 0 || hideCnt > 0) {
 
     query = "select from (" + query + ") where "
 
     if(whereClause.length > 0) {
       query += "(" + whereClause + ")";
-    }
-      
+    }      
 
     if(filterClause.length > 0)
       query += " or (" + filterClause + ")";
+  }
 
-    if(util.defined(searchTerms)) {
-      whereClause + " and any() like " + "'%" + searchTerms + "%'"
-    }
+  if(util.defined(searchTerms)) {
+    query = "select from (" + query + ") where any() like " + "'%" + searchTerms + "%'"
   }
 
 
