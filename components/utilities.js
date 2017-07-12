@@ -54,6 +54,20 @@ function arrayToList(arrayValues) {
   return retVal;
 }
 
+function createFilterClause(filters, objectType) {
+  var filterClause = '';
+  var fndFilters = this.whereProp(filters, 'objectType', objectType);
+  for(var i=0; i<fndFilters.length; i++) {
+    var filterObj = fndFilters[i];
+    if(filterObj.filters.length > 0) {
+      if(filterClause == '')
+        filterClause = strUtil.format("%s matches '.*(%s).*'", filterObj.fieldName, this.arrayToList(filterObj.filters));
+      else filterClause += strUtil.format(" and %s matches '.*(%s).*'", filterObj.fieldName, this.arrayToList(filterObj.filters));      
+    }
+  }
+  return filterClause;
+}
+
 function createWhereClause(criteria, objectType) {
 
   //console.log('~~~~~ createWhereClause: ' + objectType);
@@ -355,7 +369,7 @@ function prepareInboundData(objectType, recordData) {
   } 
 }
 
-function whereProp(obj, name, value) {
+function findWhereProp(obj, name, value) {
   for(var propertyName in obj) {
     var objItem = obj[propertyName];
     if(objItem[name] == value)
@@ -363,6 +377,17 @@ function whereProp(obj, name, value) {
   }
   return null;
 }
+
+function whereProp(obj, name, value) {
+  var retVal = [];
+  for(var propertyName in obj) {
+    var objItem = obj[propertyName];
+    if(objItem[name] == value)
+      retVal.push(objItem);
+  }
+  return retVal;
+}
+
 
 
 function logInfo(mode, file, strInfo) {
@@ -384,5 +409,6 @@ module.exports.getSchemaType = getSchemaType;
 module.exports.formatDBDate = formatDBDate;
 module.exports.logging = logging;
 module.exports.createWhereClause = createWhereClause;
+module.exports.createFilterClause = createFilterClause;
 module.exports.arrayToList = arrayToList;
 module.exports.whereProp = whereProp;
