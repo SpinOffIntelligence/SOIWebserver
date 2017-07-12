@@ -615,11 +615,21 @@ exports.fetchGridRecords = function(objectType, gridFields, currentPage, pageSiz
   }
 
   var filterClause = util.createFilterClause(filters, objectType);
-  
+  console.log('********filterClause:');
+  console.dir(filterClause);
+
+
 	var query = strUtil.format("SELECT %s FROM %s %s SKIP %s LIMIT %s", props, objectType, sortClause, skip, pageSize);
+  if(filterClause != '') {
+    query = strUtil.format("SELECT %s FROM %s where %s %s SKIP %s LIMIT %s", props, objectType, filterClause, sortClause, skip, pageSize);
+  }
+
   if(util.defined(criteria,"length") && criteria.length > 0) {
     var whereClause = util.createWhereClause(criteria, objectType);
-    var query = strUtil.format("SELECT %s FROM %s %s WHERE %s SKIP %s LIMIT %s", props, objectType, sortClause, whereClause, skip, pageSize);
+    var query = strUtil.format("SELECT %s FROM %s WHERE %s %s SKIP %s LIMIT %s", props, objectType, whereClause, sortClause, skip, pageSize);
+    if(filterClause != '') {
+      query = strUtil.format("SELECT %s FROM %s WHERE %s and %s %s SKIP %s LIMIT %s", props, objectType, whereClause, filterClause, sortClause, skip, pageSize);
+    }
   }
 	console.log('query: ' + query);
 
