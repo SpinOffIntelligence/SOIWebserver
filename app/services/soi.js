@@ -583,7 +583,7 @@ exports.addEdge = function(objectType, recordData, sourceId, targetId, callback)
 	}
 }
 
-exports.fetchGridRecords = function(objectType, gridFields, currentPage, pageSize, sortField, sortOrder, criteria, callback) {
+exports.fetchGridRecords = function(objectType, gridFields, currentPage, pageSize, sortField, sortOrder, criteria, filters, callback) {
 
 	var props = '*, ';
 	for(var i=0; i<gridFields.length; i++) {
@@ -613,6 +613,9 @@ exports.fetchGridRecords = function(objectType, gridFields, currentPage, pageSiz
       sortClause = strUtil.format('order by %s',sortField);
     }
   }
+
+  var filterClause = util.createFilterClause(filters, objectType);
+  
 	var query = strUtil.format("SELECT %s FROM %s %s SKIP %s LIMIT %s", props, objectType, sortClause, skip, pageSize);
   if(util.defined(criteria,"length") && criteria.length > 0) {
     var whereClause = util.createWhereClause(criteria, objectType);
