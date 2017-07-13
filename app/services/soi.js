@@ -646,12 +646,23 @@ exports.fetchGridRecords = function(objectType, gridFields, currentPage, pageSiz
 		// }
 
     var query = strUtil.format("SELECT COUNT(*) as count FROM %s", objectType);
+    if(filterClause != '') {
+      query = strUtil.format("SELECT COUNT(*) as count FROM %s WHERE %s", objectType, filterClause);
+    }    
     if(util.defined(criteria,"length") && criteria.length > 0) {
       var whereClause = util.createWhereClause(criteria, objectType);
       query = strUtil.format("SELECT COUNT(*) as count FROM %s WHERE %s", objectType, whereClause);
+      if(filterClause != '') {
+        query = strUtil.format("SELECT COUNT(*) as count FROM %s WHERE %s AND %s", objectType, whereClause, filterClause);
+      }
     }
-    //console.log('query: ' + query);
+    
+    console.log('query: ' + query);
+
     odb.db.query(query).then(function(ret){   
+
+      console.log('ret: ' + ret);
+
       var retObj = {
         records: records,
         size: ret[0].count
