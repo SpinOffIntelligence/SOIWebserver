@@ -102,15 +102,25 @@ exports.setRecordImage = function(objectType, logoField, idValue, file, callback
 
 }
 
-exports.searchRecords = function(objectTypes, terms, callback) {
+exports.searchRecords = function(objectTypes, terms, filters, callback) {
 
-	function searchRecs(object, terms,callback) {
-		var query = strUtil.format("select from %s where any() like ",object);
+	function searchRecs(objectType, terms, filters, callback) {
+		var query = strUtil.format("select from %s where any() like ",objectType);
 		query += "'%" + terms + "%'";
-		//console.log('search query:' + query);
+
+    var filterClause = util.createFilterClause(filters, objectType);
+    console.log('********filterClause:');
+    console.dir(filterClause);
+
+    if(filterClause != '') {
+      query += " and " + filterClause;
+    }
+    console.log('search query:' + query);
+
+
 		odb.db.query(query).then(function(records){
-			////console.log('Search Results:');
-			////console.dirrecords);
+			console.log('Search Results:' + records.length);
+			//console.dir(records);
       //recordData = util.prepareOutboundData(recordData);
 			callback(null,records);
 		}).catch(function(error){
@@ -122,7 +132,7 @@ exports.searchRecords = function(objectTypes, terms, callback) {
 	var results=[];
 	async.parallel([
 		function(callback) { //This is the first task, and `callback` is its callback task
-        searchRecs('VPerson', terms, function(err, data) {
+        searchRecs('VPerson', terms, filters, function(err, data) {
         		var obj = {
         			objectType: 'VPerson',
         			results: data
@@ -134,7 +144,7 @@ exports.searchRecords = function(objectTypes, terms, callback) {
         });
     },
     function(callback) { //This is the second task, and `callback` is its callback task
-        searchRecs('VSpinOff', terms, function(err, data) {
+        searchRecs('VSpinOff', terms, filters, function(err, data) {
             var obj = {
               objectType: 'VSpinOff',
               results: data
@@ -146,7 +156,7 @@ exports.searchRecords = function(objectTypes, terms, callback) {
         });
     },
     function(callback) { //This is the second task, and `callback` is its callback task
-        searchRecs('VCompany', terms, function(err, data) {
+        searchRecs('VCompany', terms, filters, function(err, data) {
         		var obj = {
         			objectType: 'VCompany',
         			results: data
@@ -158,7 +168,7 @@ exports.searchRecords = function(objectTypes, terms, callback) {
         });
     },
 		function(callback) { //This is the first task, and `callback` is its callback task
-        searchRecs('VAcquisition', terms, function(err, data) {
+        searchRecs('VAcquisition', terms, filters, function(err, data) {
         		var obj = {
         			objectType: 'VAcquisition',
         			results: data
@@ -168,7 +178,7 @@ exports.searchRecords = function(objectTypes, terms, callback) {
         });
     },
 		function(callback) { //This is the first task, and `callback` is its callback task
-        searchRecs('VInvestment', terms, function(err, data) {
+        searchRecs('VInvestment', terms, filters, function(err, data) {
         		var obj = {
         			objectType: 'VInvestment',
         			results: data
@@ -178,7 +188,7 @@ exports.searchRecords = function(objectTypes, terms, callback) {
         });
     },
 		function(callback) { //This is the first task, and `callback` is its callback task
-        searchRecs('VPatent', terms, function(err, data) {
+        searchRecs('VPatent', terms, filters, function(err, data) {
         		var obj = {
         			objectType: 'VPatent',
         			results: data
@@ -188,7 +198,7 @@ exports.searchRecords = function(objectTypes, terms, callback) {
         });
     },
 		function(callback) { //This is the first task, and `callback` is its callback task
-        searchRecs('VInvestmentFirm', terms, function(err, data) {
+        searchRecs('VInvestmentFirm', terms, filters, function(err, data) {
         		var obj = {
         			objectType: 'VInvestmentFirm',
         			results: data
@@ -198,9 +208,9 @@ exports.searchRecords = function(objectTypes, terms, callback) {
         });
     },
 		function(callback) { //This is the first task, and `callback` is its callback task
-        searchRecs('VUniversity', terms, function(err, data) {
+        searchRecs('VResearchInstitution', terms, filters, function(err, data) {
         		var obj = {
-        			objectType: 'VUniversity',
+        			objectType: 'VResearchInstitution',
         			results: data
         		}
             results.push(obj);
@@ -208,7 +218,7 @@ exports.searchRecords = function(objectTypes, terms, callback) {
         });
     },
     function(callback) { //This is the first task, and `callback` is its callback task
-        searchRecs('VMedia', terms, function(err, data) {
+        searchRecs('VMedia', terms, filters, function(err, data) {
             var obj = {
               objectType: 'VMedia',
               results: data
