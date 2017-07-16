@@ -130,104 +130,25 @@ exports.searchRecords = function(objectTypes, terms, filters, callback) {
 	}
 
 	var results=[];
-	async.parallel([
-		function(callback) { //This is the first task, and `callback` is its callback task
-        searchRecs('VPerson', terms, filters, function(err, data) {
-        		var obj = {
-        			objectType: 'VPerson',
-        			results: data
-        		}
-						// //console.log('VPerson Search Results:');
-						// //console.dirdata);        		
-            results.push(obj);
-            callback();
-        });
-    },
-    function(callback) { //This is the second task, and `callback` is its callback task
-        searchRecs('VSpinOff', terms, filters, function(err, data) {
+  var funcs = [];
+  _.each(objectTypes, function(objectType) {
+    funcs.push(function(callback) { //This is the first task, and `callback` is its callback task
+        searchRecs(objectType, terms, filters, function(err, data) {
             var obj = {
-              objectType: 'VSpinOff',
-              results: data
-            }
-            //console.log('VSpinOff Search Results:');
-            //console.dirdata);            
-            results.push(obj);
-            callback();
-        });
-    },
-    function(callback) { //This is the second task, and `callback` is its callback task
-        searchRecs('VCompany', terms, filters, function(err, data) {
-        		var obj = {
-        			objectType: 'VCompany',
-        			results: data
-        		}
-						//console.log('VCompany Search Results:');
-						//console.dirdata);        		
-            results.push(obj);
-            callback();
-        });
-    },
-		function(callback) { //This is the first task, and `callback` is its callback task
-        searchRecs('VAcquisition', terms, filters, function(err, data) {
-        		var obj = {
-        			objectType: 'VAcquisition',
-        			results: data
-        		}
-            results.push(obj);
-            callback();
-        });
-    },
-		function(callback) { //This is the first task, and `callback` is its callback task
-        searchRecs('VInvestment', terms, filters, function(err, data) {
-        		var obj = {
-        			objectType: 'VInvestment',
-        			results: data
-        		}
-            results.push(obj);
-            callback();
-        });
-    },
-		function(callback) { //This is the first task, and `callback` is its callback task
-        searchRecs('VPatent', terms, filters, function(err, data) {
-        		var obj = {
-        			objectType: 'VPatent',
-        			results: data
-        		}
-            results.push(obj);
-            callback();
-        });
-    },
-		function(callback) { //This is the first task, and `callback` is its callback task
-        searchRecs('VInvestmentFirm', terms, filters, function(err, data) {
-        		var obj = {
-        			objectType: 'VInvestmentFirm',
-        			results: data
-        		}
-            results.push(obj);
-            callback();
-        });
-    },
-		function(callback) { //This is the first task, and `callback` is its callback task
-        searchRecs('VResearchInstitution', terms, filters, function(err, data) {
-        		var obj = {
-        			objectType: 'VResearchInstitution',
-        			results: data
-        		}
-            results.push(obj);
-            callback();
-        });
-    },
-    function(callback) { //This is the first task, and `callback` is its callback task
-        searchRecs('VMedia', terms, filters, function(err, data) {
-            var obj = {
-              objectType: 'VMedia',
+              objectType: objectType,
               results: data
             }
             results.push(obj);
             callback();
         });
-    }
-	], function(err) { //This is the final callback
+    });
+  });
+
+  console.log('********funcs:');
+  console.dir(funcs);
+
+
+	async.parallel(funcs, function(err) { //This is the final callback
     //console.log('All Done');
     //console.dirresults);
     callback(null, results);
