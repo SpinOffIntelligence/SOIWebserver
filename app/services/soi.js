@@ -626,22 +626,11 @@ exports.fetchRecords = function(objectType, criteria, callback) {
 }
 
 exports.getRecordDetails = function(objectType, recordId, depth, filters, searchTerms, schemas, callback) {
-	//var panelRecord={};
-	//panelRecord.id = '#13:1';
 
 	var deep = 3;
 	if(util.defined(depth) && depth > 0) {
 		deep+=(depth*2);
 	}
-
-	// var filters = [];
-  //   {
-  //     objectType : 'EPartner',
-  //     fieldName : 'type',
-  //     filters : ['Customer','Supplier']
-  //   }
-  // ];
-
 
   var whereClause = '';
   var whereCnt=0;
@@ -667,20 +656,27 @@ exports.getRecordDetails = function(objectType, recordId, depth, filters, search
     }
 
     if(showObject) {
-	    var fnd = util.whereProp(filters, 'objectType', propertyName);
-	    console.log('fnd:' + fnd);
-	    console.dir(fnd);
-	    if(util.defined(fnd,"filters.length") && fnd.filters.length > 0) {
-	    	console.log('``````' + util.arrayToList(fnd.filters));
-	      if(filterCnt == 0)
-	          filterClause = strUtil.format("(@rid in (select @rid from %s where %s matches '.*(%s).*'))", fnd.objectType, fnd.fieldName, util.arrayToList(fnd.filters));
-	      else filterClause += strUtil.format(" or (@rid in (select @rid from %s where %s matches '.*(%s).*'))", fnd.objectType, fnd.fieldName, util.arrayToList(fnd.filters));
-	      filterCnt++;
-	    } else {
-	      if(whereCnt==0)
-	        whereClause = strUtil.format("@class = '%s'", propertyName);
-	      whereClause = whereClause + strUtil.format(" or @class = '%s'", propertyName);
-	      whereCnt++;      
+	    var fndFilters = util.whereProp(filters, 'objectType', propertyName);
+	    console.log('fndFilters:' + fndFilters);
+	    console.dir(fndFilters);
+	    var fndFilterCnt=0;
+	    _.each(fndFilters, function(fnd) {
+		    if(util.defined(fnd,"filters.length") && fnd.filters.length > 0) {
+		    	console.log('``````' + util.arrayToList(fnd.filters));
+		    	fndFilterCnt++;
+		      if(filterCnt == 0)
+		          filterClause = strUtil.format("(@rid in (select @rid from %s where %s matches '.*(%s).*'))", fnd.objectType, fnd.fieldName, util.arrayToList(fnd.filters));
+		      else filterClause += strUtil.format(" or (@rid in (select @rid from %s where %s matches '.*(%s).*'))", fnd.objectType, fnd.fieldName, util.arrayToList(fnd.filters));
+		      filterCnt++;
+		    } else {
+		      
+		    }
+	    });
+	    if(fndFilterCnt == 0) {
+				if(whereCnt==0)
+		        whereClause = strUtil.format("@class = '%s'", propertyName);
+		     whereClause = whereClause + strUtil.format(" or @class = '%s'", propertyName);
+		     whereCnt++;      
 	    }
     }
   }
