@@ -676,14 +676,18 @@ exports.getRecordDetails = function(objectType, recordId, depth, filters, search
 	    console.log('filterClause:' + filterClause)
 			if(search) {
 
-				if(whereCnt==0)
-					whereClause = strUtil.format("@class = '%s'", propertyName);
-				whereClause = whereClause + strUtil.format(" or @class = '%s'", propertyName);
-
 				if(filterClause != '') {
+
 					if(whereSearchClause=='')
-						whereSearchClause = strUtil.format("(select @rid from %s where %s)", propertyName, filterClause);
-					else whereSearchClause += strUtil.format(" or (select @rid from %s where %s)", propertyName, filterClause);
+						whereSearchClause = strUtil.format("(@rid in (select @rid from %s where %s))", propertyName, filterClause);
+					else whereSearchClause += strUtil.format(" or (@rid in (select @rid from %s where %s))", propertyName, filterClause);
+				
+				} else {
+
+					if(whereCnt==0)
+						whereClause = strUtil.format("@class = '%s'", propertyName);
+					whereClause = whereClause + strUtil.format(" or @class = '%s'", propertyName);
+
 				}
 
 				console.log('whereSearchClause:' + whereSearchClause)
@@ -716,7 +720,7 @@ exports.getRecordDetails = function(objectType, recordId, depth, filters, search
 
   if(search) {
 
-  	query = strUtil.format("select from (%s) where @rid in (%s)", query, whereSearchClause);
+  	query = strUtil.format("select from (%s) where %s", query, whereSearchClause);
 
   } else {
 
