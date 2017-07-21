@@ -625,7 +625,7 @@ exports.fetchRecords = function(objectType, criteria, callback) {
   });
 }
 
-exports.getRecordDetails = function(objectType, recordId, depth, filters, searchTerms, schemas, callback) {
+exports.getRecordDetails = function(objectType, recordId, depth, filters, searchTerms, schemas, search, callback) {
 
 	var deep = 3;
 	if(util.defined(depth) && depth > 0) {
@@ -633,9 +633,9 @@ exports.getRecordDetails = function(objectType, recordId, depth, filters, search
 	}
 
   var whereClause = '';
+  var whereSearchClause = '';
   var whereCnt=0;
 
-  var filterClause = '';
   var filterCnt=0;
 
   var hideCnt=0;
@@ -657,9 +657,10 @@ exports.getRecordDetails = function(objectType, recordId, depth, filters, search
 
     if(showObject) {
 	    var fndFilters = util.whereProp(filters, 'objectType', propertyName);
-	    console.log('fndFilters:' + fndFilters);
-	    console.dir(fndFilters);
+	    //console.log('fndFilters:' + fndFilters);
+	    //console.dir(fndFilters);
 	    var fndFilterCnt=0;
+	    var filterClause = '';
 	    _.each(fndFilters, function(fnd) {
 		    if(util.defined(fnd,"filters.length") && fnd.filters.length > 0) {
 		    	console.log('``````' + util.arrayToList(fnd.filters));
@@ -672,43 +673,66 @@ exports.getRecordDetails = function(objectType, recordId, depth, filters, search
 		      
 		    }
 	    });
-	    if(fndFilterCnt == 0) {
-				if(whereCnt==0)
-		        whereClause = strUtil.format("@class = '%s'", propertyName);
-		    whereClause = whereClause + strUtil.format(" or @class = '%s'", propertyName);
-		           
-	    } else {
+	    console.log('filterClause:' + filterClause)
+			if(search) {
 
 				if(whereCnt==0)
-		        whereClause = strUtil.format("(@class = '%s' and %s)", propertyName, filterClause);
-		    whereClause = whereClause + strUtil.format(" or (@class = '%s' and %s)", propertyName, filterClause);
-	    }
+					whereClause = strUtil.format("@class = '%s'", propertyName);
+				whereClause = whereClause + strUtil.format(" or @class = '%s'", propertyName);
+
+				if(filterClause != '') {
+					if(whereSearchClause=='')
+						whereSearchClause = strUtil.format("(select @rid from %s where %s)", propertyName, filterClause);
+					else whereSearchClause += strUtil.format(" or (select @rid from %s where %s)", propertyName, filterClause);
+				}
+
+				console.log('whereSearchClause:' + whereSearchClause)
+
+			} else {
+
+		    if(fndFilterCnt == 0) {
+					if(whereCnt==0)
+			        whereClause = strUtil.format("@class = '%s'", propertyName);
+			    whereClause = whereClause + strUtil.format(" or @class = '%s'", propertyName);
+			           
+		    } else {
+
+					if(whereCnt==0)
+			        whereClause = strUtil.format("(@class = '%s' and %s)", propertyName, filterClause);
+			    whereClause = whereClause + strUtil.format(" or (@class = '%s' and %s)", propertyName, filterClause);
+		    }
+
+
+			}
+
 	    whereCnt++;
     }
   }
 
 	console.log('whereClause:' + whereClause)
-	console.log('filterClause:' + filterClause)
+	
 
   var query = strUtil.format("traverse * from  %s while $depth < %s", recordId, deep);
-  if(whereClause.length > 0 || hideCnt > 0) {
 
-    //query = "select from (" + query + " and "
+  if(search) {
 
-    if(whereClause.length > 0) {
-      query += " and (" + whereClause + ")";
-    }      
+  	query = strUtil.format("select from (%s) where @rid in (%s)", query, whereSearchClause);
 
-    // if(filterClause.length > 0)
-    //   query += " and (" + filterClause + ")";
+  } else {
 
-    // query += ")";
-  }
+ 	  if(whereClause.length > 0 || hideCnt > 0) {
 
-  if(util.defined(searchTerms)) {
-    query = "select from (" + query + ") where any() like " + "'%" + searchTerms + "%'"
-  }
+	    if(whereClause.length > 0) {
+	      query += " and (" + whereClause + ")";
+	    }      
 
+	  }
+
+	  if(util.defined(searchTerms)) {
+	    query = "select from (" + query + ") where any() like " + "'%" + searchTerms + "%'"
+	  }
+
+ }
 
 	console.log("query: " + query);
 
