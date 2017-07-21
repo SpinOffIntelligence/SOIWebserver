@@ -665,8 +665,8 @@ exports.getRecordDetails = function(objectType, recordId, depth, filters, search
 		    	console.log('``````' + util.arrayToList(fnd.filters));
 		    	fndFilterCnt++;
 		      if(filterCnt == 0)
-		          filterClause = strUtil.format("(@rid in (select @rid from %s where %s matches '.*(%s).*'))", fnd.objectType, fnd.fieldName, util.arrayToList(fnd.filters));
-		      else filterClause += strUtil.format(" or (@rid in (select @rid from %s where %s matches '.*(%s).*'))", fnd.objectType, fnd.fieldName, util.arrayToList(fnd.filters));
+		          filterClause = strUtil.format("%s matches '.*(%s).*'", fnd.fieldName, util.arrayToList(fnd.filters));
+		      else filterClause += strUtil.format(" or %s matches '.*(%s).*'", fnd.fieldName, util.arrayToList(fnd.filters));
 		      filterCnt++;
 		    } else {
 		      
@@ -675,9 +675,15 @@ exports.getRecordDetails = function(objectType, recordId, depth, filters, search
 	    if(fndFilterCnt == 0) {
 				if(whereCnt==0)
 		        whereClause = strUtil.format("@class = '%s'", propertyName);
-		     whereClause = whereClause + strUtil.format(" or @class = '%s'", propertyName);
-		     whereCnt++;      
+		    whereClause = whereClause + strUtil.format(" or @class = '%s'", propertyName);
+		           
+	    } else {
+
+				if(whereCnt==0)
+		        whereClause = strUtil.format("(@class = '%s' and %s)", propertyName, filterClause);
+		    whereClause = whereClause + strUtil.format(" or (@class = '%s' and %s)", propertyName, filterClause);
 	    }
+	    whereCnt++;
     }
   }
 
@@ -685,18 +691,18 @@ exports.getRecordDetails = function(objectType, recordId, depth, filters, search
 	console.log('filterClause:' + filterClause)
 
   var query = strUtil.format("traverse * from  %s while $depth < %s", recordId, deep);
-  if(filterClause.length > 0 || hideCnt > 0) {
+  if(whereClause.length > 0 || hideCnt > 0) {
 
-    query = "select from (" + query + " and "
+    //query = "select from (" + query + " and "
 
     if(whereClause.length > 0) {
-      query += "(" + whereClause + ")";
+      query += " and (" + whereClause + ")";
     }      
 
-    if(filterClause.length > 0)
-      query += " and (" + filterClause + ")";
+    // if(filterClause.length > 0)
+    //   query += " and (" + filterClause + ")";
 
-    query += ")";
+    // query += ")";
   }
 
   if(util.defined(searchTerms)) {
