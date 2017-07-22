@@ -514,7 +514,7 @@ exports.addEdge = function(objectType, recordData, sourceId, targetId, callback)
 	}
 }
 
-exports.fetchGridRecords = function(objectType, gridFields, currentPage, pageSize, sortField, sortOrder, criteria, filters, callback) {
+exports.fetchGridRecords = function(objectType, gridFields, currentPage, pageSize, sortField, sortOrder, criteria, filters, schemas, callback) {
 
 	var props = '*, ';
 	for(var i=0; i<gridFields.length; i++) {
@@ -549,10 +549,19 @@ exports.fetchGridRecords = function(objectType, gridFields, currentPage, pageSiz
   console.log('********filterClause:');
   console.dir(filterClause);
 
+  var edgeFilterClause = util.createEdgeFilterClause(filters, schemas, objectType);
+  console.log('********edgeFilterClause:');
+  console.dir(edgeFilterClause);
+
 
 	var query = strUtil.format("SELECT %s FROM %s %s SKIP %s LIMIT %s", props, objectType, sortClause, skip, pageSize);
   if(filterClause != '') {
     query = strUtil.format("SELECT %s FROM %s where %s %s SKIP %s LIMIT %s", props, objectType, filterClause, sortClause, skip, pageSize);
+    if(edgeFilterClause != '')
+    	query = strUtil.format("SELECT %s FROM %s where %s and %s %s SKIP %s LIMIT %s", props, objectType, filterClause, edgeFilterClause, sortClause, skip, pageSize);
+  } else {
+  	if(edgeFilterClause != '')
+  		query = strUtil.format("SELECT %s FROM %s where %s %s SKIP %s LIMIT %s", props, objectType, edgeFilterClause, sortClause, skip, pageSize);
   }
 
   if(util.defined(criteria,"length") && criteria.length > 0) {

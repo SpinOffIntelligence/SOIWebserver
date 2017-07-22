@@ -3,6 +3,7 @@ var moment = require('moment');
 var soiServices = require('../app/services/soi');
 var config = require('../config/config');
 var strUtil = require('util');
+var _ = require('underscore');
 
 var schemas = [];
 
@@ -65,6 +66,23 @@ function createFilterClause(filters, objectType) {
       else filterClause += strUtil.format(" and %s matches '.*(%s).*'", filterObj.fieldName, this.arrayToList(filterObj.filters));      
     }
   }
+  return filterClause;
+}
+
+function createEdgeFilterClause(filters, schemas, objectType) {
+  var filterClause = '';
+  var _that = this;
+  _.each(schemas, function(item) {
+
+    console.log('item')
+    console.dir(item);
+
+    if(_that.defined(item,"model.isRelationship") && item.model.isRelationship && item.selected == true) {
+      if(filterClause == "") 
+        filterClause = strUtil.format("in('%s').size() > 0", item.objectType);
+      else filterClause = strUtil.format(" and in('%s').size() > 0", item.objectType);
+    }
+  });
   return filterClause;
 }
 
@@ -410,5 +428,8 @@ module.exports.formatDBDate = formatDBDate;
 module.exports.logging = logging;
 module.exports.createWhereClause = createWhereClause;
 module.exports.createFilterClause = createFilterClause;
+module.exports.createEdgeFilterClause = createEdgeFilterClause;
+
+
 module.exports.arrayToList = arrayToList;
 module.exports.whereProp = whereProp;

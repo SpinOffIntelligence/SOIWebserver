@@ -165,6 +165,7 @@ exports.fetchGridRecords = function(req, res, next) {
 	var sortOrder = req.body.sortOrder;
 	var criteria = req.body.criteria;
 	var filters = req.body.filters;
+	var schemas = req.body.schemas;
 
 	console.log('*** fetchGridRecords ***');
 	console.dir(objectType);
@@ -182,8 +183,10 @@ exports.fetchGridRecords = function(req, res, next) {
 	console.dir(criteria);
 	console.log('~~~~~~~~~~~~~~');
 	console.dir(filters);
+	console.log('~~~~~~~~~~~~~~');
+	console.dir(schemas);
 
-	soiServices.fetchGridRecords(objectType, gridFields, currentPage, pageSize, sortField, sortOrder, criteria, filters, function(err, data) {
+	soiServices.fetchGridRecords(objectType, gridFields, currentPage, pageSize, sortField, sortOrder, criteria, filters, schemas, function(err, data) {
 		res.json(data);
 	});
 }
