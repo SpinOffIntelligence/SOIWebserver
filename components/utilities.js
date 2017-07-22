@@ -80,7 +80,7 @@ function createEdgeFilterClause(filters, schemas, objectType) {
     if(_that.defined(item,"model.isRelationship") && item.model.isRelationship && item.selected == true) {
       if(filterClause == "") 
         filterClause = strUtil.format("in('%s').size() > 0", item.objectType);
-      else filterClause = strUtil.format(" and in('%s').size() > 0", item.objectType);
+      else filterClause += strUtil.format(" OR in('%s').size() > 0", item.objectType);
     }
   });
   return filterClause;

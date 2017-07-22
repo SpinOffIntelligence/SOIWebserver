@@ -558,7 +558,7 @@ exports.fetchGridRecords = function(objectType, gridFields, currentPage, pageSiz
   if(filterClause != '') {
     query = strUtil.format("SELECT %s FROM %s where %s %s SKIP %s LIMIT %s", props, objectType, filterClause, sortClause, skip, pageSize);
     if(edgeFilterClause != '')
-    	query = strUtil.format("SELECT %s FROM %s where %s and %s %s SKIP %s LIMIT %s", props, objectType, filterClause, edgeFilterClause, sortClause, skip, pageSize);
+    	query = strUtil.format("SELECT %s FROM %s where %s AND (%s) %s SKIP %s LIMIT %s", props, objectType, filterClause, edgeFilterClause, sortClause, skip, pageSize);
   } else {
   	if(edgeFilterClause != '')
   		query = strUtil.format("SELECT %s FROM %s where %s %s SKIP %s LIMIT %s", props, objectType, edgeFilterClause, sortClause, skip, pageSize);
@@ -568,7 +568,7 @@ exports.fetchGridRecords = function(objectType, gridFields, currentPage, pageSiz
     var whereClause = util.createWhereClause(criteria, objectType);
     var query = strUtil.format("SELECT %s FROM %s WHERE %s %s SKIP %s LIMIT %s", props, objectType, whereClause, sortClause, skip, pageSize);
     if(filterClause != '') {
-      query = strUtil.format("SELECT %s FROM %s WHERE %s and %s %s SKIP %s LIMIT %s", props, objectType, whereClause, filterClause, sortClause, skip, pageSize);
+      query = strUtil.format("SELECT %s FROM %s WHERE %s AND (%s) %s SKIP %s LIMIT %s", props, objectType, whereClause, filterClause, sortClause, skip, pageSize);
     }
   }
 	console.log('query: ' + query);
@@ -577,23 +577,23 @@ exports.fetchGridRecords = function(objectType, gridFields, currentPage, pageSiz
 
     records = util.prepareOutboundData(objectType, records);
 
-		// var recs=[];
-		// for(var i=0; i<records.length; i++) {
-		// 	var rec = records[i];
-		// 	var recId = rec['@rid'];
-		// 	rec.id = '#'+	recId.cluster + ':' + recId.position;
-		// 	recs.push(rec);
-		// }
-
     var query = strUtil.format("SELECT COUNT(*) as count FROM %s", objectType);
     if(filterClause != '') {
       query = strUtil.format("SELECT COUNT(*) as count FROM %s WHERE %s", objectType, filterClause);
-    }    
+	    if(edgeFilterClause != '')
+	      query = strUtil.format("SELECT COUNT(*) as count FROM %s WHERE %s AND (%s)", objectType, filterClause, edgeFilterClause);
+    } else if(edgeFilterClause != '') {
+    	query = strUtil.format("SELECT COUNT(*) as count FROM %s WHERE %s", objectType, edgeFilterClause);
+    }
     if(util.defined(criteria,"length") && criteria.length > 0) {
       var whereClause = util.createWhereClause(criteria, objectType);
       query = strUtil.format("SELECT COUNT(*) as count FROM %s WHERE %s", objectType, whereClause);
       if(filterClause != '') {
-        query = strUtil.format("SELECT COUNT(*) as count FROM %s WHERE %s AND %s", objectType, whereClause, filterClause);
+        query = strUtil.format("SELECT COUNT(*) as count FROM %s WHERE %s AND (%s)", objectType, whereClause, filterClause);
+        if(edgeFilterClause != '')
+	        query = strUtil.format("SELECT COUNT(*) as count FROM %s WHERE %s AND %s AND %s", objectType, whereClause, filterClause, edgeFilterClause);
+      } else if(edgeFilterClause != '') {
+      	query = strUtil.format("SELECT COUNT(*) as count FROM %s WHERE %s AND %s", objectType, whereClause, edgeFilterClause);
       }
     }
     
