@@ -74,15 +74,52 @@ function createEdgeFilterClause(filters, schemas, objectType) {
   var _that = this;
   _.each(schemas, function(item) {
 
-    console.log('item')
+    console.log('schemas item:')
     console.dir(item);
 
     if(_that.defined(item,"model.isRelationship") && item.model.isRelationship && item.selected == true) {
       if(filterClause == "") 
         filterClause = strUtil.format("in('%s').size() > 0", item.objectType);
       else filterClause += strUtil.format(" OR in('%s').size() > 0", item.objectType);
+
+      console.log('filterClause:' + filterClause)
+
+      var fndFilters = this.whereProp(filters, 'objectType', item.objectType);
+      console.log('fndFilter:' + fndFilter);
+
+      if(this.defined(fndFilter)) {
+        _.each(fndFilter, function(filterItem) {
+
+          if(filterItem.filters.length > 0) {
+
+            console.log('filterItem:' + filterItem)
+
+            var advWhereClause = '';
+            _.each(filterItem.filters, function(advItem) {
+
+              console.log('advItem:' + advItem)
+
+              if(advWhereClause == "")
+                advWhereClause = strUtil.format("%s = '%s'", filterItem.fieldName, advItem.name);
+              else advWhereClause = strUtil.format(" or %s = '%s'", filterItem.fieldName, advItem.name);
+            })
+            console.log('advWhereClause:' + advWhereClause)
+
+          }
+
+          if(filterClause == "") 
+            filterClause = strUtil.format("@rid in (select from (select @rid, OUTE('%s').%s as %s from %s unwind %s) where %s)", item.objectType, filterItem.fieldName, filterItem.fieldName, objectType, filterItem.fieldName, advWhereClause);
+          else filterClause += strUtil.format("OR @rid in (select from (select @rid, OUTE('%s').%s as %s from %s unwind %s) where %s)", item.objectType, filterItem.fieldName, filterItem.fieldName, objectType, filterItem.fieldName, advWhereClause);
+
+          console.log('filterClause:' + filterClause)
+
+        })
+      }
     }
   });
+
+  console.log('filterClause DONE:' + filterClause)
+
   return filterClause;
 }
 
