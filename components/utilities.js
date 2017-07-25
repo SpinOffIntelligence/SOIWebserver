@@ -84,11 +84,14 @@ function createEdgeFilterClause(filters, schemas, objectType) {
 
       console.log('filterClause:' + filterClause)
 
-      var fndFilters = this.whereProp(filters, 'objectType', item.objectType);
-      console.log('fndFilter:' + fndFilter);
+      var fndFilters = _that.whereProp(filters, 'objectType', item.objectType);
+      console.log('fndFilters:' + fndFilters);
 
-      if(this.defined(fndFilter)) {
-        _.each(fndFilter, function(filterItem) {
+      if(_that.defined(fndFilters)) {
+
+        filterClause = "";
+
+        _.each(fndFilters, function(filterItem) {
 
           if(filterItem.filters.length > 0) {
 
@@ -109,7 +112,7 @@ function createEdgeFilterClause(filters, schemas, objectType) {
 
           if(filterClause == "") 
             filterClause = strUtil.format("@rid in (select from (select @rid, OUTE('%s').%s as %s from %s unwind %s) where %s)", item.objectType, filterItem.fieldName, filterItem.fieldName, objectType, filterItem.fieldName, advWhereClause);
-          else filterClause += strUtil.format("OR @rid in (select from (select @rid, OUTE('%s').%s as %s from %s unwind %s) where %s)", item.objectType, filterItem.fieldName, filterItem.fieldName, objectType, filterItem.fieldName, advWhereClause);
+          else filterClause += strUtil.format(" OR @rid in (select from (select @rid, OUTE('%s').%s as %s from %s unwind %s) where %s)", item.objectType, filterItem.fieldName, filterItem.fieldName, objectType, filterItem.fieldName, advWhereClause);
 
           console.log('filterClause:' + filterClause)
 
