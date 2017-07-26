@@ -168,23 +168,23 @@ exports.fetchGridRecords = function(req, res, next) {
 	var schemas = req.body.schemas;
 
 	console.log('*** fetchGridRecords ***');
-	console.dir(objectType);
-	console.log('~~~~~~~~~~~~~~');
-	console.dir(gridFields);
-	console.log('~~~~~~~~~~~~~~');
-	console.dir(currentPage);
-	console.log('~~~~~~~~~~~~~~');
-	console.dir(pageSize);
-	console.log('~~~~~~~~~~~~~~');
-	console.dir(sortField);
-	console.log('~~~~~~~~~~~~~~');
-	console.dir(sortOrder);
-	console.log('~~~~~~~~~~~~~~');
-	console.dir(criteria);
-	console.log('~~~~~~~~~~~~~~');
-	console.dir(filters);
-	console.log('~~~~~~~~~~~~~~');
-	console.dir(schemas);
+	// console.dir(objectType);
+	// console.log('~~~~~~~~~~~~~~');
+	// console.dir(gridFields);
+	// console.log('~~~~~~~~~~~~~~');
+	// console.dir(currentPage);
+	// console.log('~~~~~~~~~~~~~~');
+	// console.dir(pageSize);
+	// console.log('~~~~~~~~~~~~~~');
+	// console.dir(sortField);
+	// console.log('~~~~~~~~~~~~~~');
+	// console.dir(sortOrder);
+	// console.log('~~~~~~~~~~~~~~');
+	// console.dir(criteria);
+	// console.log('~~~~~~~~~~~~~~');
+	// console.dir(filters);
+	// console.log('~~~~~~~~~~~~~~');
+	// console.dir(schemas);
 
 	soiServices.fetchGridRecords(objectType, gridFields, currentPage, pageSize, sortField, sortOrder, criteria, filters, schemas, function(err, data) {
 		res.json(data);
@@ -383,14 +383,14 @@ exports.addEdge = function(req, res, next) {
 	var sourceId = req.body.sourceId;
 	var targetId = req.body.targetId;
 
-	//console.log('*** addEdge ***');
-	//console.dir(objectType);
-	//console.log('~~~~~~~~~~~~~~');
-	//console.dir(recordData);
-	//console.log('~~~~~~~~~~~~~~');
-	//console.dir(sourceId);
-	//console.log('~~~~~~~~~~~~~~');
-	//console.dir(targetId);
+	console.log('*** addEdge ***');
+	console.dir(objectType);
+	console.log('~~~~~~~~~~~~~~');
+	console.dir(recordData);
+	console.log('~~~~~~~~~~~~~~');
+	console.dir(sourceId);
+	console.log('~~~~~~~~~~~~~~');
+	console.dir(targetId);
 
 	soiServices.addEdge(objectType, recordData, sourceId, targetId, function(err, data) {
 		res.json(data);

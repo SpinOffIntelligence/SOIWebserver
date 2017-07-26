@@ -52,7 +52,7 @@
         util.setSchemas(data);
 
         console.log('$$$$ schemas:');
-        console.dir(util.schemas)
+        //console.dir(util.schemas)
       });
 
 

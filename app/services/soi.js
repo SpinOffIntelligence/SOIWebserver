@@ -473,42 +473,42 @@ exports.updateEdge = function(objectType, recordData, sourceId, targetId, callba
 
 exports.addEdge = function(objectType, recordData, sourceId, targetId, callback) {
 
-  //console.log('>>>> addEdge <<<<');
-  //console.dirobjectType);
-  //console.log('~~~~~~~~~~~~~~');
-  //console.dirrecordData);
-  //console.log('~~~~~~~~~~~~~~');
-  //console.dirsourceId);
-  //console.log('~~~~~~~~~~~~~~');
-  //console.dirtargetId);
+  console.log('>>>> addEdge <<<<');
+  console.dir(objectType);
+  console.log('~~~~~~~~~~~~~~');
+  console.dir(recordData);
+  console.log('~~~~~~~~~~~~~~');
+  console.dir(sourceId);
+  console.log('~~~~~~~~~~~~~~');
+  console.dir(targetId);
 
 	var fndProp = false;
 	for(var propertyName in recordData) {
 		fndProp = true;
 	}
-	//console.log('^^^ fndProp:' + fndProp);
+	console.log('^^^ fndProp:' + fndProp);
 
   recordData = util.prepareInboundData(objectType, recordData);
 
 	var addedEdge;
 	if(fndProp) {
 		var query = strUtil.format("CREATE EDGE %s FROM %s TO %s CONTENT %s", objectType, sourceId, targetId, JSON.stringify(recordData));
-		//console.log('query:' + query);
+		console.log('query:' + query);
 		odb.db.query(query).then(function(records){
-	   		//console.log('records:' + records);
+	   		console.log('records:' + records);
    			callback(null, records);
 		}).catch(function(e) {
-			//console.log('error:' + e);
+			console.log('error:' + e);
 			callback(e, null);
 	  });			
 	} else {
 		var query = strUtil.format("CREATE EDGE %s FROM %s TO %s", objectType, sourceId, targetId);
-		//console.log('query:' + query);
+		console.log('query:' + query);
 		odb.db.query(query).then(function(records){
-	   		//console.log('records:' + records);
+	   		console.log('records:' + records);
    			callback(null, records);
 		}).catch(function(e) {
-			//console.log('error:' + e);
+			console.log('error:' + e);
 			callback(e, null);
 	  });			
 	}
@@ -546,12 +546,10 @@ exports.fetchGridRecords = function(objectType, gridFields, currentPage, pageSiz
   }
 
   var filterClause = util.createFilterClause(filters, objectType);
-  console.log('********filterClause:');
-  console.dir(filterClause);
+  console.log('********filterClause:' + filterClause);
 
   var edgeFilterClause = util.createEdgeFilterClause(filters, schemas, objectType);
-  console.log('********edgeFilterClause:');
-  console.dir(edgeFilterClause);
+  console.log('********edgeFilterClause:' + edgeFilterClause);
 
 
 	var query = strUtil.format("SELECT %s FROM %s %s SKIP %s LIMIT %s", props, objectType, sortClause, skip, pageSize);
