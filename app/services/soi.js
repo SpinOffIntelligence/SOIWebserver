@@ -490,6 +490,9 @@ exports.addEdge = function(objectType, recordData, sourceId, targetId, callback)
 
   recordData = util.prepareInboundData(objectType, recordData);
 
+  console.log('prepare data:');
+  console.dir(recordData);
+
 	var addedEdge;
 	if(fndProp) {
 		var query = strUtil.format("CREATE EDGE %s FROM %s TO %s CONTENT %s", objectType, sourceId, targetId, JSON.stringify(recordData));
