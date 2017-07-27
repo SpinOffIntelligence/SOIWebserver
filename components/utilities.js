@@ -117,8 +117,8 @@ function createEdgeFilterClause(filters, schemas, objectType) {
       if(advWhereClause == '') {
 
         if(filterClause == "") 
-          filterClause = strUtil.format("in('%s').size() > 0", item.objectType);
-        else filterClause += strUtil.format(" OR in('%s').size() > 0", item.objectType);
+          filterClause = strUtil.format("both('%s').size() > 0", item.objectType);
+        else filterClause += strUtil.format(" OR both('%s').size() > 0", item.objectType);
 
         console.log('filterClause:' + filterClause)        
 
