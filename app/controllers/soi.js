@@ -168,8 +168,8 @@ exports.fetchGridRecords = function(req, res, next) {
 	var schemas = req.body.schemas;
 
 	console.log('*** fetchGridRecords ***');
-	// console.dir(objectType);
-	// console.log('~~~~~~~~~~~~~~');
+	console.dir(objectType);
+	console.log('~~~~~~~~~~~~~~');
 	// console.dir(gridFields);
 	// console.log('~~~~~~~~~~~~~~');
 	// console.dir(currentPage);

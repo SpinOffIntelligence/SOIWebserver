@@ -58,6 +58,10 @@ function arrayToList(arrayValues) {
 function createFilterClause(filters, objectType) {
   var filterClause = '';
   var fndFilters = this.whereProp(filters, 'objectType', objectType);
+
+  console.log('fndFilters:')
+  console.dir(fndFilters);
+
   for(var i=0; i<fndFilters.length; i++) {
     var filterObj = fndFilters[i];
     if(filterObj.filters.length > 0) {
@@ -74,11 +78,14 @@ function createEdgeFilterClause(filters, schemas, objectType) {
   var _that = this;
   _.each(schemas, function(item) {
 
-    console.log('schemas item:')
-    //console.dir(item);
+      console.log('schemas item:')
+      console.dir(item);
+
 
     if(_that.defined(item,"model.isRelationship") && item.model.isRelationship && item.selected == true) {
 
+      console.log('isRelationship:')
+      
       var fndFilters = _that.whereProp(filters, 'objectType', item.objectType);
       console.log('fndFilters:' + fndFilters);
       var advWhereClause = '';
