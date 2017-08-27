@@ -20,6 +20,11 @@ module.exports = function(app) {
 	app.post('/soi/getRecordDetails', soiControllers.getRecordDetails);
 	app.post('/soi/fetchPanelRecords', soiControllers.fetchPanelRecords);
 
+	app.post('/soi/findShortestPath', soiControllers.findShortestPath);
+
+
+	
+
 	app.post('/soi/fetchPanelRecord', soiControllers.fetchPanelRecord);
 
 	app.post('/soi/updatePanelRecord', soiControllers.updatePanelRecord);

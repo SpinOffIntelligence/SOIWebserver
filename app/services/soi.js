@@ -635,6 +635,19 @@ exports.fetchRecords = function(objectType, criteria, callback) {
   });
 }
 
+exports.findShortestPath = function(src, dest, callback) {
+
+    var query = strUtil.format("select shortestPath(%s, %s)", src, dest);
+
+	odb.db.query(query).then(function(records){
+		callback(null,records);
+	}).catch(function(error){
+	    console.error('Exception: ' + error); 
+	    callback(error,null);   
+  });
+}
+
+
 exports.getRecordDetails = function(objectType, recordId, depth, filters, searchTerms, schemas, search, callback) {
 
 	var deep = 3;
