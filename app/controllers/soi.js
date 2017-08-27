@@ -24,6 +24,7 @@ exports.importStats = function(req, res, next) {
 exports.searchRecords = function(req, res, next) {
 	var objectTypes = req.body.objectTypes;
 	var terms = req.body.terms;
+	var notSearchTerms = req.body.notSearchTerms
 	var filters = req.body.filters;
 
 	console.log('*** searchRecords ***');
@@ -31,9 +32,11 @@ exports.searchRecords = function(req, res, next) {
 	console.log('~~~~~~~~~~~~~~');
 	console.dir(terms);
 	console.log('~~~~~~~~~~~~~~');
+	console.dir(notSearchTerms);
+	console.log('~~~~~~~~~~~~~~');
 	console.dir(filters);
 
-	soiServices.searchRecords(objectTypes, terms, filters, function(err, data) {
+	soiServices.searchRecords(objectTypes, terms, notSearchTerms, filters, function(err, data) {
 		res.json(data);
 	});
 }

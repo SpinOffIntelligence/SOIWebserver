@@ -102,12 +102,45 @@ exports.setRecordImage = function(objectType, logoField, idValue, file, callback
 
 }
 
-exports.searchRecords = function(objectTypes, terms, filters, callback) {
+exports.searchRecords = function(objectTypes, terms, notSearchTerms, filters, callback) {
 
 	function searchRecs(objectType, terms, filters, callback) {
-		var query = strUtil.format("select from %s where any() like ",objectType);
-		query += "'%" + terms + "%'";
 
+		var termsClause = "@id = 1";
+		var notTermsClause = "";
+
+		// Create List of Terms
+		if(util.defined(terms)) {
+
+			termsClause = "";
+			var inTerms = terms.split(',');
+			_.each(inTerms, function(item) {
+				var term = item.trim();
+				if(termsClause == "")
+					termsClause = strUtil.format("(any() CONTAINSTEXT '%s')",term);
+				else termsClause += strUtil.format(" OR (any() CONTAINSTEXT '%s')",term);
+			});
+
+		}
+
+		// Create List of Terms
+		if(util.defined(notSearchTerms)) {
+
+			var inTerms = notSearchTerms.split(',');
+			_.each(inTerms, function(item) {
+				var term = item.trim();
+				if(notTermsClause == "")
+					notTermsClause = strUtil.format("NOT(any() CONTAINSTEXT '%s')",term);
+				else notTermsClause += strUtil.format(" AND NOT(any() CONTAINSTEXT '%s')",term);
+			});
+
+		}
+
+		var query = strUtil.format("select from %s where (%s) ",objectType, termsClause);
+		if(notTermsClause != "") {
+			query = strUtil.format("select from %s where (%s) AND (%s) ",objectType, notTermsClause, termsClause);
+		}
+		
     var filterClause = util.createFilterClause(filters, objectType);
     console.log('********filterClause:');
     console.dir(filterClause);
