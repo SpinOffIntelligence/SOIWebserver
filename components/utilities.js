@@ -60,15 +60,21 @@ function createFilterClause(filters, objectType) {
   var fndFilters = this.whereProp(filters, 'objectType', objectType);
 
   console.log('fndFilters:')
-  console.dir(fndFilters);
+  //console.dir(fndFilters);
 
   for(var i=0; i<fndFilters.length; i++) {
     var filterObj = fndFilters[i];
-    if(filterObj.filters.length > 0) {
+    if(filterObj.filters.length > 0 && (filterObj.controlType == "picklist" || filterObj =="multiselect")) {
       if(filterClause == '')
         filterClause = strUtil.format("%s matches '.*(%s).*'", filterObj.fieldName, this.arrayToList(filterObj.filters));
       else filterClause += strUtil.format(" and %s matches '.*(%s).*'", filterObj.fieldName, this.arrayToList(filterObj.filters));      
+
+    } else if(filterObj.startDate != null && filterObj.endDate != null) {
+      if(filterClause == '')
+        filterClause = strUtil.format("(%s between '%s' and '%s')", filterObj.fieldName, moment(filterObj.startDate).format("YYYY-MM-DD hh:mm:ss"), moment(filterObj.endDate).format("YYYY-MM-DD hh:mm:ss"));
+      else filterClause += strUtil.format(" and (%s between '%s' and '%s')", filterObj.fieldName, moment(filterObj.startDate).format("YYYY-MM-DD hh:mm:ss"), moment(filterObj.endDate).format("YYYY-MM-DD hh:mm:ss"));
     }
+
   }
   return filterClause;
 }
