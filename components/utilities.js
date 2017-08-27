@@ -96,7 +96,7 @@ function createEdgeFilterClause(filters, schemas, objectType) {
       console.log('fndFilters:' + fndFilters);
       var advWhereClause = '';
 
-      if(_that.defined(fndFilters) && fndFilters.length > 0) {
+      if(_that.defined(fndFilters) && fndFilters.length > 0 && (filterObj.controlType == "picklist" || filterObj =="multiselect")) {
 
         _.each(fndFilters, function(filterItem) {
 
@@ -125,7 +125,10 @@ function createEdgeFilterClause(filters, schemas, objectType) {
           }
 
         })
-      } 
+      } else if(fndFilters.startDate != null && fndFilters.endDate != null) {
+
+          // To Do Add Date Clause
+      }
 
       if(advWhereClause == '') {
 
