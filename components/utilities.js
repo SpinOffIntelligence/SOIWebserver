@@ -85,7 +85,7 @@ function createEdgeFilterClause(filters, schemas, objectType) {
   _.each(schemas, function(item) {
 
       console.log('schemas item:')
-      console.dir(item);
+      //console.dir(item);
 
 
     if(_that.defined(item,"model.isRelationship") && item.model.isRelationship && item.selected == true) {
@@ -93,44 +93,55 @@ function createEdgeFilterClause(filters, schemas, objectType) {
       console.log('isRelationship:')
       
       var fndFilters = _that.whereProp(filters, 'objectType', item.objectType);
-      console.log('fndFilters:' + fndFilters);
-      var advWhereClause = '';
+      console.log('fndFilters:');
+      console.dir(fndFilters);
 
-      if(_that.defined(fndFilters) && fndFilters.length > 0 && (filterObj.controlType == "picklist" || filterObj =="multiselect")) {
+      var advWhereClause = '';
+      var hadAdv = false;
+
+      if(_that.defined(fndFilters) && fndFilters.length > 0) {
 
         _.each(fndFilters, function(filterItem) {
 
+          console.log('filterItem:');
+          console.dir(filterItem);
+          advWhereClause = '';
+
           if(filterItem.filters.length > 0) {
 
-            console.log('filterItem:' + filterItem)
-
-            
             _.each(filterItem.filters, function(advItem) {
 
-              console.log('advItem:' + advItem)
+              console.log('advItem:');
+              console.dir(advItem);
 
               if(advWhereClause == "")
                 advWhereClause = strUtil.format("%s = '%s'", filterItem.fieldName, advItem.name);
-              else advWhereClause += strUtil.format(" or %s = '%s'", filterItem.fieldName, advItem.name);
-            })
+              else advWhereClause += strUtil.format(" OR %s = '%s'", filterItem.fieldName, advItem.name);
+
+            });
             console.log('advWhereClause:' + advWhereClause)
+
+          } else if(filterItem.startDate != null || filterItem.endDate != null) {
+
+            // Date
+            if(advWhereClause == "")
+              advWhereClause = strUtil.format("%s between '%s' and '%s'", filterItem.fieldName, filterItem.startDate, filterItem.endDate);
+            else advWhereClause += strUtil.format(" OR %s between '%s' and '%s'", filterItem.fieldName, filterItem.startDate, filterItem.endDate);
 
           }
           if(advWhereClause != '') {
             if(filterClause == "") 
               filterClause = strUtil.format("@rid in (select from (select @rid, BOTHE('%s').%s as %s from %s unwind %s) where %s)", item.objectType, filterItem.fieldName, filterItem.fieldName, objectType, filterItem.fieldName, advWhereClause);
             else filterClause += strUtil.format(" OR @rid in (select from (select @rid, BOTHE('%s').%s as %s from %s unwind %s) where %s)", item.objectType, filterItem.fieldName, filterItem.fieldName, objectType, filterItem.fieldName, advWhereClause);
+            hadAdv = true;
 
             console.log('filterClause:' + filterClause)            
           }
 
         })
-      } else if(fndFilters.startDate != null && fndFilters.endDate != null) {
-
-          // To Do Add Date Clause
       }
 
-      if(advWhereClause == '') {
+      if(!hadAdv) {
 
         if(filterClause == "") 
           filterClause = strUtil.format("both('%s').size() > 0", item.objectType);
