@@ -681,47 +681,95 @@ exports.findShortestPath = function(src, dest, callback) {
 }
 
 
-exports.findShortestPathFilter = function(src, dest, callback) {
+exports.findShortestPathFilter = function(src, dest, depth, callback) {
 
-  // var query = strUtil.format("select expand($z) let $x = (select from E where @rid in (select distinct(@rid) from(select expand($c) let $a = (select from (select expand(bothE()) from(select flatten(sp) from (select shortestPath(%s, %s,'BOTH') as sp))) where out in (select expand(sp) from (select shortestPath(%s,%s,'BOTH') as sp)) AND in in (select expand(sp) from (select shortestPath(%s,%s,'BOTH') as sp))), $b = (select expand(sp) from (select shortestPath(%s,%s,'BOTH') as sp)), $c = unionAll( $a, $b )))), $y = (select from V where @rid in (select distinct(@rid) from(select expand($c) let $a = (select from (select expand(bothE()) from(select flatten(sp) from (select shortestPath(%s, %s,'BOTH') as sp))) where out in (select expand(sp) from (select shortestPath(%s,%s,'BOTH') as sp)) AND in in (select expand(sp) from (select shortestPath(%s,%s,'BOTH') as sp))), $b = (select expand(sp) from (select shortestPath(%s,%s,'BOTH') as sp)), $c = unionAll( $a, $b )))), $z = unionAll( $x, $y )"
-  //             , src, dest, src, dest, src, dest, src, dest, src, dest, src, dest, src, dest, src, dest);
 
-  var query = strUtil.format("select distinct(@rid) from(select expand($c) let $a = (select from (select expand(bothE()) from(select flatten(sp) from (select shortestPath(#19:1342, #16:37,'BOTH') as sp))) where out in (select expand(sp) from (select shortestPath(#19:1342,#16:37,'BOTH') as sp)) AND in in (select expand(sp) from (select shortestPath(#19:1342,#16:37,'BOTH') as sp))), $b = (select expand(sp) from (select shortestPath(#19:1342,#16:37,'BOTH') as sp)), $c = unionAll( $a, $b ))");
+  var deep = 3;
+	if(util.defined(depth) && depth > 0) {
+		deep+=(depth*2);
+	}
 
-  console.log('*******' + query);
+	var query = strUtil.format("traverse * from %s while $depth < %s and @rid in (select distinct(@rid) from(select expand($c) let $a = (select from (select expand(bothE()) from(select flatten(sp) from (select shortestPath(%s, %s,'BOTH') as sp))) where out in (select expand(sp) from (select shortestPath(%s,%s,'BOTH') as sp)) AND in in (select expand(sp) from (select shortestPath(%s,%s,'BOTH') as sp))), $b = (select expand(sp) from (select shortestPath(%s,%s,'BOTH') as sp)), $c = unionAll( $a, $b )))", src, deep, src,dest,src,dest,src,dest,src,dest);
+	console.log('*******' + query);
 
-  odb.db.query(query).then(function(records){
+  odb.db.query(query).then(function(recordDetails){
+    
+    //var recordDetails = _.union(records1,records2);
+		var returnObj = {};
+		for (var i = 0; i < recordDetails.length; i++) {
+		  var obj = recordDetails[i];
+		  var className = obj['@class'];
 
-    var strIds = "";
-    _.each(records, function(rec) {
-      if(strIds == "")
-        strIds = rec.distinct;
-      else strIds += "," + rec.distinct;
-    });
-    console.log(strIds);
-    var query1 = strUtil.format("select from V where @rid in [%s]",strIds);
-    console.log('*******1' + query1);
+		  ////console.log('** Class:' + className);
 
-    odb.db.query(query1).then(function(records1){
+		  if (!util.defined(returnObj, className)) {
+		    returnObj[className] = [];
+		  }
 
-      var query2 = strUtil.format("select from E where @rid in [%s]",strIds);
-      console.log('*******2' + query1);
+		  var props = {};
+		  for (var propertyName in obj) {
 
-      odb.db.query(query2).then(function(records2){
-        callback(null,_.union(records1,records2));
+		    //console.log('** propertyName:' + propertyName);
 
-      }).catch(function(error2){
-        console.error('Exception2: ' + error2); 
-        callback(error,null);   
-      });
+		    if (propertyName != 'in' && propertyName.indexOf('in_') == -1 && propertyName != 'out' && propertyName.indexOf('out_') == -1 && propertyName.indexOf('@') != 0 && propertyName != 'id' && propertyName != 'backup' && typeof propertyName != 'object' && typeof propertyName != 'array') {
+		      //console.log('>>Add');
+		      props[propertyName] = obj[propertyName];
+		    } else if (propertyName.indexOf('@rid') == 0) {
+		      //console.log('>>Add');
+		      var idobj = obj[propertyName];
+		      props.id = '#' + idobj.cluster + ':' + idobj.position;
+		    } else if (propertyName.indexOf('in') == 0 && propertyName.indexOf('_') != 0) {
 
-    }).catch(function(error1){
-      console.error('Exception1: ' + error1); 
-      callback(error,null);   
-    });
+		      //console.log('>>Add');
+		      //console.log('** IN:');
+
+		      var inobj = obj[propertyName];
+		      var inprops = {};
+		      for (var propertyName in inobj) {
+
+		        ////console.log('** IN propertyName:' + propertyName);
+
+		        if (propertyName.indexOf('in') != 0 && propertyName.indexOf('out') != 0 && propertyName.indexOf('@') != 0 && propertyName != 'id' && propertyName != 'backup' && typeof propertyName != 'object' && typeof propertyName != 'array') {
+		          inprops[propertyName] = inobj[propertyName];
+		          ////console.log('>>Add In' + inprops[propertyName]);
+
+		        } else if (propertyName.indexOf('@rid') == 0) {
+		          var idobj = inobj[propertyName];
+		          inprops.inId = '#' + idobj.cluster + ':' + idobj.position;
+		          ////console.log('>>Add In' + inprops.inId);
+		        }
+		      }
+		      ////console.log('** IN OBJ DONE:');
+		      ////console.dirinprops)
+		      props['in'] = inprops;
+		    } else if (propertyName.indexOf('out') == 0 && propertyName.indexOf('_') != 0) {
+
+		      ////console.log('>>Add');
+		      ////console.log('** IN:');
+
+		      var outobj = obj[propertyName];
+		      var outprops = {};
+		      for (var propertyName in outobj) {
+		        if (propertyName.indexOf('in') != 0 && propertyName.indexOf('out') != 0 && propertyName.indexOf('@') != 0 && propertyName != 'id' && propertyName != 'backup' && typeof propertyName != 'object' && typeof propertyName != 'array') {
+		          outprops[propertyName] = outobj[propertyName];
+		        } else if (propertyName.indexOf('@rid') == 0) {
+		          var idobj = outobj[propertyName];
+		          outprops.outId = '#' + idobj.cluster + ':' + idobj.position;
+		        }
+		      }
+
+		      //console.log('** OUT OBJ:');
+		      //console.diroutprops)
+		      props['out'] = outprops;
+		    }
+		  }
+		  returnObj[className].push(props);
+		}
+		callback(null,returnObj);
+
   }).catch(function(error){
-      console.error('Exception: ' + error); 
-      callback(error,null);   
+    console.error('Exception: ' + error); 
+    callback(error,null);   
   });
 }
 

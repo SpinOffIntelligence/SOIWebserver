@@ -453,13 +453,16 @@ exports.findShortestPath = function(req, res, next) {
 exports.findShortestPathFilter = function(req, res, next) {
 	var src = req.body.src;
 	var dest = req.body.dest;
+	var depth = req.body.depth;
 
 	console.log('*** findShortestPathFilter ***');
 	console.dir(src);
 	console.log('~~~~~~~~~~~~~~');
 	console.dir(dest);
+	console.log('~~~~~~~~~~~~~~');
+	console.dir(depth);
 
-	soiServices.findShortestPathFilter(src, dest, function(err, data) {
+	soiServices.findShortestPathFilter(src, dest, depth, function(err, data) {
 		res.json(data);
 	});
 }
