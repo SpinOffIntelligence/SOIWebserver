@@ -450,6 +450,20 @@ exports.findShortestPath = function(req, res, next) {
 	});
 }
 
+exports.findShortestPathFilter = function(req, res, next) {
+	var src = req.body.src;
+	var dest = req.body.dest;
+
+	console.log('*** findShortestPathFilter ***');
+	console.dir(src);
+	console.log('~~~~~~~~~~~~~~');
+	console.dir(dest);
+
+	soiServices.findShortestPathFilter(src, dest, function(err, data) {
+		res.json(data);
+	});
+}
+
 
 
 exports.getRecordDetails = function(req, res, next) {

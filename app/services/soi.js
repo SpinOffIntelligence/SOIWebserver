@@ -681,6 +681,52 @@ exports.findShortestPath = function(src, dest, callback) {
 }
 
 
+exports.findShortestPathFilter = function(src, dest, callback) {
+
+  // var query = strUtil.format("select expand($z) let $x = (select from E where @rid in (select distinct(@rid) from(select expand($c) let $a = (select from (select expand(bothE()) from(select flatten(sp) from (select shortestPath(%s, %s,'BOTH') as sp))) where out in (select expand(sp) from (select shortestPath(%s,%s,'BOTH') as sp)) AND in in (select expand(sp) from (select shortestPath(%s,%s,'BOTH') as sp))), $b = (select expand(sp) from (select shortestPath(%s,%s,'BOTH') as sp)), $c = unionAll( $a, $b )))), $y = (select from V where @rid in (select distinct(@rid) from(select expand($c) let $a = (select from (select expand(bothE()) from(select flatten(sp) from (select shortestPath(%s, %s,'BOTH') as sp))) where out in (select expand(sp) from (select shortestPath(%s,%s,'BOTH') as sp)) AND in in (select expand(sp) from (select shortestPath(%s,%s,'BOTH') as sp))), $b = (select expand(sp) from (select shortestPath(%s,%s,'BOTH') as sp)), $c = unionAll( $a, $b )))), $z = unionAll( $x, $y )"
+  //             , src, dest, src, dest, src, dest, src, dest, src, dest, src, dest, src, dest, src, dest);
+
+  var query = strUtil.format("select distinct(@rid) from(select expand($c) let $a = (select from (select expand(bothE()) from(select flatten(sp) from (select shortestPath(#19:1342, #16:37,'BOTH') as sp))) where out in (select expand(sp) from (select shortestPath(#19:1342,#16:37,'BOTH') as sp)) AND in in (select expand(sp) from (select shortestPath(#19:1342,#16:37,'BOTH') as sp))), $b = (select expand(sp) from (select shortestPath(#19:1342,#16:37,'BOTH') as sp)), $c = unionAll( $a, $b ))");
+
+  console.log('*******' + query);
+
+  odb.db.query(query).then(function(records){
+
+    var strIds = "";
+    _.each(records, function(rec) {
+      if(strIds == "")
+        strIds = rec.distinct;
+      else strIds += "," + rec.distinct;
+    });
+    console.log(strIds);
+    var query1 = strUtil.format("select from V where @rid in [%s]",strIds);
+    console.log('*******1' + query1);
+
+    odb.db.query(query1).then(function(records1){
+
+      var query2 = strUtil.format("select from E where @rid in [%s]",strIds);
+      console.log('*******2' + query1);
+
+      odb.db.query(query2).then(function(records2){
+        callback(null,_.union(records1,records2));
+
+      }).catch(function(error2){
+        console.error('Exception2: ' + error2); 
+        callback(error,null);   
+      });
+
+    }).catch(function(error1){
+      console.error('Exception1: ' + error1); 
+      callback(error,null);   
+    });
+  }).catch(function(error){
+      console.error('Exception: ' + error); 
+      callback(error,null);   
+  });
+}
+
+
+
 exports.getRecordDetails = function(objectType, recordId, depth, filters, searchTerms, schemas, search, callback) {
 
 	var deep = 3;
@@ -791,6 +837,10 @@ exports.getRecordDetails = function(objectType, recordId, depth, filters, search
 	  if(util.defined(searchTerms)) {
 	    query = "select from (" + query + ") where any() like " + "'%" + searchTerms + "%'"
 	  }
+
+    //var subquery = strUtil.format("select shortestPath(%s, %s)", recordId, '#40:177');
+    //query = strUtil.format("select expand(sp) from (select shortestPath(#16:6,#39:0,'BOTH') as sp)");
+    
 
  }
 
