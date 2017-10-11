@@ -680,6 +680,53 @@ exports.findShortestPath = function(src, dest, callback) {
   });
 }
 
+exports.findShortestPathDetail = function(src, dest, callback) {
+
+  var query = strUtil.format("select expand(sp) from (select shortestPath(%s,%s,'BOTH') as sp)", src, dest);
+  console.log('query:' + query);
+
+  odb.db.query(query).then(function(records){
+
+      //console.log('records:'); 
+      //console.dir(records);
+    try {
+      var results = [];
+      _.each(records, function(rec) {
+
+        //console.log('rec:');
+        //console.dir(rec);
+        var className = rec['@class'];
+        var fnd = _.findWhere(results, {objectType: className});
+        if(util.defined(fnd)) {
+
+          fnd.results.push(rec);
+
+        } else {
+
+          var obj = {
+            objectType: rec['@class'],
+            results: []
+          }
+          obj.results[0] = rec;
+
+        }
+        //console.log('result:');
+        //console.dir(obj);
+        results.push(obj);
+      })
+      callback(null,results);
+    } catch (e) {
+        console.dir(e);
+        callback(e, null);
+    }
+  }).catch(function(error){
+      console.error('Exception: ' + error); 
+      callback(error,null);   
+  });
+}
+
+
+
 
 exports.findShortestPathFilter = function(src, dest, depth, callback) {
 

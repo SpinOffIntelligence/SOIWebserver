@@ -21,10 +21,8 @@ module.exports = function(app) {
 	app.post('/soi/fetchPanelRecords', soiControllers.fetchPanelRecords);
 
 	app.post('/soi/findShortestPath', soiControllers.findShortestPath);
+	app.post('/soi/findShortestPathDetail', soiControllers.findShortestPathDetail);
 	app.post('/soi/findShortestPathFilter', soiControllers.findShortestPathFilter);
-
-
-	
 
 	app.post('/soi/fetchPanelRecord', soiControllers.fetchPanelRecord);
 

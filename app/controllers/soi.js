@@ -435,6 +435,19 @@ exports.fetchRecords = function(req, res, next) {
 }
 
 
+exports.findShortestPathDetail = function(req, res, next) {
+	var src = req.body.src;
+	var dest = req.body.dest;
+
+	console.log('*** findShortestPathDetail ***');
+	console.dir(src);
+	console.log('~~~~~~~~~~~~~~');
+	console.dir(dest);
+
+	soiServices.findShortestPathDetail(src, dest, function(err, data) {
+		res.json(data);
+	});
+}
 
 exports.findShortestPath = function(req, res, next) {
 	var src = req.body.src;
