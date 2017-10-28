@@ -11,7 +11,7 @@ exports.db;
 
 exports.init = function(callback) {
 	exports.server = OrientDB({
-	   host:       'ec2-52-89-153-13.us-west-2.compute.amazonaws.com',
+	   host:       'ec2-52-25-121-66.us-west-2.compute.amazonaws.com',
 	   port:       2424,
 	   username:   'root',
 	   password:   '9WlcEMvyBJqKToMWO4vvqrgRx7iuzKuf'
@@ -26,8 +26,8 @@ exports.init = function(callback) {
 
 	exports.db = exports.server.use({
 	   name:     'SpinOffIntelligence',
-	   username: 'admin',
-	   password: 'admin'
+	   username: 'root',
+	   password: '9WlcEMvyBJqKToMWO4vvqrgRx7iuzKuf'
 	});
 
 	callback(null,dbs);
