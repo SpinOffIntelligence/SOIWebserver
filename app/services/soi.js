@@ -668,9 +668,13 @@ exports.fetchRecords = function(objectType, criteria, callback) {
   });
 }
 
-exports.findShortestPath = function(src, dest, callback) {
+exports.findShortestPath = function(src, dest, mode, callback) {
 
-    var query = strUtil.format("select shortestPath(%s, %s)", src, dest);
+  var query = strUtil.format("select shortestPath(%s, %s)", src, dest);
+  if(mode == 'best') {
+    query = strUtil.format("select dijkstra(%s, %s, 'weight', 'BOTH')", src, dest);
+  }
+  console.log('query:' + query);
 
 	odb.db.query(query).then(function(records){
 		callback(null,records);
@@ -680,9 +684,13 @@ exports.findShortestPath = function(src, dest, callback) {
   });
 }
 
-exports.findShortestPathDetail = function(src, dest, callback) {
+exports.findShortestPathDetail = function(src, dest, mode, callback) {
 
   var query = strUtil.format("select expand(sp) from (select shortestPath(%s,%s,'BOTH') as sp)", src, dest);
+  if(mode == 'best') {
+    query = strUtil.format("select expand(sp) from (select dijkstra(%s,%s,'weight','BOTH') as sp)", src, dest);
+  }
+
   console.log('query:' + query);
 
   odb.db.query(query).then(function(records){
@@ -691,6 +699,7 @@ exports.findShortestPathDetail = function(src, dest, callback) {
       //console.dir(records);
     try {
       var results = [];
+      var sortNum = 1;
       _.each(records, function(rec) {
 
         //console.log('rec:');
@@ -698,8 +707,9 @@ exports.findShortestPathDetail = function(src, dest, callback) {
         var className = rec['@class'];
         var fnd = _.findWhere(results, {objectType: className});
         if(util.defined(fnd)) {
-
+          rec.sortNum = sortNum;
           fnd.results.push(rec);
+          sortNum++;
 
         } else {
 
@@ -707,8 +717,9 @@ exports.findShortestPathDetail = function(src, dest, callback) {
             objectType: rec['@class'],
             results: []
           }
+          rec.sortNum = sortNum;
           obj.results[0] = rec;
-
+          sortNum++;
         }
         //console.log('result:');
         //console.dir(obj);
@@ -728,7 +739,7 @@ exports.findShortestPathDetail = function(src, dest, callback) {
 
 
 
-exports.findShortestPathFilter = function(src, dest, depth, callback) {
+exports.findShortestPathFilter = function(src, dest, depth, mode, callback) {
 
 
   var deep = 3;
@@ -737,6 +748,11 @@ exports.findShortestPathFilter = function(src, dest, depth, callback) {
 	}
 
 	var query = strUtil.format("traverse * from %s while $depth < %s and @rid in (select distinct(@rid) from(select expand($c) let $a = (select from (select expand(bothE()) from(select flatten(sp) from (select shortestPath(%s, %s,'BOTH') as sp))) where out in (select expand(sp) from (select shortestPath(%s,%s,'BOTH') as sp)) AND in in (select expand(sp) from (select shortestPath(%s,%s,'BOTH') as sp))), $b = (select expand(sp) from (select shortestPath(%s,%s,'BOTH') as sp)), $c = unionAll( $a, $b )))", src, deep, src,dest,src,dest,src,dest,src,dest);
+
+  if(mode == 'best') {
+    query = strUtil.format("traverse * from %s while $depth < %s and @rid in (select distinct(@rid) from(select expand($c) let $a = (select from (select expand(bothE()) from(select flatten(sp) from (select dijkstra(%s,%s,'weight','BOTH') as sp))) where out in (select expand(sp) from (select dijkstra(%s,%s,'weight','BOTH') as sp)) AND in in (select expand(sp) from (select dijkstra(%s,%s,'weight','BOTH') as sp))), $b = (select expand(sp) from (select dijkstra(%s,%s,'weight','BOTH') as sp)), $c = unionAll( $a, $b )))", src, deep, src,dest,src,dest,src,dest,src,dest);
+  }
+
 	console.log('*******' + query);
 
   odb.db.query(query).then(function(recordDetails){
@@ -1133,12 +1149,14 @@ exports.getRecords = function(objectType, currentPage, pageSize, callback) {
 
 exports.getSchema = function(objName, callback) {
 
-	//console.log('^^^^^^^^^ getSchema ^^^^^^^^^^^' + objName);
+	console.log('^^^^^^^^^ getSchema ^^^^^^^^^^^' + objName);
 	function getSchemaProperties(properties) {
 		var props={};
 		var superClass=null;
 		for(var i=0; i<properties.length; i++) {
 			var prop = properties[i];
+      console.log('^^^^^^^^^ props ^^^^^^^^^^^' + prop.name);
+
 			var appType = '';
 			var fnd = _.findWhere(schemaTypeMap, {dbtype: prop.type})
 			if(util.defined(fnd)) {
@@ -1156,6 +1174,8 @@ exports.getSchema = function(objName, callback) {
 				max: prop.max,
 				cluster: prop['class'].defaultClusterId
 			}
+      console.log('^^^^^^^^^ prop vals ^^^^^^^^^^^' + obj);
+
 			props[prop.name] = obj;
 		}		
 		if(util.defined(superClass)) {
@@ -1165,21 +1185,26 @@ exports.getSchema = function(objName, callback) {
 	}
 
 	odb.db.class.get(objName).then(function(obj){
+
+    console.dir(obj);
+
 	   obj.property.list()
 	   .then(
 	      function(properties){
 	        var props=getSchemaProperties(properties);
-	        //console.log('^^^^^^^^^ props ^^^^^^^^^^^' + objName);
 	        ////console.dirprops);
+          console.log('~~~~~~~~~~~~~~~~~ Object ~~~~~~~~~~~~~~~~~~' + objName);
 
-	        if(util.defined(props,"superClass")) {
+	        if(util.defined(obj,"superClass")) {
 
-						odb.db.class.get(props.superClass).then(function(obj){
-							obj.property.list()
+            console.log('hasSuper');
+
+						odb.db.class.get(obj.superClass).then(function(subobj){
+							subobj.property.list()
 							.then(
 							function(properties){	        	
 								var subProps=getSchemaProperties(properties);
-								//console.log('^^^^^^^^^ subProps ^^^^^^^^^^^' + props.superClass);
+								console.log('^^^^^^^^^ subProps ^^^^^^^^^^^' + obj.superClass);
 								////console.dirsubProps);
 
 								for(var propertyName in subProps) {
@@ -1187,7 +1212,7 @@ exports.getSchema = function(objName, callback) {
 								}
 								//console.log('^^^^^^^^^ final props ^^^^^^^^^^^');
 								////console.dirprops);
-								delete props.superClass;
+								//delete props.superClass;
 								callback(null,props);	        	
 							});
 						});

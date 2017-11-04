@@ -196,7 +196,8 @@ exports.fetchGridRecords = function(req, res, next) {
 
 
 exports.getSchemasServer = function(callback) {
-  var schemas = [ { objectType: 'EAcquired' },
+  var schemas = [ 
+  { objectType: 'EAcquired' },
   { objectType: 'EEntrepreneurialResourcesProvider' },
   { objectType: 'EAcquire' },
   { objectType: 'EBoardMember' },
@@ -438,13 +439,16 @@ exports.fetchRecords = function(req, res, next) {
 exports.findShortestPathDetail = function(req, res, next) {
 	var src = req.body.src;
 	var dest = req.body.dest;
+	var mode = req.body.mode;
 
 	console.log('*** findShortestPathDetail ***');
 	console.dir(src);
 	console.log('~~~~~~~~~~~~~~');
 	console.dir(dest);
+	console.log('~~~~~~~~~~~~~~');
+	console.dir(mode);
 
-	soiServices.findShortestPathDetail(src, dest, function(err, data) {
+	soiServices.findShortestPathDetail(src, dest, mode, function(err, data) {
 		res.json(data);
 	});
 }
@@ -452,13 +456,16 @@ exports.findShortestPathDetail = function(req, res, next) {
 exports.findShortestPath = function(req, res, next) {
 	var src = req.body.src;
 	var dest = req.body.dest;
+	var mode = req.body.mode;
 
 	console.log('*** findShortestPath ***');
 	console.dir(src);
 	console.log('~~~~~~~~~~~~~~');
 	console.dir(dest);
+	console.log('~~~~~~~~~~~~~~');
+	console.dir(mode);
 
-	soiServices.findShortestPath(src, dest, function(err, data) {
+	soiServices.findShortestPath(src, dest, mode, function(err, data) {
 		res.json(data);
 	});
 }
@@ -467,6 +474,7 @@ exports.findShortestPathFilter = function(req, res, next) {
 	var src = req.body.src;
 	var dest = req.body.dest;
 	var depth = req.body.depth;
+	var mode = req.body.mode;
 
 	console.log('*** findShortestPathFilter ***');
 	console.dir(src);
@@ -474,8 +482,10 @@ exports.findShortestPathFilter = function(req, res, next) {
 	console.dir(dest);
 	console.log('~~~~~~~~~~~~~~');
 	console.dir(depth);
+	console.log('~~~~~~~~~~~~~~');
+	console.dir(mode);
 
-	soiServices.findShortestPathFilter(src, dest, depth, function(err, data) {
+	soiServices.findShortestPathFilter(src, dest, depth, mode, function(err, data) {
 		res.json(data);
 	});
 }
