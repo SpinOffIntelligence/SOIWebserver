@@ -1149,13 +1149,13 @@ exports.getRecords = function(objectType, currentPage, pageSize, callback) {
 
 exports.getSchema = function(objName, callback) {
 
-	console.log('^^^^^^^^^ getSchema ^^^^^^^^^^^' + objName);
+	//console.log('^^^^^^^^^ getSchema ^^^^^^^^^^^' + objName);
 	function getSchemaProperties(properties) {
 		var props={};
 		var superClass=null;
 		for(var i=0; i<properties.length; i++) {
 			var prop = properties[i];
-      console.log('^^^^^^^^^ props ^^^^^^^^^^^' + prop.name);
+      //console.log('^^^^^^^^^ props ^^^^^^^^^^^' + prop.name);
 
 			var appType = '';
 			var fnd = _.findWhere(schemaTypeMap, {dbtype: prop.type})
@@ -1174,7 +1174,7 @@ exports.getSchema = function(objName, callback) {
 				max: prop.max,
 				cluster: prop['class'].defaultClusterId
 			}
-      console.log('^^^^^^^^^ prop vals ^^^^^^^^^^^' + obj);
+      //console.log('^^^^^^^^^ prop vals ^^^^^^^^^^^' + obj);
 
 			props[prop.name] = obj;
 		}		
@@ -1193,7 +1193,7 @@ exports.getSchema = function(objName, callback) {
 	      function(properties){
 	        var props=getSchemaProperties(properties);
 	        ////console.dirprops);
-          console.log('~~~~~~~~~~~~~~~~~ Object ~~~~~~~~~~~~~~~~~~' + objName);
+          //console.log('~~~~~~~~~~~~~~~~~ Object ~~~~~~~~~~~~~~~~~~' + objName);
 
 	        if(util.defined(obj,"superClass")) {
 
@@ -1204,7 +1204,7 @@ exports.getSchema = function(objName, callback) {
 							.then(
 							function(properties){	        	
 								var subProps=getSchemaProperties(properties);
-								console.log('^^^^^^^^^ subProps ^^^^^^^^^^^' + obj.superClass);
+								//console.log('^^^^^^^^^ subProps ^^^^^^^^^^^' + obj.superClass);
 								////console.dirsubProps);
 
 								for(var propertyName in subProps) {
