@@ -1186,7 +1186,7 @@ exports.getSchema = function(objName, callback) {
 
 	odb.db.class.get(objName).then(function(obj){
 
-    console.dir(obj);
+    //console.dir(obj);
 
 	   obj.property.list()
 	   .then(
@@ -1197,7 +1197,7 @@ exports.getSchema = function(objName, callback) {
 
 	        if(util.defined(obj,"superClass")) {
 
-            console.log('hasSuper');
+            //console.log('hasSuper');
 
 						odb.db.class.get(obj.superClass).then(function(subobj){
 							subobj.property.list()

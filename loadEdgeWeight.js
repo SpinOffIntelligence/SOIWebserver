@@ -80,16 +80,17 @@ function loadVertexStats(infoObj, callback) {
   var allScores = {};
   //var query = strUtil.format("select @rid from V where @class = '%s'", objectType);
 
-  var id = '#' + record.rid.cluster + ':' + record.rid.position;
-  console.log('id: ' + id);
+  var mainId = '#' + record.rid.cluster + ':' + record.rid.position;
+  console.log('mainId: ' + mainId);
 
-  var query = strUtil.format("traverse * from  %s while $depth < 2", id);
+  var query = strUtil.format("traverse * from  %s while $depth < 2", mainId);
   console.log('query:' + query);
 
   odb.db.query(query).then(function(records){
 
     console.log("records:" + records.length);
     //console.dir(records);
+    var mainRec;
 
     // Prep records
     _.each(records, function(rec) {
@@ -97,12 +98,30 @@ function loadVertexStats(infoObj, callback) {
       console.log("prep id:" + id);
       rec.id = id;
       var className = rec['@class']
+      rec.className = className;
       console.log("prep class:" + className);
+
+      if(className.charAt(0) == 'E') {
+        var inId;
+        if(util.defined(rec,"in.cluster"))
+          inId =  '#' + rec['in'].cluster + ':' + rec['in'].position;
+        else inId =  '#' + rec['in']['@rid'].cluster + ':' + rec['in']['@rid'].position;
+        rec.inId = inId;
+
+        var outId;
+        if(util.defined(rec,"out.cluster"))
+          outId =  '#' + rec['out'].cluster + ':' + rec['out'].position;
+        else outId =  '#' + rec['out']['@rid'].cluster + ':' + rec['out']['@rid'].position;
+        rec.outId = outId;
+      } else {
+        if(id == mainId)
+          mainRec = rec;
+      }
     });
 
     _.each(records, function(rec) {
       console.log("rec:" + rec);
-      console.dir(rec);
+      //console.dir(rec);
 
       var id = rec.id;
       console.log("id:" + id);
@@ -116,6 +135,7 @@ function loadVertexStats(infoObj, callback) {
 
         console.log('Is Vertex');
 
+        // Data Quality Score
         var totalProp=0;
         var totalUsedProp=0;
         if(util.defined(schemas,className)) {
@@ -135,7 +155,67 @@ function loadVertexStats(infoObj, callback) {
             setVertexScore(id, 'dataquailityscore', score, function() {
             });
           }
-//process.exit(1);             
+        }
+
+        // Prestige Score
+        var pscore = 0;
+        // Number of patents
+        var fndPat = _.where(records, {className: 'VPatent'});
+        if(util.defined(fndPat) && fndPat.length > 0) {
+          console.log('fndPat:' + fndPat.length);
+          pscore+=fndPat.length;
+        }
+
+        // Has Awards          
+        _.each(records, function(rec) {
+          if(util.defined(rec,"certsawards")) {
+            console.log('certsawards:' + rec.certsawards);
+            pscore += rec.certsawards.split('^').length;
+          }
+        })
+
+        // Has Tech Applications          
+        _.each(records, function(rec) {
+          if(util.defined(rec,"technologyapplication")) {
+            console.log('technologyapplication:' + rec.technologyapplication);
+            pscore++;
+          }
+        })
+
+        // Is Joint R&D   
+        _.each(records, function(rec) {
+          var className = rec['@class']
+          console.log("className:" + className);
+          if(className == 'VSpinOff' && util.defined(rec,'type') && rec.type.indexOf('Joint ') > -1) {
+            console.log('Joint:' + rec.type);
+            pscore++;
+          }
+        })
+
+        // If is SpinOff score by founder
+        _.each(records, function(rec) {
+          var className = rec['@class']
+          console.log("className:" + className);
+          if(className == 'ESpinOff' && util.defined(rec,"outId")) {
+            console.log('ESpinOff:' + rec.outId);
+            var fnd = _.findWhere(records,{id: rec.outId});
+            if(util.defined(fnd)) {
+              console.log('spinclassName:' + rec.className);
+              if(rec.className == "VResearchInstitution") {
+                pscore++;
+              } else if(rec.className == "VCompany") {
+                pscore+=2;
+              } else if(rec.className == "VSpinOff") {
+                pscore+=3;
+              }
+            }
+          }
+        })
+
+        if(pscore > 0) {
+          console.log('**pscore:' + pscore);
+          setVertexScore(id, 'prestigescore', pscore, function() {
+          });
         }
 
       }
@@ -160,16 +240,20 @@ function loadEdgeStats(infoObj, callback) {
   var allScores = {};
   //var query = strUtil.format("select @rid from V where @class = '%s'", objectType);
 
-  var id = '#' + record.rid.cluster + ':' + record.rid.position;
-  console.log('id: ' + id);
+  var mainId = '#' + record.rid.cluster + ':' + record.rid.position;
+  console.log('mainId: ' + mainId);
 
-  var query = strUtil.format("traverse * from  %s while $depth < 2", id);
+  var query = strUtil.format("traverse * from  %s while $depth < 2", mainId);
   console.log('query:' + query);
 
   odb.db.query(query).then(function(records){
 
     console.log("records:" + records.length);
     //console.dir(records);
+
+
+    // Save main record
+    var mainRec;
 
     // Prep records
     _.each(records, function(rec) {
@@ -191,6 +275,9 @@ function loadEdgeStats(infoObj, callback) {
           outId =  '#' + rec['out'].cluster + ':' + rec['out'].position;
         else outId =  '#' + rec['out']['@rid'].cluster + ':' + rec['out']['@rid'].position;
         rec.outId = outId;
+      } else {
+        if(id == mainId)
+          mainRec = rec;
       }
     });
 
@@ -243,6 +330,39 @@ function loadEdgeStats(infoObj, callback) {
                 
             });          
           }
+
+          // Weight Edge by Vertex Dataquality
+          console.log("In Vertex:" + rec.inId + ":" + rec.outId);
+          var fndIn = _.findWhere(records, {id: rec.inId});
+          var fndOut = _.findWhere(records, {id: rec.outId});
+
+          var addScore=0;
+          if(util.defined(fndIn,"dataquailityscore")) {
+            console.log('fndIn:' + fndIn.dataquailityscore);
+            addScore += Math.ceil(fndIn.dataquailityscore / 10);
+            console.log('addScore:' + addScore);
+          }
+          if(util.defined(fndOut,"dataquailityscore")) {
+            console.log('fndOut:' + fndOut.dataquailityscore);
+            addScore += Math.ceil(fndOut.dataquailityscore / 10);
+            console.log('addScore:' + addScore);
+          }
+          score+=addScore;
+
+          // Weight Edge by Vertex Prestige
+          var addScore=0;
+          if(util.defined(fndIn,"prestigescore")) {
+            console.log('fndIn:' + fndIn.prestigescore);
+            addScore += fndIn.prestigescore;
+            console.log('addScore:' + addScore);
+          }
+          if(util.defined(fndOut,"prestigescore")) {
+            console.log('fndOut:' + fndOut.prestigescore);
+            addScore += fndOut.prestigescore;
+            console.log('addScore:' + addScore);
+          }
+          score+=addScore;
+          console.log("~~~~addScore:" + addScore);
 
           console.log("++++score:" + score);
           setEdgeScore(id, score, function(error, data) {            
@@ -435,18 +555,18 @@ odb.init(function(err, res) {
     schemas = data;
 
     console.log('$$$$ schemas:');
-    console.dir(schemas)
+    //console.dir(schemas)
   });
 
 
-  var query = strUtil.format("update E set weight = 0");
-  console.log('query:' + query);
-  odb.db.query(query).then(function(records){
+  //var query = strUtil.format("update E set weight = 0");
+  //console.log('query:' + query);
+  //odb.db.query(query).then(function(records){
 
 
-    var query = strUtil.format("update V set dataquailityscore = 0,prestigescore = 0");
-    console.log('query:' + query);
-    odb.db.query(query).then(function(records){
+    //var query = strUtil.format("update V set dataquailityscore = 0,prestigescore = 0 limit 10");
+    //console.log('query:' + query);
+    //odb.db.query(query).then(function(records){
 
       var query = strUtil.format("select @rid from V");
       console.log('query:' + query);
@@ -468,12 +588,10 @@ odb.init(function(err, res) {
             console.log('loadEdgeWeight done!' + comboCnt)
             process.exit(1);            
           });    
-
-
         });    
       });
-    });    
-  });    
+    //});    
+  //});    
   // processStats('statsdegreecentrality', function(err, data) {
   //     console.log('*** statsdegreecentrality');
   //     processStats('statsbetweencentrality', function(err, data) {
