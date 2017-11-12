@@ -10,7 +10,8 @@ var comboCnt = 0;
 
 function setEdgeScore(id, score, callback) {
 
-  var query = strUtil.format("UPDATE E SET weight = %s WHERE @rid = '%s'", score, id);
+  var newScore = 1000 - score;
+  var query = strUtil.format("UPDATE E SET weight = %s WHERE @rid = '%s'", newScore, id);
   //console.log('query:' + query);
   process.stdout.write('+');
   odb.db.query(query).then(function(records){
@@ -21,7 +22,8 @@ function setEdgeScore(id, score, callback) {
 
 function setVertexScore(id, prop, score, callback) {
 
-  var query = strUtil.format("UPDATE V SET %s = %s WHERE @rid = '%s'", prop, score, id);
+  var newScore = 1000 - score;
+  var query = strUtil.format("UPDATE V SET %s = %s WHERE @rid = '%s'", prop, newScore, id);
   console.log('query:' + query);
   process.stdout.write('+');
   odb.db.query(query).then(function(records){

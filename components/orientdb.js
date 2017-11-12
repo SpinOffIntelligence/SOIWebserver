@@ -25,7 +25,7 @@ exports.init = function(callback) {
 	   );
 
 	exports.db = exports.server.use({
-	   name:     'SpinOffIntelligence',
+	   name:     'SOI2',
 	   username: 'root',
 	   password: '9WlcEMvyBJqKToMWO4vvqrgRx7iuzKuf'
 	});
