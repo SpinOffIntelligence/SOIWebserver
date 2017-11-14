@@ -25,7 +25,7 @@ exports.init = function(callback) {
 	   );
 
 	exports.db = exports.server.use({
-	   name:     'SOI2',
+	   name:     config.dbname,
 	   username: 'root',
 	   password: '9WlcEMvyBJqKToMWO4vvqrgRx7iuzKuf'
 	});

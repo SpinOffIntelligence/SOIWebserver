@@ -1,4 +1,4 @@
-loadStatsvar OrientDB = require('orientjs');
+var OrientDB = require('orientjs');
 var odb =  require('./components/orientdb.js');
 var fs = require('fs');
 var strUtil = require('util');

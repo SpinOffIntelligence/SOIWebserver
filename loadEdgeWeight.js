@@ -72,6 +72,43 @@ function scoreEdge(rec, className) {
   return score;
 }
 
+function getCentralityScore(statType, score) {
+
+  var prVal = score
+
+  if (statType == 'statsbetweencentrality') {
+
+    // 752 - 222873
+    if (prVal / 100000 > 1) {
+      var plus = (prVal / 100000) / 4;
+      prVal = 11 + plus;
+    } else if (prVal / 10000 > 1) {
+      var plus = (prVal / 10000) / 4;
+      prVal = 7 + plus;
+    } else if (prVal / 1000 > 1) {
+      var plus = (prVal / 1000) / 4;
+      prVal = 3 + plus;
+    } else if (prVal / 100 > 1) {
+      var plus = (prVal / 100) / 4;
+      prVal = 1 + plus;
+    } else if (prVal / 10 > 1) {
+      var plus = (prVal / 10) / 4;
+      prVal = 0 + plus;
+    }
+    visObj.size = prVal;
+    console.log('prVal:' + prVal + '~' + orgVal);
+
+  } else {
+
+    prVal = 5 + (prVal * (5 / 84));
+    visObj.size = prVal;
+
+  }
+  return prVal;
+}
+
+
+
 function loadVertexStats(infoObj, callback) {
 
   var count = infoObj.count;
@@ -366,6 +403,35 @@ function loadEdgeStats(infoObj, callback) {
           score+=addScore;
           console.log("~~~~addScore:" + addScore);
 
+
+          //statsbetweencentrality
+          if(util.defined(fndIn,"statsbetweencentrality")) {
+            console.log('fndIn:' + fndIn.statsbetweencentrality);
+            addScore += getCentralityScore('statsbetweencentrality', fndIn.statsbetweencentrality);
+            console.log('addScore:' + addScore);
+          }
+          if(util.defined(fndOut,"statsbetweencentrality")) {
+            console.log('fndOut:' + fndOut.statsbetweencentrality);
+            addScore += getCentralityScore('statsbetweencentrality', fndOut.statsbetweencentrality);
+            console.log('**************addScore:' + addScore);
+          }
+          score+=addScore;
+          console.log("~~~~addScore:" + addScore);
+
+          //statsdegreecentrality
+          if(util.defined(fndIn,"statsdegreecentrality")) {
+            console.log('fndIn:' + fndIn.statsdegreecentrality);
+            addScore += getCentralityScore('statsdegreecentrality', fndIn.statsdegreecentrality);
+            console.log('addScore:' + addScore);
+          }
+          if(util.defined(fndOut,"statsdegreecentrality")) {
+            console.log('fndOut:' + fndOut.statsdegreecentrality);
+           addScore += getCentralityScore('statsdegreecentrality', fndOut.statsdegreecentrality);
+            console.log('***************addScore:' + addScore);
+          }
+          score+=addScore;
+          console.log("~~~~addScore:" + addScore);
+
           console.log("++++score:" + score);
           setEdgeScore(id, score, function(error, data) {            
           });
@@ -561,14 +627,14 @@ odb.init(function(err, res) {
   });
 
 
-  //var query = strUtil.format("update E set weight = 0");
-  //console.log('query:' + query);
-  //odb.db.query(query).then(function(records){
+  var query = strUtil.format("update E set weight = 0");
+  console.log('query:' + query);
+  odb.db.query(query).then(function(records){
 
 
-    //var query = strUtil.format("update V set dataquailityscore = 0,prestigescore = 0 limit 10");
-    //console.log('query:' + query);
-    //odb.db.query(query).then(function(records){
+    var query = strUtil.format("update V set dataquailityscore = 0,prestigescore = 0 limit 10");
+    console.log('query:' + query);
+    odb.db.query(query).then(function(records){
 
       var query = strUtil.format("select @rid from V");
       console.log('query:' + query);
@@ -592,8 +658,8 @@ odb.init(function(err, res) {
           });    
         });    
       });
-    //});    
-  //});    
+    });    
+  });    
   // processStats('statsdegreecentrality', function(err, data) {
   //     console.log('*** statsdegreecentrality');
   //     processStats('statsbetweencentrality', function(err, data) {
