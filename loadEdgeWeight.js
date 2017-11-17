@@ -95,13 +95,12 @@ function getCentralityScore(statType, score) {
       var plus = (prVal / 10) / 4;
       prVal = 0 + plus;
     }
-    visObj.size = prVal;
-    console.log('prVal:' + prVal + '~' + orgVal);
+    console.log('prVal:' + prVal + '~' + score);
 
   } else {
 
     prVal = 5 + (prVal * (5 / 84));
-    visObj.size = prVal;
+    console.log('prVal:' + prVal + '~' + score);
 
   }
   return prVal;
@@ -166,12 +165,13 @@ function loadVertexStats(infoObj, callback) {
       console.log("id:" + id);
 
       var className = rec['@class']
-      console.log("className:" + className);
+      //console.log("className:" + className);
 
       var score=1;
       if(className.charAt(0) == 'V') {
         // Set Node Scores
 
+        console.log("className:" + className);
         console.log('Is Vertex');
 
         // Data Quality Score
@@ -182,7 +182,7 @@ function loadVertexStats(infoObj, callback) {
           //console.dir(schemas[className]);
 
           for (var prop in schemas[className]) {            
-            console.log("Prop:" + prop);
+            //console.log("Prop:" + prop);
             totalProp++;
             if(util.defined(rec,prop))
               totalUsedProp++;
@@ -198,17 +198,18 @@ function loadVertexStats(infoObj, callback) {
 
         // Prestige Score
         var pscore = 0;
+        console.log('pscore~start');
         // Number of patents
         var fndPat = _.where(records, {className: 'VPatent'});
         if(util.defined(fndPat) && fndPat.length > 0) {
-          console.log('fndPat:' + fndPat.length);
+          console.log('pscore~fndPat:' + fndPat.length);
           pscore+=fndPat.length;
         }
 
         // Has Awards          
         _.each(records, function(rec) {
           if(util.defined(rec,"certsawards")) {
-            console.log('certsawards:' + rec.certsawards);
+            console.log('pscore~certsawards:' + rec.certsawards);
             pscore += rec.certsawards.split('^').length;
           }
         })
@@ -216,7 +217,7 @@ function loadVertexStats(infoObj, callback) {
         // Has Tech Applications          
         _.each(records, function(rec) {
           if(util.defined(rec,"technologyapplication")) {
-            console.log('technologyapplication:' + rec.technologyapplication);
+            console.log('pscore~technologyapplication:' + rec.technologyapplication);
             pscore++;
           }
         })
@@ -224,9 +225,9 @@ function loadVertexStats(infoObj, callback) {
         // Is Joint R&D   
         _.each(records, function(rec) {
           var className = rec['@class']
-          console.log("className:" + className);
+          //console.log("className:" + className);
           if(className == 'VSpinOff' && util.defined(rec,'type') && rec.type.indexOf('Joint ') > -1) {
-            console.log('Joint:' + rec.type);
+            console.log('pscore~Joint:' + rec.type);
             pscore++;
           }
         })
@@ -234,17 +235,17 @@ function loadVertexStats(infoObj, callback) {
         // If is SpinOff score by founder
         _.each(records, function(rec) {
           var className = rec['@class']
-          console.log("className:" + className);
-          if(className == 'ESpinOff' && util.defined(rec,"outId")) {
-            console.log('ESpinOff:' + rec.outId);
-            var fnd = _.findWhere(records,{id: rec.outId});
+          //console.log("className:" + className);
+          if(className == 'ESpinOff' && util.defined(rec,"inId")) {
+            console.log('pscore~ESpinOff:' + rec.inId);
+            var fnd = _.findWhere(records,{id: rec.inId});
             if(util.defined(fnd)) {
-              console.log('spinclassName:' + rec.className);
-              if(rec.className == "VResearchInstitution") {
+              console.log('spinclassName:' + fnd.className);
+              if(fnd.className == "VResearchInstitution") {
                 pscore++;
-              } else if(rec.className == "VCompany") {
+              } else if(fnd.className == "VCompany") {
                 pscore+=2;
-              } else if(rec.className == "VSpinOff") {
+              } else if(fnd.className == "VSpinOff") {
                 pscore+=3;
               }
             }
