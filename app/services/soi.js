@@ -13,6 +13,45 @@ var schemaTypeMap = [
 	{dbtype: 19, apptype: 'date'}
 ];
 
+exports.accountSearch = function(email, callback) {  
+  var query = strUtil.format("select from SOIUsers  where email = '%s'", email);
+  console.log('query:' + query);
+  odb.db.query(query).then(function(records){
+    callback(null,records);
+  }).catch(function(error){
+      console.error('Exception: ' + error); 
+      callback(error,null);   
+  });
+}
+
+exports.accountRegister = function(fname, lname, email, password, callback) {  
+  var infoObj = {
+    fisrtname: fname,
+    lastname: lname,
+    email: email,
+    password: password
+  }
+  odb.db.insert().into('SOIUsers')
+   .set(infoObj).all().then(function(returnObj){
+      callback(null, returnObj);
+   }).catch(function(error){
+      console.error('Exception: ' + error); 
+      callback(error,null);   
+  });
+}
+
+
+exports.accountLogin = function(email, password, callback) {  
+  var query = strUtil.format("select from SOIUsers where email = '%s' and password = '%s'", email, password);
+  console.log('query:' + query);
+  odb.db.query(query).then(function(records){
+    callback(null,records);
+  }).catch(function(error){
+      console.error('Exception: ' + error); 
+      callback(error,null);   
+  });
+}
+
 
 exports.removeImage = function(objectType, recordId, field, callback) {
   

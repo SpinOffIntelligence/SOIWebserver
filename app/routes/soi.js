@@ -1,8 +1,13 @@
 'use strict';
 
 module.exports = function(app) {
-
 	var soiControllers = require('../controllers/soi');
+
+	app.post('/soi/account/register', soiControllers.accountRegister);
+	app.post('/soi/account/login', soiControllers.accountLogin);
+	app.post('/soi/account/forgot', soiControllers.accountForgot);
+
+
 
 	app.post('/soi/getSchemas', soiControllers.getSchemas);
 	app.post('/soi/fetchGridRecords', soiControllers.fetchGridRecords);

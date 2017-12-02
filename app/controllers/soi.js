@@ -6,19 +6,69 @@ var async = require('async');
 var util = require('../../components/utilities.js');
 var moment = require('moment');
 
+exports.accountRegister = function(req, res, next) {
+	var fname = req.body.fname;
+	var lname = req.body.lname;
+	var email = req.body.email
+	var password = req.body.password;
 
-
-
-exports.importStats = function(req, res, next) {
-	var dataStr = req.body.dataStr;
-
-	console.log('****');
-	console.dir(req.body);
-
-	// soiServices.importStats(objectTypes, terms, function(err, data) {
-	// 	res.json(data);
-	// });
+	console.log('*** accountRegister ***');
+	console.dir(fname);
+	console.log('~~~~~~~~~~~~~~');
+	console.dir(lname);
+	console.log('~~~~~~~~~~~~~~');
+	console.dir(email);
+	console.log('~~~~~~~~~~~~~~');
+	console.dir(password);
+	
+	soiServices.accountSearch(email, function(err, records) {
+		console.log('accountSearch:' + records.length);
+		if(!util.defined(records,"length") || records.length == 0) {
+			soiServices.accountRegister(fname, lname, email, password, function(err, records) {
+				res.json({status: 200, resp:'Account Created'});
+			});
+		} else {
+			res.json({status: 500, resp:'Account Exists'});
+		}
+	});
 }
+
+exports.accountLogin = function(req, res, next) {
+	var email = req.body.email
+	var password = req.body.password;
+
+	console.log('*** accountLogin ***');
+	console.dir(email);
+	console.log('~~~~~~~~~~~~~~');
+	console.dir(password);
+
+	soiServices.accountLogin(email, password, function(err, records) {
+		console.log('accountLogin:' + records.length);
+		if(util.defined(records,"length") && records.length > 0) {
+   		res.json({status: 200, resp:'Login Worked'});
+		} else {
+			res.json({status: 500, resp:'Login Failed'});
+		}
+	});
+}
+
+exports.accountForgot = function(req, res, next) {
+	var email = req.body.email
+
+	console.log('*** accountForgot ***');
+	console.dir(email);
+
+	soiServices.accountSearch(email, function(err, records) {
+		console.log('accountSearch:' + records.length);
+		if(util.defined(records,"length") && records.length > 0) {
+				res.json({status: 200, resp:'Email Sent'});
+		} else {
+			res.json({status: 404, resp:'Account Not Found'});
+		}
+	});
+
+}
+
 
 
 exports.searchRecords = function(req, res, next) {
@@ -657,4 +707,15 @@ exports.getLogInfo = function(req, res, next) {
 		});	
 
 	}
+}
+
+exports.importStats = function(req, res, next) {
+	var dataStr = req.body.dataStr;
+
+	console.log('****');
+	console.dir(req.body);
+
+	// soiServices.importStats(objectTypes, terms, function(err, data) {
+	// 	res.json(data);
+	// });
 }
