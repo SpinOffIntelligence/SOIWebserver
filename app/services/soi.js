@@ -26,7 +26,7 @@ exports.accountSearch = function(email, callback) {
 
 exports.accountRegister = function(fname, lname, email, password, callback) {  
   var infoObj = {
-    fisrtname: fname,
+    firstname: fname,
     lastname: lname,
     email: email,
     password: password
@@ -38,6 +38,27 @@ exports.accountRegister = function(fname, lname, email, password, callback) {
       console.error('Exception: ' + error); 
       callback(error,null);   
   });
+}
+
+exports.accountUpdateProfile = function(rid, fname, lname, email, password, callback) {  
+  var infoObj = {
+    firstname: fname,
+    lastname: lname,
+    email: email,
+  };
+
+  if(util.defined(password)) {
+    infoObj.password = password;
+  }
+
+  odb.db.update(rid)
+   .set(infoObj).one()
+   .then(
+      function(update){
+        console.log('Records Updated:', update);
+        callback(null, update);
+      }
+   );
 }
 
 

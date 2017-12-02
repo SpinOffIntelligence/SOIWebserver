@@ -6,6 +6,7 @@ module.exports = function(app) {
 	app.post('/soi/account/register', soiControllers.accountRegister);
 	app.post('/soi/account/login', soiControllers.accountLogin);
 	app.post('/soi/account/forgot', soiControllers.accountForgot);
+	app.post('/soi/account/updateProfile', soiControllers.accountUpdateProfile);
 
 
 

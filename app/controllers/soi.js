@@ -25,7 +25,7 @@ exports.accountRegister = function(req, res, next) {
 		console.log('accountSearch:' + records.length);
 		if(!util.defined(records,"length") || records.length == 0) {
 			soiServices.accountRegister(fname, lname, email, password, function(err, records) {
-				res.json({status: 200, resp:'Account Created'});
+				res.json({status: 200, resp:'Account Created', record: records[0]});
 			});
 		} else {
 			res.json({status: 500, resp:'Account Exists'});
@@ -45,7 +45,7 @@ exports.accountLogin = function(req, res, next) {
 	soiServices.accountLogin(email, password, function(err, records) {
 		console.log('accountLogin:' + records.length);
 		if(util.defined(records,"length") && records.length > 0) {
-   		res.json({status: 200, resp:'Login Worked'});
+   		res.json({status: 200, resp:'Login Worked', record: records[0]});
 		} else {
 			res.json({status: 500, resp:'Login Failed'});
 		}
@@ -69,6 +69,41 @@ exports.accountForgot = function(req, res, next) {
 
 }
 
+exports.accountUpdateProfile = function(req, res, next) {
+	var fname = req.body.fname;
+	var lname = req.body.lname;
+	var email = req.body.email
+	var password = req.body.password;
+
+	console.log('*** accountRegister ***');
+	console.dir(fname);
+	console.log('~~~~~~~~~~~~~~');
+	console.dir(lname);
+	console.log('~~~~~~~~~~~~~~');
+	console.dir(email);
+	console.log('~~~~~~~~~~~~~~');
+	console.dir(password);
+	
+	soiServices.accountSearch(email, function(err, records) {
+		console.log('accountSearch:' + records.length);
+		if(util.defined(records,"length") && records.length > 0) {
+
+			console.log('record:');
+			console.dir(records[0]);
+
+			soiServices.accountUpdateProfile(records[0]['@rid'], fname, lname, email, password, function(err, data) {
+				if(data == 1) {
+					res.json({status: 200, resp:'Account Update Successful', record: data});
+				} else {
+					res.json({status: 500, resp:'Account Update Faild', record: data});
+				}
+					
+			});
+		} else {
+			res.json({status: 404, resp:'Account Not Found'});
+		}
+	});
+}
 
 
 exports.searchRecords = function(req, res, next) {
