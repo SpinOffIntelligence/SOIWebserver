@@ -45,6 +45,13 @@ exports.accountLogin = function(req, res, next) {
 	soiServices.accountLogin(email, password, function(err, records) {
 		console.log('accountLogin:' + records.length);
 		if(util.defined(records,"length") && records.length > 0) {
+			records[0].password=null;
+			records[0].token = util.token();
+			
+			
+			soiServices.accountSetToken(records[0]['@rid'], records[0].token, function(err, records) {
+			});
+
    		res.json({status: 200, resp:'Login Worked', record: records[0]});
 		} else {
 			res.json({status: 500, resp:'Login Failed'});
@@ -344,9 +351,12 @@ exports.getSchemasServer = function(callback) {
 
 exports.getSchemas = function(req, res, next) {
 	var schemas = req.body.schemas
+	var token = req.body.token
 
-	//console.log('*** getSchemas ***');
-	//console.dir(schemas);
+	console.log('*** getSchemas ***');
+	console.dir(schemas);
+	console.log('~~~~~~~~~~~~~~');
+	console.dir(token);
 
 	function getInfo(infoObj, callback) {
 		var mode = infoObj.mode;

@@ -15,7 +15,59 @@ var moment = require('moment');
 module.exports = function(app,express){
 
 	//app.use(express.compress());
-  
+	var SecurityProxy = function(req, res, next) {
+
+		var Response = res;
+		console.log('req.url:',req.url);
+		console.log(req.url.indexOf('\/soi\/'));
+
+		if(req.url.indexOf('\/soi\/') == -1) {
+			express.static(path.join(__dirname, '../public'), {index:false, redirect:false})(req, res, next);
+			return;
+		}
+			
+
+
+		if(util.defined(req,"headers.cookie")) {
+			//console.log(req.headers.cookie);
+			var strUserSession = util.getCookie('userSession',req.headers.cookie);
+			//console.log(strUserSession);
+			if(util.defined(strUserSession)) {
+				var userSession = JSON.parse(strUserSession);
+				console.log('!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!');
+				console.log(userSession.token);
+				console.log(userSession.email);
+				console.log('!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!');
+
+				_that = this;
+				soiServices.accountSearch(userSession.email, function(err, records) {
+					if(records.length > 0) {
+						var userRec = records[0];
+						console.dir(userRec);
+						if(util.defined(userRec,"token")) {
+							if(userRec.token != userSession.token) {
+								console.log('!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!');
+								console.log('TIMEOUT');
+								console.log('!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!');		
+								Response.send(401);
+								return;
+							} else {
+				        var recId = userRec['@rid'];
+				        strRecId = '#' + recId.cluster + ':' + recId.position;							
+								soiServices.accountSetToken(strRecId, userRec.token, function(err, records) {
+								});
+							}
+						}
+					}
+				})
+			}
+
+		}
+
+		express.static(path.join(__dirname, '../public'), {index:false, redirect:false})(req, res, next);
+	}
+
+  app.use(SecurityProxy);
 	app.use("/www", express.static(path.join(__dirname, '../public')));
 	app.use("/soiapp", express.static(path.join(__dirname, '../../soiapp')));
 	app.use("/dev", express.static(path.join(__dirname, '../../../dev')));

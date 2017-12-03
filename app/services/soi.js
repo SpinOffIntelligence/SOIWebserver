@@ -73,6 +73,22 @@ exports.accountLogin = function(email, password, callback) {
   });
 }
 
+exports.accountSetToken = function(rid, token, callback) {  
+  var infoObj = {
+    token: token,
+    tokenDate: moment().format('YYYY-MM-DD hh:mm:ss')
+  };
+  
+  odb.db.update(rid)
+   .set(infoObj).one()
+   .then(
+      function(update){
+        console.log('Records Updated:', update);
+        callback(null, update);
+      }
+   );
+}
+
 
 exports.removeImage = function(objectType, recordId, field, callback) {
   

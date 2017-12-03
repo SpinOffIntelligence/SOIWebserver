@@ -37,6 +37,24 @@ function defined(ref, strNames) {
 }
 
 
+var rand = function() {
+    return Math.random().toString(36).substr(2); // remove `0.`
+};
+module.exports.rand = rand;
+
+var token = function() {
+    return rand() + rand(); // to make it longer
+};
+module.exports.token = token;
+
+var getCookie = function(name, cookieStr) {
+      var value = "; " + cookieStr;
+      var parts = value.split("; " + name + "=");
+      if (parts.length == 2) return parts.pop().split(";").shift();
+    }
+module.exports.getCookie = getCookie;
+
+
 function toLower(inStr) {
   if(inStr !== null && typeof inStr !== "undefined")
     return inStr.toLowerCase();
