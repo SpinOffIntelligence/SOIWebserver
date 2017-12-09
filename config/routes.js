@@ -50,21 +50,31 @@ module.exports = function(app,express){
 								console.log('TIMEOUT');
 								console.log('!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!');		
 								Response.send(401);
-								return;
 							} else {
 				        var recId = userRec['@rid'];
 				        strRecId = '#' + recId.cluster + ':' + recId.position;							
 								soiServices.accountSetToken(strRecId, userRec.token, function(err, records) {
 								});
+
+								if(util.defined(userRec,"rights") && userRec.rights == 'Full Admin') {
+									res.locals = {};
+									res.locals.isAdmin = true;									
+								}
+								next();
 							}
+						} else {
+							express.static(path.join(__dirname, '../public'), {index:false, redirect:false})(req, res, next);
 						}
+					} else {
+						express.static(path.join(__dirname, '../public'), {index:false, redirect:false})(req, res, next);
 					}
 				})
 			}
-
+		} else {
+			express.static(path.join(__dirname, '../public'), {index:false, redirect:false})(req, res, next);	
 		}
 
-		express.static(path.join(__dirname, '../public'), {index:false, redirect:false})(req, res, next);
+		
 	}
 
   app.use(SecurityProxy);

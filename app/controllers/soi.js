@@ -635,13 +635,21 @@ exports.updatePanelRecord = function(req, res, next) {
 	var objectType = req.body.objectType;
 	var recordId = req.body.recordId;
 	var panelRecord = req.body.panelRecord;
+	var isAdmin = res.locals.isAdmin;
 
-	//console.log('*** updatePanelRecord ***');
-	//console.dir(objectType);
-	//console.log('~~~~~~~~~~~~~~');
-	//console.dir(recordId);
-	//console.log('~~~~~~~~~~~~~~');
-	//console.dir(panelRecord);
+	console.log('*** updatePanelRecord ***');
+	console.dir(objectType);
+	console.log('~~~~~~~~~~~~~~');
+	console.dir(recordId);
+	console.log('~~~~~~~~~~~~~~');
+	console.dir(panelRecord);
+	console.log('~~~~~~~~~~~~~~');
+	console.dir(isAdmin);
+
+	if(!util.defined(isAdmin) || isAdmin != true) {
+		res.send(401);
+		return;
+	}
 
 	soiServices.updateRecord(objectType, recordId, panelRecord, function(err, data) {
 		res.json(data);

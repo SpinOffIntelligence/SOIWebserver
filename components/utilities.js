@@ -55,6 +55,22 @@ var getCookie = function(name, cookieStr) {
 module.exports.getCookie = getCookie;
 
 
+module.exports.delete_cookie = function(name, cookieStr) {
+  cookieStr = name + '=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT;';
+  return cookieStr;
+}
+
+module.exports.createCookie = function(name, value, min, cookieStr) {
+  if (min) {
+    var date = new Date();
+    date.setTime(date.getTime() + (min * 60 * 1000));
+    var expires = "; expires=" + date.toGMTString();
+  } else var expires = "";
+  cookieStr = name + "=" + value + expires + "; path=/";
+  return cookieStr;
+}
+
+
 function toLower(inStr) {
   if(inStr !== null && typeof inStr !== "undefined")
     return inStr.toLowerCase();
