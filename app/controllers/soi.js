@@ -314,6 +314,8 @@ exports.getSchemasServer = function(callback) {
   { objectType: 'VPerson' },
   { objectType: 'VMedia' },
   { objectType: 'VEntrepreneurialResource' },
+  { objectType: 'SOIUsers' },
+  { objectType: 'PersonConnectRequest' },
    ];
 
 	//console.log('*** getSchemasServer ***');
