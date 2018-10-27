@@ -218,7 +218,7 @@ function loadVertexStats(infoObj, callback) {
         _.each(records, function(rec) {
           if(util.defined(rec,"technologyapplication")) {
             console.log('pscore~technologyapplication:' + rec.technologyapplication);
-            pscore++;
+            pscore+= rec.certsawards.split('^').length;
           }
         })
 

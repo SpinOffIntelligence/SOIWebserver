@@ -273,23 +273,59 @@ function processStats(statsItem, callback) {
 odb.init(function(err, res) {
   console.log('^^^^')
   console.log('*** statsdegreecentrality');
-  var allRecords;
+
+  var inCount = parseInt(process.argv[2]);
+  console.log('*** inCount:' + inCount);
+  
+  if(inCount == 0) {
+
+    var allRecords;
+    var query = strUtil.format("update v set statsbetweencentrality = 0");
+    console.log('query:' + query);
+    odb.db.query(query).then(function(records){
+
+      var query = strUtil.format("select @rid from V");
+      console.log('query:' + query);
+      odb.db.query(query).then(function(records){
+        var allRecords = records;
+        var mapObjs = [];
+        var cnt=inCount;
+        //_.each(allRecords, function(rec) {
+          mapObjs.push({count: cnt, records: records});
+          cnt++;
+        //});
+        console.log('loadStats mapObjs:' + mapObjs.length);
+        //console.dir(mapObjs);
+
+        async.mapSeries(mapObjs, loadStats, function(err, results){
+          console.log('loadStats mapObjs done!' + comboCnt)
+          process.exit(1);            
+        });    
+
+        // loadStats(allRecords, 1, function(err, data) {
+        //     console.log('loadStats done!');
+        //     process.exit(1);
+        // });
 
 
-  var query = strUtil.format("update v set statsbetweencentrality = 0");
-  console.log('query:' + query);
-  odb.db.query(query).then(function(records){
+      });
+    });    
+
+  } else {
+
+
+    var allRecords;
 
     var query = strUtil.format("select @rid from V");
     console.log('query:' + query);
     odb.db.query(query).then(function(records){
       var allRecords = records;
       var mapObjs = [];
-      var cnt=0;
-      _.each(allRecords, function(rec) {
+      var cnt=inCount;
+      //_.each(allRecords, function(rec) {
         mapObjs.push({count: cnt, records: records});
         cnt++;
-      });
+      //});
       console.log('loadStats mapObjs:' + mapObjs.length);
       //console.dir(mapObjs);
 
@@ -305,8 +341,8 @@ odb.init(function(err, res) {
 
 
     });
-  });    
 
+  }
 
 
 

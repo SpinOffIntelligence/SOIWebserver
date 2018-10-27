@@ -345,7 +345,8 @@ function cleanString(input) {
 function prepareInboudString(inString) {
   //console.log('prepareInboudString:');
 
-  var cleanStr = cleanString(inString);
+  //var cleanStr = cleanString(inString);
+  var cleanStr = inString;
   cleanStr = cleanStr.replace(/(\r\n|\n|\r)/gm," ");
 
   cleanStr = cleanStr.replace(/\'/gm,"\\'");
@@ -445,8 +446,10 @@ function prepareInboundData(objectType, recordData) {
 
   if(this.defined(recordData)) {
     for(var propertyName in recordData) {
-      //console.log('^^^^ propertyName:' + propertyName);
+      console.log('^^^^ propertyName:' + propertyName);
       var val = recordData[propertyName];
+      console.log('^^^^ val:' + val);
+      
       if(val == null) {
         //console.log('fail1');
       } else if(propertyName == 'in') {
@@ -459,9 +462,9 @@ function prepareInboundData(objectType, recordData) {
         //console.log('fail5');
       } else if(propertyName == 'backup') {
         //console.log('fail6');
-      } else if(typeof propertyName == 'object') {
+      } else if(typeof val == 'object') {
         //console.log('fail7');
-      } else if(typeof propertyName == 'array') {
+      } else if(typeof val == 'array') {
         //console.log('fail8');
       } else if(!this.defined(recordData,propertyName)) {
         //console.log('fail9');
