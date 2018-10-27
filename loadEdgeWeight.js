@@ -121,7 +121,7 @@ function loadVertexStats(infoObj, callback) {
   var mainId = '#' + record.rid.cluster + ':' + record.rid.position;
   console.log('mainId: ' + mainId);
 
-  var query = strUtil.format("traverse * from  %s while $depth < 2", mainId);
+  var query = strUtil.format("traverse * from %s while $depth < 3", mainId);
   console.log('query:' + query);
 
   odb.db.query(query).then(function(records){
@@ -199,58 +199,116 @@ function loadVertexStats(infoObj, callback) {
         // Prestige Score
         var pscore = 0;
         console.log('pscore~start');
-        // Number of patents
-        var fndPat = _.where(records, {className: 'VPatent'});
-        if(util.defined(fndPat) && fndPat.length > 0) {
-          console.log('pscore~fndPat:' + fndPat.length);
-          pscore+=fndPat.length;
-        }
 
-        // Has Awards          
-        _.each(records, function(rec) {
-          if(util.defined(rec,"certsawards")) {
-            console.log('pscore~certsawards:' + rec.certsawards);
-            pscore += rec.certsawards.split('^').length;
-          }
-        })
+        if(className == 'VPerson' || className == 'VSpinOff' || className == 'VCompany' || className == 'VResearchInstitution') {
 
-        // Has Tech Applications          
-        _.each(records, function(rec) {
-          if(util.defined(rec,"technologyapplication")) {
-            console.log('pscore~technologyapplication:' + rec.technologyapplication);
-            pscore+= rec.certsawards.split('^').length;
-          }
-        })
-
-        // Is Joint R&D   
-        _.each(records, function(rec) {
-          var className = rec['@class']
-          //console.log("className:" + className);
-          if(className == 'VSpinOff' && util.defined(rec,'type') && rec.type.indexOf('Joint ') > -1) {
-            console.log('pscore~Joint:' + rec.type);
-            pscore++;
-          }
-        })
-
-        // If is SpinOff score by founder
-        _.each(records, function(rec) {
-          var className = rec['@class']
-          //console.log("className:" + className);
-          if(className == 'ESpinOff' && util.defined(rec,"inId")) {
-            console.log('pscore~ESpinOff:' + rec.inId);
-            var fnd = _.findWhere(records,{id: rec.inId});
-            if(util.defined(fnd)) {
-              console.log('spinclassName:' + fnd.className);
-              if(fnd.className == "VResearchInstitution") {
-                pscore++;
-              } else if(fnd.className == "VCompany") {
-                pscore+=2;
-              } else if(fnd.className == "VSpinOff") {
-                pscore+=3;
+          // Total Investments
+          var totalInvIn = 0;
+          var totalInvOut = 0;
+          _.each(records, function(rec) {
+            var className = rec['@class']
+            console.log("className:" + className);
+            
+            if(className == 'EInvestor' && util.defined(rec,"inId")) {
+              console.log('!!!!!!!!!!!!!! pscore~EInvestor:' + rec.inId);
+              if(util.defined(rec,"out.amount")) {
+                console.dir(rec.out.amount);
+                totalInvIn+=rec.out.amount;
               }
             }
+
+            if(className == 'EFunded' && util.defined(rec,"outId")) {
+              console.log('!!!!!!!!!!!!!! pscore~EInvestor:' + rec.inId);
+              if(util.defined(rec,"out.amount")) {
+                console.dir(rec.out.amount);
+                totalInvOut+=rec.out.amount;
+              }
+            }
+
+          });
+
+          console.log('totalInvIn:' + totalInvIn);
+          if(totalInvIn > 0) {
+            var calcPoints = (Math.floor(totalInvIn / 50000)+1) * .5;
+            pscore+=calcPoints;            
           }
-        })
+
+          console.log('totalInvOut:' + totalInvOut);
+          if(totalInvIn > 0) {
+            var calcPoints = (Math.floor(totalInvOut / 50000)+1) * .5;
+            pscore+=calcPoints;
+          }
+          console.log('pscore:' + pscore);
+
+          if(className == 'VSpinOff' || className == 'VCompany' || className == 'VResearchInstitution') {
+
+            // Number of SpinOffs
+            var fndSpin = _.where(records, {className: 'VSpinOff'});
+            if(util.defined(fndSpin) && fndSpin.length > 0) {
+              console.log('pscore~SpinOffs:' + fndSpin.length);
+              pscore+=fndSpin.length;
+            }
+
+
+            // Number of Merger & Acquisition
+            var fndRel = _.where(records, {className: 'EAcquire'});
+            if(util.defined(fndRel) && fndRel.length > 0) {
+              console.log('pscore~Merger:' + fndRel.length);
+              pscore+=fndRel.length;
+            }
+
+            // Number of Employees
+            var fndRel = _.where(records, {className: 'EWorksfor'});
+            if(util.defined(fndRel) && fndRel.length > 0) {
+              console.log('pscore~Employees:' + fndRel.length);
+              pscore+=fndRel.length * .5;
+            }
+
+
+          }
+
+          // Has Awards          
+          _.each(records, function(rec) {
+            if(util.defined(rec,"certsawards")) {
+              console.log('pscore~Awards:' + rec.certsawards);
+              pscore += rec.certsawards.split('^').length * .5;
+            }
+          })
+
+          // Number of Patents
+          var fndPat = _.where(records, {className: 'VPatent'});
+          if(util.defined(fndPat) && fndPat.length > 0) {
+            console.log('pscore~Patents:' + fndPat.length);
+            pscore+=fndPat.length * .5;
+          }
+
+          // Number of Projects
+          var fndRel = _.where(records, {className: 'VProject'});
+          if(util.defined(fndRel) && fndRel.length > 0) {
+            console.log('pscore~Projects:' + fndRel.length);
+            pscore+=fndRel.length* .5;
+          }
+
+          // Number of Entrepreneurial Resource
+          var fndRel = _.where(records, {className: 'VEntrepreneurialResource'});
+          if(util.defined(fndRel) && fndRel.length > 0) {
+            console.log('pscore~Resource:' + fndRel.length);
+            pscore+=fndRel.length * .5;
+          }
+
+          // Number of VMedia
+          var fndRel = _.where(records, {className: 'VMedia'});
+          if(util.defined(fndRel) && fndRel.length > 0) {
+            console.log('pscore~VMedia:' + fndRel.length);
+            pscore+=fndRel.length * .5;
+          }
+
+          console.log('pscore:' + pscore);
+
+          //if(pscore > 0)
+          //  process.exit(1);    
+
+        }
 
         if(pscore > 0) {
           console.log('**pscore:' + pscore);
@@ -637,6 +695,7 @@ odb.init(function(err, res) {
     console.log('query:' + query);
     odb.db.query(query).then(function(records){
 
+      //var query = strUtil.format("select @rid from V where @class = 'VResearchInstitution'");
       var query = strUtil.format("select @rid from V");
       console.log('query:' + query);
       odb.db.query(query).then(function(records){
