@@ -1,4 +1,7 @@
-for ((i=1;i<=100;i++));
+OUTPUT="$(node loadStats.js -1)"
+echo "${OUTPUT}"
+
+for ((i=1;i<=${OUTPUT};i++));
 do
    # your-unix-command-here
    echo $i
