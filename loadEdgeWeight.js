@@ -22,8 +22,8 @@ function setEdgeScore(id, score, callback) {
 
 function setVertexScore(id, prop, score, callback) {
 
-  var newScore = 1000 - score;
-  var query = strUtil.format("UPDATE V SET %s = %s WHERE @rid = '%s'", prop, newScore, id);
+  //var newScore = 1000 - score;
+  var query = strUtil.format("UPDATE V SET %s = %s WHERE @rid = '%s'", prop, score, id);
   console.log('query:' + query);
   process.stdout.write('+');
   odb.db.query(query).then(function(records){
@@ -341,7 +341,7 @@ function loadEdgeStats(infoObj, callback) {
   var mainId = '#' + record.rid.cluster + ':' + record.rid.position;
   console.log('mainId: ' + mainId);
 
-  var query = strUtil.format("traverse * from  %s while $depth < 2", mainId);
+  var query = strUtil.format("traverse * from  %s while $depth < 3", mainId);
   console.log('query:' + query);
 
   odb.db.query(query).then(function(records){
@@ -395,129 +395,62 @@ function loadEdgeStats(infoObj, callback) {
         var weight = rec['weight'];
         console.log("weight:" + weight);
         if(weight == 0) {
-          score = scoreEdge(rec,className);
-          if(score==0)
-            score=1;
-          else console.log("~~Score: " + score);
 
-          // Find multiple 
-          console.log("in & out:" + rec.inId + ":" + rec.outId);
-          var fndIn = _.where(records, {inId: rec.inId, outId: rec.outId});
-          console.log("fndIn:" + fndIn.length);
-          //console.dir(fndIn);
+          var totalIn = 0;
+          var totalOut = 0;
+          var maxScore = 100000;
+          var scaleScore = 1000;
 
-          var fndOut = _.where(records, {outId: rec.inId, inId: rec.outId});
-          console.log("fndOut:" + fndOut.length);
-          //console.dir(fndOut);
+          if(util.defined(rec,"in.prestigescore") && rec.in.prestigescore > 0) {
+            console.log("prestigescore: " + rec.in.prestigescore);
+            totalIn+=rec.in.prestigescore;
+          }
+          else totalIn=maxScore;
 
-          if(util.defined(fndIn,"length") && fndIn.length > 0) {
-            _.each(fndIn, function(subrec) {
-              if(subrec.id != rec.id) {
-                score++;
-                console.log("*****found multiple:" + subrec.id);
-              }
-                
-            });          
+          if(util.defined(rec,"in.dataquailityscore") && rec.in.dataquailityscore > 0) {
+            console.log("dataquailityscore: " + rec.in.dataquailityscore);
+            totalIn+=(rec.in.dataquailityscore/10);
           }
-          if(util.defined(fndOut,"length") && fndOut.length > 0) {
-            _.each(fndOut, function(subrec) {
-              if(subrec.id != rec.id) {
-                console.log("*****found multiple:" + subrec.id);
-                score++;
-              }
-                
-            });          
-          }
+          else totalIn=maxScore;
 
-          // Weight Edge by Vertex Dataquality
-          console.log("In Vertex:" + rec.inId + ":" + rec.outId);
-          var fndIn = _.findWhere(records, {id: rec.inId});
-          var fndOut = _.findWhere(records, {id: rec.outId});
+          // if(util.defined(rec,"in.statsbetweencentrality") && rec.in.statsbetweencentrality > 0) {
+          //   console.log("statsbetweencentrality: " + rec.in.prestigescore);
+          //   totalIn+=rec.in.statsbetweencentrality;
+          // }
+          // else totalIn=maxScore;
 
-          var addScore=0;
-          if(util.defined(fndIn,"dataquailityscore")) {
-            console.log('fndIn:' + fndIn.dataquailityscore);
-            addScore += Math.ceil(fndIn.dataquailityscore / 10);
-            console.log('addScore:' + addScore);
-          }
-          if(util.defined(fndOut,"dataquailityscore")) {
-            console.log('fndOut:' + fndOut.dataquailityscore);
-            addScore += Math.ceil(fndOut.dataquailityscore / 10);
-            console.log('addScore:' + addScore);
-          }
-          score+=addScore;
-
-          // Weight Edge by Vertex Prestige
-          var addScore=0;
-          if(util.defined(fndIn,"prestigescore")) {
-            console.log('fndIn:' + fndIn.prestigescore);
-            addScore += fndIn.prestigescore;
-            console.log('addScore:' + addScore);
-          }
-          if(util.defined(fndOut,"prestigescore")) {
-            console.log('fndOut:' + fndOut.prestigescore);
-            addScore += fndOut.prestigescore;
-            console.log('addScore:' + addScore);
-          }
-          score+=addScore;
-          console.log("~~~~addScore:" + addScore);
+          console.log("totalIn:" + totalIn);
 
 
-          //statsbetweencentrality
-          if(util.defined(fndIn,"statsbetweencentrality")) {
-            console.log('fndIn:' + fndIn.statsbetweencentrality);
-            addScore += getCentralityScore('statsbetweencentrality', fndIn.statsbetweencentrality);
-            console.log('addScore:' + addScore);
+          if(util.defined(rec,"out.prestigescore") && rec.out.prestigescore > 0) {
+            console.log("prestigescore: " + rec.out.prestigescore);
+            totalOut+=rec.out.prestigescore;
           }
-          if(util.defined(fndOut,"statsbetweencentrality")) {
-            console.log('fndOut:' + fndOut.statsbetweencentrality);
-            addScore += getCentralityScore('statsbetweencentrality', fndOut.statsbetweencentrality);
-            console.log('**************addScore:' + addScore);
-          }
-          score+=addScore;
-          console.log("~~~~addScore:" + addScore);
+          else totalOut=maxScore;
 
-          //statsdegreecentrality
-          if(util.defined(fndIn,"statsdegreecentrality")) {
-            console.log('fndIn:' + fndIn.statsdegreecentrality);
-            addScore += getCentralityScore('statsdegreecentrality', fndIn.statsdegreecentrality);
-            console.log('addScore:' + addScore);
+          if(util.defined(rec,"out.dataquailityscore") && rec.out.dataquailityscore > 0) {
+            console.log("dataquailityscore: " + rec.out.dataquailityscore);
+            totalOut+=(rec.out.dataquailityscore/10);
           }
-          if(util.defined(fndOut,"statsdegreecentrality")) {
-            console.log('fndOut:' + fndOut.statsdegreecentrality);
-           addScore += getCentralityScore('statsdegreecentrality', fndOut.statsdegreecentrality);
-            console.log('***************addScore:' + addScore);
-          }
-          score+=addScore;
-          console.log("~~~~addScore:" + addScore);
+          else totalOut=maxScore;
 
-          console.log("++++score:" + score);
-          setEdgeScore(id, score, function(error, data) {            
+          // if(util.defined(rec,"out.statsbetweencentrality") && rec.out.statsbetweencentrality > 0) {
+          //   console.log("statsbetweencentrality: " + rec.out.prestigescore);
+          //   totalOut+=rec.out.statsbetweencentrality;
+          // }
+          // else totalOut=maxScore;
+
+          console.log("totalOut:" + totalOut);
+
+
+          setEdgeScore(id, (scaleScore-(totalIn+totalOut)), function(error, data) {            
           });
+          //process.exit(1);
+
+
         }
-
-      } else {
-
-        // Set Node Scores
-        var totalProp=0;
-        var totalUsedProp=0;
-        if(util.defined(schemas,"className")) {
-          _.each(schemas.className, function(prop) {
-            totalProp++;
-            if(util.define(rec,"prop"))
-              totalUsedProp++;''
-          });
-          console.log('Prop:' + totalProp + ":" + totalUsedProp);
-          if(totalProp > 0) {
-            var score = Math.ceil((totalUsedProp/totalProp)*100);
-            console.log('Vertext Score:' + score);
-            setVertexScore(id, 'dataquailityscore', score, function() {
-            });
-          }
-          
-        }
-
       }
+
     });
 
     var mapObjs = [];
@@ -707,10 +640,10 @@ odb.init(function(err, res) {
           cnt++;
         });
         console.log('mapObjs:' + mapObjs.length);
-        //console.dir(mapObjs);
+        console.dir(mapObjs);
 
         async.mapSeries(mapObjs, loadVertexStats, function(err, results){
-          console.log('loadVertexStats done!' + comboCnt)
+         console.log('loadVertexStats done!' + comboCnt)
 
           async.mapSeries(mapObjs, loadEdgeStats, function(err, results){
             console.log('loadEdgeWeight done!' + comboCnt)
@@ -720,11 +653,6 @@ odb.init(function(err, res) {
       });
     });    
   });    
-  // processStats('statsdegreecentrality', function(err, data) {
-  //     console.log('*** statsdegreecentrality');
-  //     processStats('statsbetweencentrality', function(err, data) {
-  //       process.exit(1);
-  //     });
-  // });
+
 });
 
