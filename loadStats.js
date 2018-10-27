@@ -271,13 +271,26 @@ function processStats(statsItem, callback) {
 
 
 odb.init(function(err, res) {
-  console.log('^^^^')
-  console.log('*** statsdegreecentrality');
 
   var inCount = parseInt(process.argv[2]);
-  console.log('*** inCount:' + inCount);
+
+  if(inCount == -1) {
+
+    var query = strUtil.format("select count(*) from V");
+    //console.log('query:' + query);
+    odb.db.query(query).then(function(records){    
+      console.log(records[0].count);
+      process.exit(1);      
+    });
+
   
-  if(inCount == 0) {
+  } else if(inCount == 0) {
+
+    console.log('^^^^')
+    console.log('*** statsdegreecentrality');
+
+    
+    console.log('*** inCount:' + inCount);
 
     var allRecords;
     var query = strUtil.format("update v set statsbetweencentrality = 0");
@@ -313,6 +326,11 @@ odb.init(function(err, res) {
 
   } else {
 
+    console.log('^^^^')
+    console.log('*** statsdegreecentrality');
+
+    var inCount = parseInt(process.argv[2]);
+    console.log('*** inCount:' + inCount);
 
     var allRecords;
 

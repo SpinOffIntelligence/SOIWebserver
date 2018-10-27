@@ -20,7 +20,7 @@ exports.init = function(callback) {
 	var dbs = exports.server.list()
 	   .then(
 	      function(list){
-	         console.log('Databases on Server:', list.length);
+	         //console.log('Databases on Server:', list.length);
 	      }
 	   );
 
