@@ -14,7 +14,7 @@ var schemaTypeMap = [
 ];
 
 exports.accountSearch = function(email, callback) {  
-  var query = strUtil.format("select from SOIUsers  where email = '%s'", email);
+  var query = strUtil.format("select from SOIUsers where email = '%s'", email);
   console.log('query:' + query);
   odb.db.query(query).then(function(records){
     callback(null,records);

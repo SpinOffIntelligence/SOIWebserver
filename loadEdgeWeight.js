@@ -178,7 +178,7 @@ function loadVertexStats(infoObj, callback) {
         var totalProp=0;
         var totalUsedProp=0;
         if(util.defined(schemas,className)) {
-          console.dir("schemas:" + className);
+          //console.dir("schemas:" + className);
           //console.dir(schemas[className]);
 
           for (var prop in schemas[className]) {            
@@ -189,7 +189,7 @@ function loadVertexStats(infoObj, callback) {
           }
           console.log('Prop:' + totalProp + ":" + totalUsedProp);
           if(totalProp > 0) {
-            var score = Math.ceil((totalUsedProp/totalProp)*100);
+            var score = Math.ceil((totalUsedProp/totalProp)*10);
             console.log('Vertext Score:' + score);
             setVertexScore(id, 'dataquailityscore', score, function() {
             });
@@ -199,6 +199,23 @@ function loadVertexStats(infoObj, callback) {
         // Prestige Score
         var pscore = 0;
         console.log('pscore~start');
+
+        // Compute Degree centrality - Total In and Out
+        var totalEdges = 0;
+         _.each(records, function(rec) {
+            var className = rec['@class']
+            console.log("Degree Centrality className:" + className);
+
+            if(className.indexOf('E') == 0) {
+              totalEdges++;
+            }
+            console.log("totalEdges:" + totalEdges);
+        });
+
+        setVertexScore(id, 'statsdegreecentrality', totalEdges, function() {
+        });
+
+        //process.exit(1);
 
         if(className == 'VPerson' || className == 'VSpinOff' || className == 'VCompany' || className == 'VResearchInstitution') {
 
@@ -212,7 +229,7 @@ function loadVertexStats(infoObj, callback) {
             if(className == 'EInvestor' && util.defined(rec,"inId")) {
               console.log('!!!!!!!!!!!!!! pscore~EInvestor:' + rec.inId);
               if(util.defined(rec,"out.amount")) {
-                console.dir(rec.out.amount);
+                //console.dir(rec.out.amount);
                 totalInvIn+=rec.out.amount;
               }
             }
@@ -220,7 +237,7 @@ function loadVertexStats(infoObj, callback) {
             if(className == 'EFunded' && util.defined(rec,"outId")) {
               console.log('!!!!!!!!!!!!!! pscore~EInvestor:' + rec.inId);
               if(util.defined(rec,"out.amount")) {
-                console.dir(rec.out.amount);
+                //console.dir(rec.out.amount);
                 totalInvOut+=rec.out.amount;
               }
             }
@@ -310,11 +327,11 @@ function loadVertexStats(infoObj, callback) {
 
         }
 
-        if(pscore > 0) {
+        //if(pscore > 0) {
           console.log('**pscore:' + pscore);
           setVertexScore(id, 'prestigescore', pscore, function() {
           });
-        }
+        //}
 
       }
     });
@@ -381,7 +398,7 @@ function loadEdgeStats(infoObj, callback) {
 
     _.each(records, function(rec) {
       console.log("rec:" + rec);
-      console.dir(rec);
+      //console.dir(rec);
 
       var id = rec.id;
       console.log("id:" + id);
@@ -405,13 +422,13 @@ function loadEdgeStats(infoObj, callback) {
             console.log("prestigescore: " + rec.in.prestigescore);
             totalIn+=rec.in.prestigescore;
           }
-          else totalIn=maxScore;
+          //else totalIn=maxScore;
 
           if(util.defined(rec,"in.dataquailityscore") && rec.in.dataquailityscore > 0) {
             console.log("dataquailityscore: " + rec.in.dataquailityscore);
             totalIn+=(rec.in.dataquailityscore/10);
           }
-          else totalIn=maxScore;
+          //else totalIn=maxScore;
 
           // if(util.defined(rec,"in.statsbetweencentrality") && rec.in.statsbetweencentrality > 0) {
           //   console.log("statsbetweencentrality: " + rec.in.prestigescore);
@@ -426,13 +443,13 @@ function loadEdgeStats(infoObj, callback) {
             console.log("prestigescore: " + rec.out.prestigescore);
             totalOut+=rec.out.prestigescore;
           }
-          else totalOut=maxScore;
+          //else totalOut=maxScore;
 
           if(util.defined(rec,"out.dataquailityscore") && rec.out.dataquailityscore > 0) {
             console.log("dataquailityscore: " + rec.out.dataquailityscore);
             totalOut+=(rec.out.dataquailityscore/10);
           }
-          else totalOut=maxScore;
+          //else totalOut=maxScore;
 
           // if(util.defined(rec,"out.statsbetweencentrality") && rec.out.statsbetweencentrality > 0) {
           //   console.log("statsbetweencentrality: " + rec.out.prestigescore);
@@ -549,7 +566,7 @@ function processStats(statsItem, callback) {
         }
       }
       console.log('Map Objs:');
-      console.dir(mapObjs);
+      //console.dir(mapObjs);
 
       async.map(mapObjs, getInfo, function(err, results){
 
@@ -587,7 +604,7 @@ function processStats(statsItem, callback) {
             });
           }
           console.log('mapSetObjs:');
-          console.dir(mapSetObjs);
+          //console.dir(mapSetObjs);
 
           async.map(mapSetObjs, setInfo, function(err, results){
             console.log('mapSetObjs done!')
@@ -624,7 +641,7 @@ odb.init(function(err, res) {
   odb.db.query(query).then(function(records){
 
 
-    var query = strUtil.format("update V set dataquailityscore = 0,prestigescore = 0 limit 10");
+    var query = strUtil.format("update V set dataquailityscore = 0,prestigescore = 0, statsdegreecentrality = 0 limit 10");
     console.log('query:' + query);
     odb.db.query(query).then(function(records){
 
@@ -640,7 +657,7 @@ odb.init(function(err, res) {
           cnt++;
         });
         console.log('mapObjs:' + mapObjs.length);
-        console.dir(mapObjs);
+        //console.dir(mapObjs);
 
         async.mapSeries(mapObjs, loadVertexStats, function(err, results){
          console.log('loadVertexStats done!' + comboCnt)
