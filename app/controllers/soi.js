@@ -291,7 +291,8 @@ exports.getSchemasServer = function(callback) {
   var schemas = [ 
   { objectType: 'EAcquired' },
   { objectType: 'EEntrepreneurialResourcesProvider' },
-  { objectType: 'EAcquire' },
+  { objectType: 'EAcquirer' },
+  { objectType: 'EAcquired' },
   { objectType: 'EAuthor' },
   { objectType: 'EAdvisor' },
 	{ objectType: 'EResult' },
@@ -306,6 +307,7 @@ exports.getSchemasServer = function(callback) {
 	{ objectType: 'EMediaTarget' },  
 	{ objectType: 'EProjectContributor' },  	
   { objectType: 'VInvestment' },
+  { objectType: 'VAcquisition' },
   { objectType: 'VPatent' },
   { objectType: 'VCompany' },
   { objectType: 'VSpinOff' },
