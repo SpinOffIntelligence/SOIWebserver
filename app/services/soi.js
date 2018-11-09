@@ -79,6 +79,9 @@ exports.accountSetToken = function(rid, token, callback) {
     tokenDate: moment().format('YYYY-MM-DD hh:mm:ss')
   };
   
+  console.log('accountSetToken:');
+  console.dir(infoObj);
+
   odb.db.update(rid)
    .set(infoObj).one()
    .then(
@@ -329,10 +332,10 @@ exports.exportRecords = function(objectType, criteria, schema, callback) {
 		query = strUtil.format("SELECT FROM %s", objectType);
 	}
 
-	//console.log('query:' + query);
+	console.log('export query:' + query);
 	odb.db.query(query).then(function(records){
-		//console.log('records:');
-		////console.dirrecords);
+		console.log('export records:');
+		console.dir(records);
 		callback(null,records);
 	}).catch(function(error){
 	    console.error('Exception: ' + error); 

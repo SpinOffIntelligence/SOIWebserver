@@ -53,8 +53,8 @@ module.exports = function(app,express){
 							} else {
 				        var recId = userRec['@rid'];
 				        strRecId = '#' + recId.cluster + ':' + recId.position;							
-								soiServices.accountSetToken(strRecId, userRec.token, function(err, records) {
-								});
+								//soiServices.accountSetToken(strRecId, userRec.token, function(err, records) {
+								//});
 
 								if(util.defined(userRec,"rights") && userRec.rights == 'Full Admin') {
 									res.locals = {};
@@ -259,6 +259,7 @@ module.exports = function(app,express){
 				}
 
 				if(mode.toLowerCase(mode) == 'add') {
+
 					if(isEdge==false) {						    			
 						// var addObj = util.prepareInboudData(objectType, lineData, schemas);
 						// console.dir(addObj);

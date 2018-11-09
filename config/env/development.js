@@ -9,7 +9,7 @@ module.exports = {
     cache: false,
     riskFolderId: 'a1h40000001iuh8',
     loglevel: 'trace',
-    dbname: 'SOI3',
+    dbname: 'demo1',
     sfdc: {
         portalUrl: 'https://preprod-mygarp.cs28.force.com',
         loginUrl : 'https://test.salesforce.com',

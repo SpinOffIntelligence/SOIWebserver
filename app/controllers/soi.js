@@ -731,7 +731,7 @@ exports.exportRecords = function(req, res, next) {
 			strInfo = 'Error Exporting:' + err;
 			util.logInfo('Export', 'n/a', strInfo);
 		} else {
-			//console.log('Exporting:' + records);	
+			console.log('Exporting:' + records);	
 			strInfo = 'Exporting: ' + objectType + ':' + records.length;
 			util.logInfo('Export', 'n/a', strInfo);	
 			res.json({error_code:0,err_desc:null,strLog: strInfo, file: 'n/a', exportData: records});			

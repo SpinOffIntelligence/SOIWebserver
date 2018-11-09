@@ -11,7 +11,7 @@ exports.db;
 
 exports.init = function(callback) {
 	exports.server = OrientDB({
-	   host:       'ec2-54-185-235-250.us-west-2.compute.amazonaws.com',
+	   host:       'ec2-54-190-49-212.us-west-2.compute.amazonaws.com',
 	   port:       2424,
 	   username:   'root',
 	   password:   '9WlcEMvyBJqKToMWO4vvqrgRx7iuzKuf'
