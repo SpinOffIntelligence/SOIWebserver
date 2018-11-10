@@ -289,11 +289,9 @@ exports.fetchGridRecords = function(req, res, next) {
 
 exports.getSchemasServer = function(callback) {
   var schemas = [ 
-  { objectType: 'EAcquired' },
   { objectType: 'EEntrepreneurialResourcesProvider' },
   { objectType: 'EAcquirer' },
   { objectType: 'EAcquired' },
-  { objectType: 'EAuthor' },
   { objectType: 'EAdvisor' },
 	{ objectType: 'EResult' },
   { objectType: 'EFunded' },

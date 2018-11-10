@@ -196,8 +196,8 @@ exports.searchRecords = function(objectTypes, terms, notSearchTerms, filters, ca
 			_.each(inTerms, function(item) {
 				var term = item.trim();
 				if(termsClause == "")
-					termsClause = strUtil.format("(any() CONTAINSTEXT '%s')",term);
-				else termsClause += strUtil.format(" OR (any() CONTAINSTEXT '%s')",term);
+					termsClause = strUtil.format("(any() matches '(?i).*%s.*')",term);
+				else termsClause += strUtil.format(" OR (any() matches '(?i).*%s.*')')",term);
 			});
 
 		}
@@ -209,8 +209,8 @@ exports.searchRecords = function(objectTypes, terms, notSearchTerms, filters, ca
 			_.each(inTerms, function(item) {
 				var term = item.trim();
 				if(notTermsClause == "")
-					notTermsClause = strUtil.format("NOT(any() CONTAINSTEXT '%s')",term);
-				else notTermsClause += strUtil.format(" AND NOT(any() CONTAINSTEXT '%s')",term);
+					notTermsClause = strUtil.format("NOT(any() matches '(?i).*%s.*')')",term);
+				else notTermsClause += strUtil.format(" AND NOT(any() matches '(?i).*%s.*')')",term);
 			});
 
 		}
@@ -927,25 +927,27 @@ exports.getRecordDetails = function(objectType, recordId, depth, filters, search
   var whereClause = '';
   var whereSearchClause = '';
   var whereCnt=0;
-
   var filterCnt=0;
-
   var hideCnt=0;
 
   for(var propertyName in util.schemas) {
-    console.log('util.schemas:'+ propertyName);
+    console.log('!!util.schemas:'+ propertyName);
 
-    var showObject = true;
-    if(util.defined(schemas,"length")) {
+    var showObject = false;
+    if(util.defined(schemas)) {
       var fndSchema = _.findWhere(schemas,  {objectType : propertyName})
+      console.log('fndSchema:'+ fndSchema);
       if(util.defined(fndSchema,"selected")) {
-        console.log('fndSchema:'+ fndSchema.selected);
-        if(fndSchema.selected == false) {
-          showObject = fndSchema.selected;
+        console.log('fndSchema selected:'+ fndSchema.selected);
+        if(fndSchema.selected == true) {
+          showObject = true;
+        } else {
           hideCnt++;
         }
       }
     }
+
+    console.log('showObject:'+ showObject);
 
     if(showObject) {
 	    var fndFilters = util.whereProp(filters, 'objectType', propertyName);
@@ -965,8 +967,11 @@ exports.getRecordDetails = function(objectType, recordId, depth, filters, search
 		      
 		    }
 	    });
-	    console.log('filterClause:' + filterClause)
+	    console.log('filterClause:' + filterClause);
+
 			if(search) {
+
+        console.log('Is Search:' + search);
 
 				if(filterClause != '') {
 
@@ -982,7 +987,8 @@ exports.getRecordDetails = function(objectType, recordId, depth, filters, search
 
 				}
 
-				console.log('whereSearchClause:' + whereSearchClause)
+				console.log('whereSearchClause:' + whereSearchClause);
+        console.log('whereClause:' + whereClause);
 
 			} else {
 
@@ -998,14 +1004,14 @@ exports.getRecordDetails = function(objectType, recordId, depth, filters, search
 			    whereClause = whereClause + strUtil.format(" or (@class = '%s' and %s)", propertyName, filterClause);
 		    }
 
-
+        console.log('whereClause:' + whereClause);
 			}
 
 	    whereCnt++;
     }
   }
 
-	console.log('whereClause:' + whereClause)
+	console.log('Final whereClause:' + whereClause)
 	
 
   var query = strUtil.format("traverse * from  %s while $depth < %s", recordId, deep);
@@ -1025,7 +1031,7 @@ exports.getRecordDetails = function(objectType, recordId, depth, filters, search
 	  }
 
 	  if(util.defined(searchTerms)) {
-	    query = "select from (" + query + ") where any() like " + "'%" + searchTerms + "%'"
+	    query = "select from (" + query + ") where any() matches " + "'(?i).*" + searchTerms + ".*'"
 	  }
 
     //var subquery = strUtil.format("select shortestPath(%s, %s)", recordId, '#40:177');
