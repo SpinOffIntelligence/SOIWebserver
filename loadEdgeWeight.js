@@ -659,7 +659,7 @@ odb.init(function(err, res) {
   odb.db.query(query).then(function(records){
 
 
-    var query = strUtil.format("update V set dataquailityscore = 0,prestigescore = 0, statsdegreecentrality = 0 limit 10");
+    var query = strUtil.format("update V set dataquailityscore = 0,prestigescore = 0, statsdegreecentrality = 0");
     console.log('query:' + query);
     odb.db.query(query).then(function(records){
 
