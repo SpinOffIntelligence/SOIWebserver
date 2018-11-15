@@ -664,7 +664,8 @@ odb.init(function(err, res) {
     odb.db.query(query).then(function(records){
 
       //var query = strUtil.format("select @rid from V where @class = 'VResearchInstitution'");
-      var query = strUtil.format("select @rid from V where @rid = '#39:0'");
+      //var query = strUtil.format("select @rid from V where @rid = '#39:0'");
+      var query = strUtil.format("select @rid from V");
       console.log('query:' + query);
       odb.db.query(query).then(function(records){
         var allRecords = records;
