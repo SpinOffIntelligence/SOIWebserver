@@ -10,15 +10,29 @@ var comboCnt = 0;
 
 function setEdgeScore(id, score, callback) {
 
-  var newScore = 1000 - score;
+  var newScore = Math.ceil(1000 - score);
   var query = strUtil.format("UPDATE E SET weight = %s WHERE @rid = '%s'", newScore, id);
-  //console.log('query:' + query);
+  console.log('query:' + query);
   process.stdout.write('+');
   odb.db.query(query).then(function(records){
     //console.log('Updated records:' + records);
     callback(null,records);
   });
 }
+
+function setVertexScores(id, dataquailityscore, statsdegreecentrality, prestigescore, callback) {
+
+  //var newScore = 1000 - score;
+  var query = strUtil.format("UPDATE V SET dataquailityscore = %s, statsdegreecentrality = %s, prestigescore = %s WHERE @rid = '%s'", Math.ceil(dataquailityscore), Math.ceil(statsdegreecentrality), Math.ceil(prestigescore), id);
+  console.log('query:' + query);
+  process.stdout.write('+');
+  odb.db.query(query).then(function(records){
+    console.log('Updated records:');
+    console.dir(records);
+    callback(null,records);
+  });
+}
+
 
 function setVertexScore(id, prop, score, callback) {
 
@@ -158,9 +172,12 @@ function loadVertexStats(infoObj, callback) {
       }
     });
 
+    var dataquailityscore=0;
+    var statsdegreecentrality=0;
+    var prestigescore=0;
+
     _.each(records, function(rec) {
       console.log("rec:" + rec);
-      console.dir(rec);
 
       var id = rec.id;
       console.log("id:" + id);
@@ -169,11 +186,11 @@ function loadVertexStats(infoObj, callback) {
       console.log("className:" + className);
 
       var score=1;
-      if(className.charAt(0) == 'V') {
-        // Set Node Scores
+      if(className.charAt(0) == 'V' && id == mainId) {
 
-        console.log("className:" + className);
+        // Set Node Scores
         console.log('Is Vertex');
+        console.dir(rec);
 
         // Data Quality Score
         var totalProp=0;
@@ -192,8 +209,9 @@ function loadVertexStats(infoObj, callback) {
           if(totalProp > 0) {
             var score = Math.ceil((totalUsedProp/totalProp)*10);
             console.log('Vertext Score:' + score);
-            setVertexScore(id, 'dataquailityscore', score, function() {
-            });
+            dataquailityscore = score;
+            //setVertexScore(id, 'dataquailityscore', score, function() {
+            //});
           }
         }
 
@@ -213,8 +231,9 @@ function loadVertexStats(infoObj, callback) {
             console.log("totalEdges:" + totalEdges);
         });
 
-        setVertexScore(id, 'statsdegreecentrality', totalEdges, function() {
-        });
+        statsdegreecentrality = totalEdges;
+        //setVertexScore(id, 'statsdegreecentrality', totalEdges, function() {
+        //});
 
         if(className == 'VPerson' || className == 'VSpinOff' || className == 'VCompany' || className == 'VResearchInstitution') {
 
@@ -336,20 +355,13 @@ function loadVertexStats(infoObj, callback) {
             pscore+=fndRel.length * .5;
             console.log('pscore:' + pscore);
           }
-          
-
-          //if(pscore > 0)
-          //  process.exit(1);    
-
         }
 
-        //if(pscore > 0) {
-          console.log('**pscore:' + pscore);
-          setVertexScore(id, 'prestigescore', pscore, function() {
-          });
-        //}
+        console.log('**pscore:' + pscore);
+        prestigescore = pscore;
 
-        //process.exit(1);
+        setVertexScores(id, dataquailityscore, statsdegreecentrality, prestigescore, function() {
+        });
 
       }
     });
@@ -368,7 +380,7 @@ function loadEdgeStats(infoObj, callback) {
   var count = infoObj.count;
   var record = infoObj.record;
 
-  console.log('********************* loadStats: ' + count);
+  console.log('********************* loadEdgeStats: ' + count);
 
   var allScores = {};
   //var query = strUtil.format("select @rid from V where @class = '%s'", objectType);
@@ -382,8 +394,6 @@ function loadEdgeStats(infoObj, callback) {
   odb.db.query(query).then(function(records){
 
     console.log("records:" + records.length);
-    //console.dir(records);
-
 
     // Save main record
     var mainRec;
@@ -429,6 +439,7 @@ function loadEdgeStats(infoObj, callback) {
         console.log("is edge:");
         var weight = rec['weight'];
         console.log("weight:" + weight);
+
         if(weight == 0) {
 
           var totalIn = 0;
@@ -687,7 +698,7 @@ odb.init(function(err, res) {
           });    
         });    
       });
-      
+
     });    
   });    
 
