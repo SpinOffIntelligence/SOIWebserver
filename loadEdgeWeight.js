@@ -27,7 +27,8 @@ function setVertexScore(id, prop, score, callback) {
   console.log('query:' + query);
   process.stdout.write('+');
   odb.db.query(query).then(function(records){
-    //console.log('Updated records:' + records);
+    console.log('Updated records:');
+    console.dir(records);
     callback(null,records);
   });
 }
@@ -159,13 +160,13 @@ function loadVertexStats(infoObj, callback) {
 
     _.each(records, function(rec) {
       console.log("rec:" + rec);
-      //console.dir(rec);
+      console.dir(rec);
 
       var id = rec.id;
       console.log("id:" + id);
 
       var className = rec['@class']
-      //console.log("className:" + className);
+      console.log("className:" + className);
 
       var score=1;
       if(className.charAt(0) == 'V') {
@@ -215,8 +216,6 @@ function loadVertexStats(infoObj, callback) {
         setVertexScore(id, 'statsdegreecentrality', totalEdges, function() {
         });
 
-        //process.exit(1);
-
         if(className == 'VPerson' || className == 'VSpinOff' || className == 'VCompany' || className == 'VResearchInstitution') {
 
           // Total Investments
@@ -245,17 +244,23 @@ function loadVertexStats(infoObj, callback) {
           });
 
           console.log('totalInvIn:' + totalInvIn);
+          console.log('totalInvOut:' + totalInvOut);
+
           if(totalInvIn > 0) {
             var calcPoints = (Math.floor(totalInvIn / 50000)+1) * .5;
-            pscore+=calcPoints;            
+            pscore+=calcPoints;       
+            console.log('pscore:' + pscore);     
           }
 
-          console.log('totalInvOut:' + totalInvOut);
-          if(totalInvIn > 0) {
+          console.log('totalInvIn calcPoints:' + calcPoints);
+
+          if(totalInvOut > 0) {
             var calcPoints = (Math.floor(totalInvOut / 50000)+1) * .5;
             pscore+=calcPoints;
+            console.log('pscore:' + pscore);
           }
-          console.log('pscore:' + pscore);
+
+          console.log('totalInvOut calcPoints:' + calcPoints);
 
           if(className == 'VSpinOff' || className == 'VCompany' || className == 'VResearchInstitution') {
 
@@ -264,6 +269,7 @@ function loadVertexStats(infoObj, callback) {
             if(util.defined(fndSpin) && fndSpin.length > 0) {
               console.log('pscore~SpinOffs:' + fndSpin.length);
               pscore+=fndSpin.length;
+              console.log('pscore:' + pscore);
             }
 
 
@@ -272,23 +278,30 @@ function loadVertexStats(infoObj, callback) {
             if(util.defined(fndRel) && fndRel.length > 0) {
               console.log('pscore~Merger:' + fndRel.length);
               pscore+=fndRel.length;
+              console.log('pscore:' + pscore);
             }
 
             // Number of Employees
-            var fndRel = _.where(records, {className: 'EWorksfor'});
-            if(util.defined(fndRel) && fndRel.length > 0) {
-              console.log('pscore~Employees:' + fndRel.length);
-              pscore+=fndRel.length * .5;
+            // var fndRel = _.where(records, {className: 'EWorksfor'});
+            // if(util.defined(fndRel) && fndRel.length > 0) {
+            //   console.log('pscore~Employees:' + fndRel.length);
+            //   pscore+=fndRel.length * .5;
+            // }
+            if(util.defined(mainRec,"size")) {
+              console.log('pscore~Employees:' + mainRec['size']);
+              pscore+=parseInt(mainRec['size']) / 100; 
+              console.log('pscore:' + pscore);             
             }
-
 
           }
 
           // Has Awards          
           _.each(records, function(rec) {
             if(util.defined(rec,"certsawards")) {
+              var awds = rec.certsawards.split('^').length;
+              pscore += awds * .5;
               console.log('pscore~Awards:' + rec.certsawards);
-              pscore += rec.certsawards.split('^').length * .5;
+              console.log('pscore:' + pscore);
             }
           })
 
@@ -297,6 +310,7 @@ function loadVertexStats(infoObj, callback) {
           if(util.defined(fndPat) && fndPat.length > 0) {
             console.log('pscore~Patents:' + fndPat.length);
             pscore+=fndPat.length * .5;
+            console.log('pscore:' + pscore);
           }
 
           // Number of Projects
@@ -304,6 +318,7 @@ function loadVertexStats(infoObj, callback) {
           if(util.defined(fndRel) && fndRel.length > 0) {
             console.log('pscore~Projects:' + fndRel.length);
             pscore+=fndRel.length* .5;
+            console.log('pscore:' + pscore);
           }
 
           // Number of Entrepreneurial Resource
@@ -311,6 +326,7 @@ function loadVertexStats(infoObj, callback) {
           if(util.defined(fndRel) && fndRel.length > 0) {
             console.log('pscore~Resource:' + fndRel.length);
             pscore+=fndRel.length * .5;
+            console.log('pscore:' + pscore);
           }
 
           // Number of VMedia
@@ -318,9 +334,9 @@ function loadVertexStats(infoObj, callback) {
           if(util.defined(fndRel) && fndRel.length > 0) {
             console.log('pscore~VMedia:' + fndRel.length);
             pscore+=fndRel.length * .5;
+            console.log('pscore:' + pscore);
           }
-
-          console.log('pscore:' + pscore);
+          
 
           //if(pscore > 0)
           //  process.exit(1);    
@@ -332,6 +348,8 @@ function loadVertexStats(infoObj, callback) {
           setVertexScore(id, 'prestigescore', pscore, function() {
           });
         //}
+
+        //process.exit(1);
 
       }
     });
@@ -646,7 +664,7 @@ odb.init(function(err, res) {
     odb.db.query(query).then(function(records){
 
       //var query = strUtil.format("select @rid from V where @class = 'VResearchInstitution'");
-      var query = strUtil.format("select @rid from V");
+      var query = strUtil.format("select @rid from V where @rid = '#39:0'");
       console.log('query:' + query);
       odb.db.query(query).then(function(records){
         var allRecords = records;
