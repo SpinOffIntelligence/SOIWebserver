@@ -15,7 +15,7 @@ var schemaTypeMap = [
 
 exports.accountSearch = function(email, callback) {  
   var query = strUtil.format("select from SOIUsers where email = '%s'", email);
-  console.log('query:' + query);
+  //console.log('query:' + query);
   odb.db.query(query).then(function(records){
     callback(null,records);
   }).catch(function(error){
@@ -435,7 +435,8 @@ exports.deleteVertexByProp = function(objectType, idField, idValue, schemas, cal
 			} else {
 				query = strUtil.format("DELETE VERTEX %s where %s = %s", objectType ,idField, idValue);	
 			}
-			//console.log('query:' + query);
+
+			console.log('query:' + query);
 			odb.db.query(query).then(function(records){
 				callback(null,records);
 				return;
@@ -1175,8 +1176,17 @@ exports.updateRecord = function(objectType, recordId, panelRecord, callback) {
 }
 
 exports.deleteRecord = function(objectType, recordId, callback) {
-	odb.db.record.delete(recordId);
-	callback(null, true);
+
+  var query = strUtil.format("@rid = %s", recordId);
+  console.log('query:' + query);
+
+  odb.db.delete('VERTEX',objectType)
+   .where(query).one()
+   .then(
+      function(del){
+         callback(null, true);
+      }   
+  );	
 }
 
 

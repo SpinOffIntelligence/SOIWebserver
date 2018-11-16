@@ -34,10 +34,10 @@ module.exports = function(app,express){
 			//console.log(strUserSession);
 			if(util.defined(strUserSession)) {
 				var userSession = JSON.parse(strUserSession);
-				console.log('!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!');
-				console.log(userSession.token);
-				console.log(userSession.email);
-				console.log('!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!');
+				// console.log('!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!');
+				// console.log(userSession.token);
+				// console.log(userSession.email);
+				// console.log('!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!');
 
 				_that = this;
 				soiServices.accountSearch(userSession.email, function(err, records) {
