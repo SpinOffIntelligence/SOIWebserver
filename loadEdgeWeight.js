@@ -147,6 +147,10 @@ function loadVertexStats(infoObj, callback) {
 
     // Prep records
     _.each(records, function(rec) {
+
+      //console.log("record: ***********************************");
+      //console.dir(rec);
+
       var id = '#' + rec['@rid'].cluster + ':' + rec['@rid'].position;
       console.log("prep id:" + id);
       rec.id = id;
@@ -190,7 +194,7 @@ function loadVertexStats(infoObj, callback) {
 
         // Set Node Scores
         console.log('Is Vertex');
-        console.dir(rec);
+        //console.dir(rec);
 
         // Data Quality Score
         var totalProp=0;
@@ -266,7 +270,7 @@ function loadVertexStats(infoObj, callback) {
           console.log('totalInvOut:' + totalInvOut);
 
           if(totalInvIn > 0) {
-            var calcPoints = (Math.floor(totalInvIn / 50000)+1) * .5;
+            var calcPoints = (Math.floor(totalInvIn / 50000)) * .5;
             pscore+=calcPoints;       
             console.log('pscore:' + pscore);     
           }
@@ -274,7 +278,7 @@ function loadVertexStats(infoObj, callback) {
           console.log('totalInvIn calcPoints:' + calcPoints);
 
           if(totalInvOut > 0) {
-            var calcPoints = (Math.floor(totalInvOut / 50000)+1) * .5;
+            var calcPoints = (Math.floor(totalInvOut / 50000)) * .5;
             pscore+=calcPoints;
             console.log('pscore:' + pscore);
           }
@@ -284,10 +288,20 @@ function loadVertexStats(infoObj, callback) {
           if(className == 'VSpinOff' || className == 'VCompany' || className == 'VResearchInstitution') {
 
             // Number of SpinOffs
-            var fndSpin = _.where(records, {className: 'VSpinOff'});
+            var fndSpin = _.where(records, {className: 'ESpinOff'});
+            console.log('**********Found Spin:');
+            //console.dir(fndSpin);
             if(util.defined(fndSpin) && fndSpin.length > 0) {
-              console.log('pscore~SpinOffs:' + fndSpin.length);
-              pscore+=fndSpin.length;
+              var tot = 0;
+               _.each(fndSpin, function(rec) {
+                console.log('**********Found Spin rec:' + rec["inId"]);
+                if(util.defined(rec,"inId") && rec["inId"] != mainId) {
+                  tot++;
+                }
+              });
+
+              console.log('pscore~SpinOffs:' + tot);
+              pscore+=tot;
               console.log('pscore:' + pscore);
             }
 
