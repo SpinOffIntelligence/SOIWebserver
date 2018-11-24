@@ -307,28 +307,14 @@ function loadVertexStats(infoObj, callback) {
 
 
             // Number of Merger & Acquisition
-            var fndRel = _.where(records, {className: 'EAcquirer'});
-            if(util.defined(fndRel) && fndRel.length > 0) {
-
-               var tot = 0;
-               _.each(fndRel, function(rec) {
-                console.log('**********Found Acquisition rec:' + rec["inId"]);
-                if(util.defined(rec,"inId") && rec["inId"] != mainId) {
-                  tot++;
-                }
-              });
-
-              console.log('pscore~Merger:' + tot);
-              pscore+=tot;
+            var fndPat = _.where(records, {className: 'EAcquirer'});
+            if(util.defined(fndPat) && fndPat.length > 0) {
+              console.log('pscore~EAcquirer:' + fndPat.length);
+              pscore+=fndPat.length * .5;
               console.log('pscore:' + pscore);
             }
 
             // Number of Employees
-            // var fndRel = _.where(records, {className: 'EWorksfor'});
-            // if(util.defined(fndRel) && fndRel.length > 0) {
-            //   console.log('pscore~Employees:' + fndRel.length);
-            //   pscore+=fndRel.length * .5;
-            // }
             if(util.defined(mainRec,"size")) {
               console.log('pscore~Employees:' + mainRec['size']);
               pscore+=parseInt(mainRec['size']) / 100; 
@@ -347,46 +333,60 @@ function loadVertexStats(infoObj, callback) {
 
               var objs = [];
 
-              for(var i=0; i<rows.length; i++) {
-                                
-                var r = rows[i];
-                console.log('row:' + r);
+              if(rows.length > 1) {
+                for(var i=0; i<rows.length; i++) {
+                                  
+                  var r = rows[i];
+                  console.log('row:' + r);
 
-                var cols = r.split('~');
-                console.log('cols:' + cols);
+                  var cols = r.split('~');
+                  console.log('cols:' + cols);
 
-                if(cols.length > 1) {
-                  var year = cols[0];
-                  var val = parseInt(cols[1]);
+                  if(cols.length > 1) {
+                    var year = cols[0];
+                    var val = parseInt(cols[1]);
 
-                  objs.push({year:year, val:val});
+                    objs.push({year:year, val:val});
 
-                  tover+=val;
-                  console.log('tover:' + tover);
+                    tover+=val;
+                    console.log('tover:' + tover);
+                  }
                 }
+                var avg = tover / (rows.length);
+                console.log('tover avg:' + avg);
+                var sc = (avg / 1000000) * .5;
+
+                console.log('pscore~Turnover1:' + sc);
+                pscore+=sc;
+                console.log('pscore:' + pscore);       
+
+                objs = _.sortBy(objs, function(obj) {
+                  return obj.year;
+                });
+
+                console.dir(objs);
+                startVal = objs[0].val;
+                endVal = objs[objs.length-1].val;
+
+                console.log('startVal:' + startVal);
+                console.log('endVal:' + endVal);
+                console.log('range:' + range);
+                val = util.round((Math.pow((endVal/startVal), (1/range)) - 1) * 100,1);
+                val = val / 2
+                console.log('pscore~Turnover2:' + val);
+                pscore+=val;
+                console.log('pscore:' + pscore); 
               }
-              var sc =  Math.ceil(tover / 1000000);
+            }
 
-              console.log('pscore~Turnover:' + sc);
-              pscore+=sc;
-              console.log('pscore:' + pscore);       
+          } else {
 
-              objs = _.sortBy(objs, function(obj) {
-                return obj.year;
-              });
-
-              console.dir(objs);
-              startVal = objs[0].val;
-              endVal = objs[objs.length-1].val;
-
-              console.log('startVal:' + startVal);
-              console.log('endVal:' + endVal);
-              console.log('range:' + range);
-              val = util.round((Math.pow((endVal/startVal), (1/range)) - 1) * 100,1);
-              val = val / 2
-              console.log('pscore~Turnover:' + val);
-              pscore+=val;
-              console.log('pscore:' + pscore); 
+            // Deal Maker
+            var fndPat = _.where(records, {className: 'EAdvisor'});
+            if(util.defined(fndPat) && fndPat.length > 0) {
+              console.log('pscore~EAdvisor:' + fndPat.length);
+              pscore+=fndPat.length * .5;
+              console.log('pscore:' + pscore);
             }
 
           }
@@ -742,18 +742,18 @@ odb.init(function(err, res) {
   });
 
 
-  // var query = strUtil.format("update E set weight = 0");
-  // console.log('query:' + query);
-  // odb.db.query(query).then(function(records){
+   var query = strUtil.format("update E set weight = 0");
+   console.log('query:' + query);
+   odb.db.query(query).then(function(records){
 
 
-  //   var query = strUtil.format("update V set dataquailityscore = 0,prestigescore = 0, statsdegreecentrality = 0");
-  //   console.log('query:' + query);
-  //   odb.db.query(query).then(function(records){
+     var query = strUtil.format("update V set dataquailityscore = 0,prestigescore = 0, statsdegreecentrality = 0");
+     console.log('query:' + query);
+     odb.db.query(query).then(function(records){
 
       //var query = strUtil.format("select @rid from V where @class = 'VResearchInstitution'");
-      var query = strUtil.format("select @rid from V where @rid = '#39:0'");
-      //var query = strUtil.format("select @rid from V");
+      //var query = strUtil.format("select @rid from V where @rid = '#13:0'");
+      var query = strUtil.format("select @rid from V");
       console.log('query:' + query);
       odb.db.query(query).then(function(records){
         var allRecords = records;
@@ -769,15 +769,15 @@ odb.init(function(err, res) {
         async.mapSeries(mapObjs, loadVertexStats, function(err, results){
          console.log('loadVertexStats done!' + comboCnt)
 
-          // async.mapSeries(mapObjs, loadEdgeStats, function(err, results){
-          //   console.log('loadEdgeWeight done!' + comboCnt)
-          //   process.exit(1);            
-          // });    
+          async.mapSeries(mapObjs, loadEdgeStats, function(err, results){
+            console.log('loadEdgeWeight done!' + comboCnt)
+            process.exit(1);            
+          });    
         });    
       });
 
-  //   });    
-  // });    
+     });    
+   });    
 
 });
 

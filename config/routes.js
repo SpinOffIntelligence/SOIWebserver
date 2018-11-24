@@ -278,16 +278,19 @@ module.exports = function(app,express){
 					} else {
 						var sourceId = util.prepareInboudString(lineData.sourceid);
 						var targetId = util.prepareInboudString(lineData.targetid);
+						var objectType = util.prepareInboudString(lineData.edgetype);
 						delete lineData.sourceid;
 						delete lineData.targetid;
+						delete lineData.edgetype;
 						//var addObj = util.prepareInboudData(objectType, lineData, schemas);
 						console.log('sourceId:' + sourceId);
 						console.log('targetId:' + targetId);
+						console.log('objectType:' + objectType);
 						console.log('data:');
 						console.dir(lineData);
 
 						if(sourceId.indexOf('#') == -1) {
-							getSourceTargetID(objectTypeSource, objectTypeTarget, sourceId, targetId, function(err, data) {
+							getSourceTargetID('V', 'V', sourceId, targetId, function(err, data) {
 								if(util.defined(err)) {
 									console.log('getSourceTargetID Error:' + err);
 									strInfo = 'getSourceTargetID Error on line ' + lineNum + ':' + err;
