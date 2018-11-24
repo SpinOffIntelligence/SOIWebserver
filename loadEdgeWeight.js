@@ -292,7 +292,7 @@ function loadVertexStats(infoObj, callback) {
             console.log('**********Found Spin:');
             //console.dir(fndSpin);
             if(util.defined(fndSpin) && fndSpin.length > 0) {
-              var tot = 0;
+               var tot = 0;
                _.each(fndSpin, function(rec) {
                 console.log('**********Found Spin rec:' + rec["inId"]);
                 if(util.defined(rec,"inId") && rec["inId"] != mainId) {
@@ -307,10 +307,19 @@ function loadVertexStats(infoObj, callback) {
 
 
             // Number of Merger & Acquisition
-            var fndRel = _.where(records, {className: 'EAcquire'});
+            var fndRel = _.where(records, {className: 'EAcquirer'});
             if(util.defined(fndRel) && fndRel.length > 0) {
-              console.log('pscore~Merger:' + fndRel.length);
-              pscore+=fndRel.length;
+
+               var tot = 0;
+               _.each(fndRel, function(rec) {
+                console.log('**********Found Acquisition rec:' + rec["inId"]);
+                if(util.defined(rec,"inId") && rec["inId"] != mainId) {
+                  tot++;
+                }
+              });
+
+              console.log('pscore~Merger:' + tot);
+              pscore+=tot;
               console.log('pscore:' + pscore);
             }
 
@@ -324,6 +333,60 @@ function loadVertexStats(infoObj, callback) {
               console.log('pscore~Employees:' + mainRec['size']);
               pscore+=parseInt(mainRec['size']) / 100; 
               console.log('pscore:' + pscore);             
+            }
+
+
+            if(util.defined(mainRec,"turnover")) {
+
+              var tover = 0;
+              var startVal=0;
+              var endVal=0;
+
+              var rows = mainRec['turnover'].split('^');
+              var range = rows.length;
+
+              var objs = [];
+
+              for(var i=0; i<rows.length; i++) {
+                                
+                var r = rows[i];
+                console.log('row:' + r);
+
+                var cols = r.split('~');
+                console.log('cols:' + cols);
+
+                if(cols.length > 1) {
+                  var year = cols[0];
+                  var val = parseInt(cols[1]);
+
+                  objs.push({year:year, val:val});
+
+                  tover+=val;
+                  console.log('tover:' + tover);
+                }
+              }
+              var sc =  Math.ceil(tover / 1000000);
+
+              console.log('pscore~Turnover:' + sc);
+              pscore+=sc;
+              console.log('pscore:' + pscore);       
+
+              objs = _.sortBy(objs, function(obj) {
+                return obj.year;
+              });
+
+              console.dir(objs);
+              startVal = objs[0].val;
+              endVal = objs[objs.length-1].val;
+
+              console.log('startVal:' + startVal);
+              console.log('endVal:' + endVal);
+              console.log('range:' + range);
+              val = util.round((Math.pow((endVal/startVal), (1/range)) - 1) * 100,1);
+              val = val / 2
+              console.log('pscore~Turnover:' + val);
+              pscore+=val;
+              console.log('pscore:' + pscore); 
             }
 
           }
@@ -679,18 +742,18 @@ odb.init(function(err, res) {
   });
 
 
-  var query = strUtil.format("update E set weight = 0");
-  console.log('query:' + query);
-  odb.db.query(query).then(function(records){
+  // var query = strUtil.format("update E set weight = 0");
+  // console.log('query:' + query);
+  // odb.db.query(query).then(function(records){
 
 
-    var query = strUtil.format("update V set dataquailityscore = 0,prestigescore = 0, statsdegreecentrality = 0");
-    console.log('query:' + query);
-    odb.db.query(query).then(function(records){
+  //   var query = strUtil.format("update V set dataquailityscore = 0,prestigescore = 0, statsdegreecentrality = 0");
+  //   console.log('query:' + query);
+  //   odb.db.query(query).then(function(records){
 
       //var query = strUtil.format("select @rid from V where @class = 'VResearchInstitution'");
-      //var query = strUtil.format("select @rid from V where @rid = '#39:0'");
-      var query = strUtil.format("select @rid from V");
+      var query = strUtil.format("select @rid from V where @rid = '#39:0'");
+      //var query = strUtil.format("select @rid from V");
       console.log('query:' + query);
       odb.db.query(query).then(function(records){
         var allRecords = records;
@@ -706,15 +769,15 @@ odb.init(function(err, res) {
         async.mapSeries(mapObjs, loadVertexStats, function(err, results){
          console.log('loadVertexStats done!' + comboCnt)
 
-          async.mapSeries(mapObjs, loadEdgeStats, function(err, results){
-            console.log('loadEdgeWeight done!' + comboCnt)
-            process.exit(1);            
-          });    
+          // async.mapSeries(mapObjs, loadEdgeStats, function(err, results){
+          //   console.log('loadEdgeWeight done!' + comboCnt)
+          //   process.exit(1);            
+          // });    
         });    
       });
 
-    });    
-  });    
+  //   });    
+  // });    
 
 });
 

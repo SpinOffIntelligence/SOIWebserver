@@ -37,6 +37,12 @@ function defined(ref, strNames) {
 }
 
 
+var round = function(value, precision) {
+    var multiplier = Math.pow(10, precision || 0);
+    return Math.round(value * multiplier) / multiplier;
+}
+
+
 var rand = function() {
     return Math.random().toString(36).substr(2); // remove `0.`
 };
@@ -542,3 +548,5 @@ module.exports.createEdgeFilterClause = createEdgeFilterClause;
 
 module.exports.arrayToList = arrayToList;
 module.exports.whereProp = whereProp;
+module.exports.round = round;
+
