@@ -11,10 +11,10 @@ exports.db;
 
 exports.init = function(callback) {
 	exports.server = OrientDB({
-	   host:       'ec2-54-190-49-212.us-west-2.compute.amazonaws.com',
+	   host:       'ec2-54-203-1-104.us-west-2.compute.amazonaws.com',
 	   port:       2424,
-	   username:   'root',
-	   password:   '9WlcEMvyBJqKToMWO4vvqrgRx7iuzKuf'
+	   username:   'admin',
+	   password:   'OrientDB2018!'
 	});
 
 	var dbs = exports.server.list()
@@ -26,8 +26,8 @@ exports.init = function(callback) {
 
 	exports.db = exports.server.use({
 	   name:     config.dbname,
-	   username: 'root',
-	   password: '9WlcEMvyBJqKToMWO4vvqrgRx7iuzKuf'
+	   username: 'admin',
+	   password: 'OrientDB2018!'
 	});
 
 	callback(null,dbs);
